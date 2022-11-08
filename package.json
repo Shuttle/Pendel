@@ -1,0 +1,18 @@
+{
+  "name": "Pendel",
+  "version": "1.0.0",
+  "description": "Shuttle Documentation.",
+  "main": "index.js",
+  "repository": "https://github.com/Shuttle/Pendel.git",
+  "author": "Eben <me@ebenroux.co.za>",
+  "license": "MIT",
+  "scripts": {
+    "docs:dev": "vitepress dev docs",
+    "docs:build": "vitepress build docs",
+    "docs:serve": "vitepress serve docs"
+  },
+  "devDependencies": {
+    "vitepress": "^1.0.0-alpha.27",
+    "vue": "^3.2.41"
+  }
+}
