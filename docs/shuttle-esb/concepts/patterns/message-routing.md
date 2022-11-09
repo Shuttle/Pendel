@@ -23,7 +23,7 @@ public interface IMessageRouteProvider
 
 ## Implementation
 
-The `DefaultMessageRouteProvider` is registered if no `IMessageRouteProvider` has been registered and makes use of the [message routing options](/options/message-routes) to determine where to send messages:
+The `DefaultMessageRouteProvider` is registered if no `IMessageRouteProvider` has been registered and makes use of the [message routing options](/shuttle-esb/options/message-routes) to determine where to send messages:
 
 Each implementation of `IMessageRouteProvider` can determine the routes however it needs to, from the given message.  A typical scenario, and the way the `DefaultMessageRouteProvider` works, is to use the full type name to determine the destination.
 
