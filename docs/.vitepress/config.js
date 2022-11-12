@@ -43,17 +43,17 @@ module.exports = (async () => {
 
             nav: [
                 {
-                    text: 'Shuttle.Core',
+                    text: 'Core',
                     activeMatch: `^/shuttle-core/`,
                     link: '/shuttle-core/index'
                 },
                 {
-                    text: 'Shuttle.Esb',
+                    text: 'Service Bus',
                     activeMatch: `^/shuttle-esb/`,
                     link: '/shuttle-esb/index'
                 },
                 {
-                    text: 'Shuttle.Recall',
+                    text: 'Event Sourcing',
                     activeMatch: `^/shuttle-recall/`,
                     link: '/shuttle-recall/index'
                 },
