@@ -21,11 +21,11 @@ module.exports = (async () => {
 
         themeConfig: {
             logo: '/logo.svg',
-            // algolia: {
-            //     indexName: 'shuttle-esb',
-            //     appId: 'VM33RJ87BH',
-            //     apiKey: 'fc560606a3c14b173d0ddf57a3258c84'
-            // },
+            algolia: {
+                indexName: 'pendel',
+                appId: 'GJYF98YRRG',
+                apiKey: '81ba59e2c51ff9b5a0308da85d014a3b'
+            },
 
             // carbonAds: {
             //     code: '',
