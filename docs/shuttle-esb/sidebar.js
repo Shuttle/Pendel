@@ -208,6 +208,10 @@ const implementations = [
                 text: 'Kafka',
                 link: '/shuttle-esb/implementations/stream/kafka'
             },
+            {
+                text: 'Azure Event Hubs',
+                link: '/shuttle-esb/implementations/stream/azureeh'
+            },
         ]
     },
     {
