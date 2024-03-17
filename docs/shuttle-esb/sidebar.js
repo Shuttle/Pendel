@@ -346,6 +346,10 @@ const esb = [
         text: 'Service Bus',
         items: [
             {
+                text: 'Concepts',
+                link: '/shuttle-esb/concepts/why'
+            },
+            {
                 text: 'Getting started',
                 link: '/shuttle-esb/guide/getting-started'
             },
