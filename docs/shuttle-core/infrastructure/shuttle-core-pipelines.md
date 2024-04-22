@@ -6,6 +6,74 @@ PM> Install-Package Shuttle.Core.Pipelines
 
 Observable event-based pipelines based broadly on pipes and filters.
 
+## Configuration
+
+In order to more easily make use of pipelines an implementation of the `IPipelineFactory` should be used.  The following will register the `PipelineFactory` implementation:
+
+```c#
+services.AddPipelineProcessing(builder => {
+    builder.AddAssembly(assembly);
+});
+```
+
+This will register the `IPipelineFactory` and, using the builder, add all `IPipeline` and `IPipelineObserver` implementations as `Transient`.  The pipeline instances are re-used as they are kept in a pool.
+
+Since pipelines are quite frequently extended by adding observers, the recommended pattern is to make use of an `IHostedService` implementation that accepts the `IPipelineFactory` dependency:
+
+```c#
+public class CustomHostedService : IHostedService
+{
+    private readonly Type _pipelineType = typeof(InterestingPipeline);
+
+    public CustomHostedService(IPipelineFactory pipelineFactory)
+    {
+        Guard.AgainstNull(pipelineFactory, nameof(pipelineFactory));
+
+        pipelineFactory.PipelineCreated += PipelineCreated;
+    }
+
+    private void PipelineCreated(object sender, PipelineEventArgs e)
+    {
+        if (e.Pipeline.GetType() != _pipelineType
+        {
+            return;
+        }
+
+        e.Pipeline.RegisterObserver(new SomeObserver());
+    }
+
+    public async Task StartAsync(CancellationToken cancellationToken)
+    {
+        await Task.CompletedTask;
+    }
+
+    public async Task StopAsync(CancellationToken cancellationToken)
+    {
+        _pipelineFactory.PipelineCreated -= OnPipelineCreated;
+
+        await Task.CompletedTask;
+    }
+}
+```
+
+Typically you would also have a way to register the above `CustomHostedService` with the `IServiceCollection`:
+
+```c#
+public static class ServiceCollectionExtensions
+{
+    public static IServiceCollection AddCustomPipelineObserver(this IServiceCollection services)
+    {
+        services.AddHostedService<CustomHostedService>();
+
+        return services;
+    }
+}
+```
+
+The above is a rather naive example but it should give you an idea of how to extend pipelines using the `IPipelineFactory` and `IHostedService` implementations.
+
+## Overview
+
 A `Pipeline` is a variation of the pipes and filters pattern and consists of 1 or more stages that each contain one or more events.  When the pipeline is executed each event in each stage is raised in the order that they were registered.  One or more observers should be registered to handle the relevant event(s).
 
 Each `Pipeline` always has its own state that is simply a name/value pair with some convenience methods to get and set/replace values.  The `State` class will use the full type name of the object as a key should none be specified:
@@ -21,60 +89,21 @@ Console.WriteLine(state.Get<List<string>>()[0]);
 Console.Write(state.Get<string>("my-key"));
 ```
 
-## Configuration
+The `Pipeline` class has a `RegisterStage` method that will return a `PipelineStage` instance.  The `PipelineStage` instance has a `WithEvent` method that will return a `PipelineStageEvent` instance.  This allows for a fluent interface to register events for a pipeline:
 
-In order to more easily make use of pipelines an implementation of the `IPipelineFactory` should be used.  The following will register the `PipelineFactory` implementation:
+### IPipelineObserver
 
-```c#
-services.AddPipelineProcessing(builder => {
-    builder.AddAssembly(assembly);
-});
-```
+The `IPipelineObserver` interface is used to define the observer that will handle the events:
 
-This will register the `IPipelineFactory` and, using the builder, add all `IPipeline` and `IPipelineObserver` implementations as `Transient`.  The pipeline instances are re-used as they are kept in a pool.
-
-## Modules
-
-Since pipelines are quite frequently extended by adding observers a *module* may be added that adds the relevant observers to a pipeline on creation:
-
-```c#
-services.AddPipelineModule<T>();
-services.AddPipelineModule(type);
-```
-
-The way this is accomplished is having a module such as the following:
-
-```c#
-public class SomeModule
+``` c#
+public interface IPipelineObserver<in TPipelineEvent> : IPipelineObserver where TPipelineEvent : IPipelineEvent
 {
-    private readonly Type _pipelineType = typeof(InterestingPipeline);
-
-    public SomeModule(IPipelineFactory pipelineFactory)
-    {
-        Guard.AgainstNull(pipelineFactory, nameof(pipelineFactory));
-
-        pipelineFactory.PipelineCreated += PipelineCreated;
-    }
-
-    private void PipelineCreated(object sender, PipelineEventArgs e)
-    {
-        var pipelineType = ;
-
-        if (e.Pipeline.GetType() != _pipelineType
-        {
-            return;
-        }
-
-        e.Pipeline.RegisterObserver(new SomeObserver());
-    }
+    void Execute(TPipelineEvent pipelineEvent);
+    Task ExecuteAsync(TPipelineEvent pipelineEvent);
 }
 ```
 
-The above module could be added to the `IServiceCollection` as follows:
-
-```c#
-services.AddPipelineModule<SomeModule>();
-```
+The interface has two methods that should be implemented.  The `Execute` method is used for synchronous processing whereas the `ExecuteAsync` method is used for asynchronous processing.
 
 ## Example
 
@@ -117,6 +146,13 @@ In order for the pipeline to process the events we will have to define one or mo
             state.Replace("value", value);
         }
 
+        public async Task ExecuteAsync(OnAddCharacterA pipelineEvent)
+        {
+			Execute(pipelineEvent);
+
+            await Task.CompletedTask;
+        }
+
         public void Execute(OnAddCharacter pipelineEvent)
         {
             var state = pipelineEvent.Pipeline.State;
@@ -125,6 +161,13 @@ In order for the pipeline to process the events we will have to define one or mo
             value = string.Format("{0}-{1}", value, pipelineEvent.Character);
 
             state.Replace("value", value);
+        }
+
+        public async Task ExecuteAsync(OnAddCharacter pipelineEvent)
+        {
+            Execute(pipelineEvent);
+
+			await Task.CompletedTask;
         }
     }
 ```
@@ -141,7 +184,15 @@ pipeline.RegisterStage("process")
 pipeline.RegisterObserver(new CharacterPipelineObserver());
 
 pipeline.State.Add("value", "start");
-pipeline.Execute();
+
+if (sync)
+{
+    pipeline.Execute();
+}
+else
+{
+	await pipeline.ExecuteAsync();
+}
 
 Console.WriteLine(pipeline.State.Get<string>("value")); // outputs start-A-Z
 ```

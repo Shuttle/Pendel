@@ -17,7 +17,7 @@ Shuttle.Esb provides the following out-of-the-box:
 - Dependency injection
 - Stream processing
 
-A service bus will buy you quite a bit out-of=the-box whereas coding against the queues directly may be a bit of work to get going.
+A service bus will buy you quite a bit out-of-the-box whereas coding against the queues directly may be a bit of work to get going.
 
 The following provides a quick overview of some service bus concepts as implemented in Shuttle.Esb that may help you along the way.
 
@@ -62,9 +62,9 @@ A service bus instance is required in every application that accesses the servic
 ``` c#
 public class Program
 {
-    public static void Main()
+    public static async Task Main()
     {
-        Host.CreateDefaultBuilder()
+        await Host.CreateDefaultBuilder()
             .ConfigureServices(services =>
             {
                 services.AddSingleton<IDependency, Implementation>();
@@ -73,6 +73,8 @@ public class Program
                 {
                     builder.Options.Inbox.WorkQueueUri = 
                         "queue://configuration/queue-name";
+
+                    builder.Options.Asynchronous = true;
                 });
 
                 services.AddAzureStorageQueues(builder =>
@@ -84,7 +86,7 @@ public class Program
                 });
             })
             .Build()
-            .Run();
+            .RunAsync();
     }
 }
 ```
@@ -106,11 +108,11 @@ There are situations where we need to _start_ something off.  Let's take the cas
 So from the client code:
 
 ``` c#
-bus.Send(new CreateOrder
-        {
-            Name = "CustomerName",
-            Product = "ProductXYZ"
-        });
+await bus.SendAsync(new CreateOrder
+    {
+        Name = "CustomerName",
+        Product = "ProductXYZ"
+    });
 ```
 
 The call would fail if there is nowhere to send the message.
@@ -118,11 +120,11 @@ The call would fail if there is nowhere to send the message.
 We could publish an event such as **OrderReceived** and our ordering service could subscribe to the event.
 
 ```c#
-bus.Publish(new OrderReceived
-        {
-            Name = "ClientName",
-            Product = "ProductXYZ"
-        });
+await bus.PublishAsync(new OrderReceived
+    {
+        Name = "ClientName",
+        Product = "ProductXYZ"
+    });
 ```
 
 The call would *not* fail should there be no subscribers.  
@@ -136,13 +138,13 @@ In some situations an event will not be able to relay the intent of any particul
 In this case the e-mail system is responsible for sending e-mails.  Any system that would like to send a mail will need to decide when to do so.  Therefore, the ordering service would send a *command* to the e-mail service:
 
 ```c#
-bus.Send(new SendMail
-        {
-            To = "manager@ordercompany.co.za",
-            From = "orderservice@ordercompany.co.za",
-            Subject = "Important Order Received",
-            Body = "Order Details"
-        });
+await bus.SendAsync(new SendMail
+    {
+        To = "manager@ordercompany.co.za",
+        From = "orderservice@ordercompany.co.za",
+        Subject = "Important Order Received",
+        Body = "Order Details"
+    });
 ```
 
 ### Event message

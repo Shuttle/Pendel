@@ -17,7 +17,10 @@ Shuttle.Esb uses an implementation of an `IMessageRouteProvider` to determine wh
 ```c#
 public interface IMessageRouteProvider
 {
-    IEnumerable<string> GetRouteUris(object message);    
+    IEnumerable<IMessageRoute> MessageRoutes { get; }
+    Task<IEnumerable<string>> GetRouteUrisAsync(string messageType);
+    IEnumerable<string> GetRouteUris(string messageType);
+    void Add(IMessageRoute messageRoute);
 }
 ```
 
@@ -25,6 +28,6 @@ public interface IMessageRouteProvider
 
 The `DefaultMessageRouteProvider` is registered if no `IMessageRouteProvider` has been registered and makes use of the [message routing options](/shuttle-esb/options/message-routes) to determine where to send messages:
 
-Each implementation of `IMessageRouteProvider` can determine the routes however it needs to, from the given message.  A typical scenario, and the way the `DefaultMessageRouteProvider` works, is to use the full type name to determine the destination.
+Each implementation of `IMessageRouteProvider` can determine the routes however it needs to, from the given message type.  A typical scenario, and the way the `DefaultMessageRouteProvider` works, is to use the full type name to determine the destination.
 
 **Please note**: each message type may only be sent to _one_ endpoint using `Send`.

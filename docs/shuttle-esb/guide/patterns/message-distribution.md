@@ -85,7 +85,7 @@ namespace Shuttle.Distribution.Client
 {
     internal class Program
     {
-        private static void Main(string[] args)
+        private static async Task Main(string[] args)
         {
             var services = new ServiceCollection();
 
@@ -109,13 +109,13 @@ namespace Shuttle.Distribution.Client
             Console.WriteLine("Type some characters and then press [enter] to submit; an empty line submission stops execution:");
             Console.WriteLine();
 
-            using (var bus = services.BuildServiceProvider().GetRequiredService<IServiceBus>().Start())
+            await using (var serviceBus = await services.BuildServiceProvider().GetRequiredService<IServiceBus>().StartAsync())
             {
                 string userName;
 
                 while (!string.IsNullOrEmpty(userName = Console.ReadLine()))
                 {
-                    bus.Send(new RegisterMember
+                    await serviceBus.SendAsync(new RegisterMember
                     {
                         UserName = userName
                     });
@@ -186,9 +186,9 @@ namespace Shuttle.Distribution.Server
 {
     public class Program
     {
-        public static void Main()
+        public static async Task Main()
         {
-            Host.CreateDefaultBuilder()
+            await Host.CreateDefaultBuilder()
                 .ConfigureServices(services =>
                 {
                     var configuration = new ConfigurationBuilder().AddJsonFile("appsettings.json").Build();
@@ -198,6 +198,8 @@ namespace Shuttle.Distribution.Server
                     services.AddServiceBus(builder =>
                     {
                         configuration.GetSection(ServiceBusOptions.SectionName).Bind(builder.Options);
+
+                        builder.Options.Asynchronous = true;
                     });
 
                     services.AddAzureStorageQueues(builder =>
@@ -209,7 +211,7 @@ namespace Shuttle.Distribution.Server
                     });
                 })
                 .Build()
-                .Run();
+                .RunAsync();
         }
     }
 }
@@ -277,9 +279,9 @@ namespace Shuttle.Distribution.Worker
 {
     public class Program
     {
-        public static void Main()
+        public static async Task Main()
         {
-            Host.CreateDefaultBuilder()
+            await Host.CreateDefaultBuilder()
                 .ConfigureServices(services =>
                 {
                     var configuration = new ConfigurationBuilder().AddJsonFile("appsettings.json").Build();
@@ -289,6 +291,8 @@ namespace Shuttle.Distribution.Worker
                     services.AddServiceBus(builder =>
                     {
                         configuration.GetSection(ServiceBusOptions.SectionName).Bind(builder.Options);
+
+                        builder.Options.Asynchronous = true;
                     });
 
                     services.AddAzureStorageQueues(builder =>
@@ -300,7 +304,7 @@ namespace Shuttle.Distribution.Worker
                     });
                 })
                 .Build()
-                .Run();
+                .RunAsync();
         }
     }
 }
@@ -339,13 +343,15 @@ using Shuttle.Distribution.Messages;
 
 namespace Shuttle.Distribution.Worker
 {
-	public class RegisterMemberHandler : IMessageHandler<RegisterMember>
+	public class RegisterMemberHandler : IAsyncMessageHandler<RegisterMember>
 	{
-		public void ProcessMessage(IHandlerContext<RegisterMember> context)
+		public async Task ProcessMessageAsync(IHandlerContext<RegisterMember> context)
 		{
 			Console.WriteLine();
 			Console.WriteLine("[MEMBER REGISTERED --- WORKER] : user name = '{0}'", context.Message.UserName);
 			Console.WriteLine();
+
+			await Task.CompletedTask;
 		}
 	}
 }

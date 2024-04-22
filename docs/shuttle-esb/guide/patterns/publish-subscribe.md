@@ -89,7 +89,7 @@ namespace Shuttle.PublishSubscribe.Client
 {
     internal class Program
     {
-        private static void Main(string[] args)
+        private static async Task Main(string[] args)
         {
             var services = new ServiceCollection();
 
@@ -113,13 +113,13 @@ namespace Shuttle.PublishSubscribe.Client
             Console.WriteLine("Type some characters and then press [enter] to submit; an empty line submission stops execution:");
             Console.WriteLine();
 
-            using (var bus = services.BuildServiceProvider().GetRequiredService<IServiceBus>().Start())
+            await using (var serviceBus = await services.BuildServiceProvider().GetRequiredService<IServiceBus>().StartAsync())
             {
                 string userName;
 
                 while (!string.IsNullOrEmpty(userName = Console.ReadLine()))
                 {
-                    bus.Send(new RegisterMember
+                    await serviceBus.SendAsync(new RegisterMember
                     {
                         UserName = userName
                     });
@@ -201,11 +201,11 @@ namespace Shuttle.PublishSubscribe.Server
 {
     public class Program
     {
-        public static void Main()
+        public static async Task Main()
         {
             DbProviderFactories.RegisterFactory("Microsoft.Data.SqlClient", SqlClientFactory.Instance);
 
-            Host.CreateDefaultBuilder()
+            await Host.CreateDefaultBuilder()
                 .ConfigureServices(services =>
                 {
                     var configuration = new ConfigurationBuilder().AddJsonFile("appsettings.json").Build();
@@ -222,6 +222,8 @@ namespace Shuttle.PublishSubscribe.Server
                     services.AddServiceBus(builder =>
                     {
                         configuration.GetSection(ServiceBusOptions.SectionName).Bind(builder.Options);
+
+                        builder.Options.Asynchronous = true;
                     });
 
                     services.AddAzureStorageQueues(builder =>
@@ -233,7 +235,7 @@ namespace Shuttle.PublishSubscribe.Server
                     });
                 })
                 .Build()
-                .Run();
+                .RunAsync();
         }
     }
 }
@@ -241,9 +243,13 @@ namespace Shuttle.PublishSubscribe.Server
 
 ### Database
 
-We need a store for our subscriptions.  In this example we will be using **Sql Server**.  Remember to make any required changges to the relevant connection strings.
+We need a store for our subscriptions.  In this example we will be using **Sql Server**.  If you are using docker you can quickly get up-and-running with the following:
 
-When you reference the `Shuttle.Esb.Sql.Subscription` package a `scripts` folder is included in the relevant package folder.  Click on the Nuget referenced assembly in the `Dependencies` and navigate to the package folder (in the `Path` property)  to find the `scripts` folder.
+```
+docker run -d --name sql -h sql -e "ACCEPT_EULA=Y" -e "SA_PASSWORD=Pass!000" -e "MSSQL_PID=Express" -p 1433:1433 -v C:\SQLServer.Data\:/var/opt/mssql/data mcr.microsoft.com/mssql/server:2019-latest
+```
+
+When you reference the `Shuttle.Esb.Sql.Subscription` package a `scripts` folder is included in the relevant package folder.  Click on the NuGet referenced assembly in the `Dependencies` and navigate to the package folder (in the `Path` property) to find the `scripts` folder.
 
 The `{version}` bit will be in a `semver` format.
 
@@ -287,15 +293,15 @@ using Shuttle.PublishSubscribe.Messages;
 
 namespace Shuttle.PublishSubscribe.Server
 {
-	public class RegisterMemberHandler : IMessageHandler<RegisterMember>
+	public class RegisterMemberHandler : IAsyncMessageHandler<RegisterMember>
 	{
-		public void ProcessMessage(IHandlerContext<RegisterMember> context)
+		public async Task ProcessMessageAsync(IHandlerContext<RegisterMember> context)
 		{
 			Console.WriteLine();
 			Console.WriteLine("[MEMBER REGISTERED] : user name = '{0}'", context.Message.UserName);
 			Console.WriteLine();
 
-			context.Publish(new MemberRegistered
+			await context.PublishAsync(new MemberRegistered
 			{
 				UserName = context.Message.UserName
 			});
@@ -352,11 +358,11 @@ namespace Shuttle.PublishSubscribe.Subscriber
 {
     public class Program
     {
-        public static void Main()
+        public static async Task Main()
         {
             DbProviderFactories.RegisterFactory("Microsoft.Data.SqlClient", SqlClientFactory.Instance);
 
-            Host.CreateDefaultBuilder()
+            await Host.CreateDefaultBuilder()
                 .ConfigureServices(services =>
                 {
                     var configuration = new ConfigurationBuilder().AddJsonFile("appsettings.json").Build();
@@ -374,6 +380,8 @@ namespace Shuttle.PublishSubscribe.Subscriber
                     {
                         configuration.GetSection(ServiceBusOptions.SectionName).Bind(builder.Options);
 
+                        builder.Options.Asynchronous = true;
+
                         builder.AddSubscription<MemberRegistered>();
                     });
 
@@ -386,7 +394,7 @@ namespace Shuttle.PublishSubscribe.Subscriber
                     });
                 })
                 .Build()
-                .Run();
+                .RunAsync();
         }
     }
 }
@@ -428,13 +436,15 @@ using Shuttle.PublishSubscribe.Messages;
 
 namespace Shuttle.PublishSubscribe.Subscriber
 {
-	public class MemberRegisteredHandler : IMessageHandler<MemberRegistered>
+	public class MemberRegisteredHandler : IAsyncMessageHandler<MemberRegistered>
 	{
-		public void ProcessMessage(IHandlerContext<MemberRegistered> context)
+		public async Task ProcessMessageAsync(IHandlerContext<MemberRegistered> context)
 		{
 			Console.WriteLine();
 			Console.WriteLine("[EVENT RECEIVED] : user name = '{0}'", context.Message.UserName);
 			Console.WriteLine();
+
+			await Task.CompletedTask;
 		}
 	}
 }

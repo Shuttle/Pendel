@@ -83,15 +83,6 @@ const data = [
                 link: '/shuttle-core/data/shuttle-core-data'
             },
         ]
-    },
-    {
-        text: 'Implementations',
-        items: [
-            {
-                text: 'Http',
-                link: '/shuttle-core/data/shuttle-core-data-http'
-            },
-        ]
     }
 ]
 
