@@ -71,7 +71,7 @@ namespace Shuttle.Deferred.Client
 {
     internal class Program
     {
-        private static void Main(string[] args)
+        private static async Task Main(string[] args)
         {
             var services = new ServiceCollection();
 
@@ -95,13 +95,13 @@ namespace Shuttle.Deferred.Client
             Console.WriteLine("Type some characters and then press [enter] to submit; an empty line submission stops execution:");
             Console.WriteLine();
 
-            using (var bus = services.BuildServiceProvider().GetRequiredService<IServiceBus>().Start())
+            await using (var serviceBus = await services.BuildServiceProvider().GetRequiredService<IServiceBus>().StartAsync())
             {
                 string userName;
 
                 while (!string.IsNullOrEmpty(userName = Console.ReadLine()))
                 {
-                    bus.Send(new RegisterMember
+                    await serviceBus.SendAsync(new RegisterMember
                     {
                         UserName = userName
                     }, builder => builder.Defer(DateTime.Now.AddSeconds(5)));
@@ -173,9 +173,9 @@ namespace Shuttle.Deferred.Server
 {
     public class Programs
     {
-        public static void Main()
+        public static async Task Main()
         {
-            Host.CreateDefaultBuilder()
+            await Host.CreateDefaultBuilder()
                 .ConfigureServices(services =>
                 {
                     var configuration = new ConfigurationBuilder().AddJsonFile("appsettings.json").Build();
@@ -185,6 +185,8 @@ namespace Shuttle.Deferred.Server
                     services.AddServiceBus(builder =>
                     {
                         configuration.GetSection(ServiceBusOptions.SectionName).Bind(builder.Options);
+
+                        builder.Options.Asynchronous = true;
                     });
 
                     services.AddAzureStorageQueues(builder =>
@@ -196,7 +198,7 @@ namespace Shuttle.Deferred.Server
                     });
                 })
                 .Build()
-                .Run();
+                .RunAsync();
         }
     }
 }
@@ -234,11 +236,13 @@ using Shuttle.Deferred.Messages;
 
 namespace Shuttle.Deferred.Server
 {
-	public class RegisterMemberHandler : IMessageHandler<RegisterMember>
+	public class RegisterMemberHandler : IAsyncMessageHandler<RegisterMember>
 	{
-	    public void ProcessMessage(IHandlerContext<RegisterMember> context)
+	    public async Task ProcessMessageAsync(IHandlerContext<RegisterMember> context)
 		{
 		    Console.WriteLine($"[MEMBER REGISTERED] : user name = '{context.Message.UserName}'");
+
+		    await Task.CompletedTask;
 		}
 	}
 }

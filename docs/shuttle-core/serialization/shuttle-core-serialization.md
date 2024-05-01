@@ -14,6 +14,7 @@ The `DefaultSerializer` makes use of the standard .NET xml serialization functio
 
 ``` c#
 Stream Serialize(object message);
+Task<Stream> SerializeAsync(object message);
 ```
 
 Returns the message `object` as a `Stream`.
@@ -22,9 +23,10 @@ Returns the message `object` as a `Stream`.
 
 ``` c#
 object Deserialize(Type type, Stream stream);
+Task<object> DeserializeAsync(Type type, Stream stream);
 ```
 
-Deserializes the `Stream` into an `obejct` of the given type.
+Deserializes the `Stream` into an `object` of the given type.
 
 # ISerializerRootType
 
@@ -37,27 +39,27 @@ For instance, the following two types will cause issues when used in the root `C
 ``` c#
 namespace Serializer.v1
 {
-    public class MovedEvent
-    {
-        public string Where { get; set; } 
-    }
+	public class MovedEvent
+	{
+		public string Where { get; set; } 
+	}
 }
 
 namespace Serializer.v2
 {
-    public class MovedEvent
-    {
-        public string Where { get; set; } 
-    }
+	public class MovedEvent
+	{
+		public string Where { get; set; } 
+	}
 }
 
 namespace Serializer
 {
-    public class Complex
-    {
-        public v1.MovedEvent { get; set; }
-        public v2.MovedEvent { get; set; }
-    }
+	public class Complex
+	{
+		public v1.MovedEvent { get; set; }
+		public v2.MovedEvent { get; set; }
+	}
 }
 ```
 
@@ -69,4 +71,4 @@ By explicitly specifying the types the `DefaultSerializer` will add a namespace 
 void AddSerializerType(Type root, Type contained);
 ```
 
-Specify the `contained` type that is used within the `root` type somewhere.
+Specify the `contained` tpe that is used within te `root` type somewhere.

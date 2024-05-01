@@ -1,7 +1,7 @@
 # Purge Queues
 
 ```
-PM> Install-Package Shuttle.Esb.Module.PurgeQueues
+PM> Install-Package Shuttle.Esb.PurgeQueues
 ```
 
 The PurgeQueues module for Shuttle.Esb clears the specified queues on startup.
@@ -11,7 +11,7 @@ The module will attach the `PurgeQueuesObserver` to the `OnAfterConfigure` event
 ## Configuration
 
 ```c#
-services.AddPurgeQueuesModule(builder => 
+services.AddPurgeQueues(builder => 
 {
 	builder.Options.Uris = new List<string>
 	{

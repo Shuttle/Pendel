@@ -1,7 +1,7 @@
 # Message Forwarding
 
 ```
-PM> Install-Package Shuttle.Esb.Module.MessageForwarding
+PM> Install-Package Shuttle.Esb.MessageForwarding
 ```
 
 The MessageForwarding module for Shuttle.Esb will forward any handled messages onto the specified queue(s).
@@ -9,7 +9,7 @@ The MessageForwarding module for Shuttle.Esb will forward any handled messages o
 ## Configuration
 
 ```c#
-services.AddMessageForwardingModule(builder => 
+services.AddMessageForwarding(builder => 
 {
 	builder.Options.ForwardingRoutes.Add(new MessageRouteOptions
 	{

@@ -29,7 +29,7 @@ services.AddEventStore(builder =>
 
 ## IEventHandler
 
-An event handler must implement the `IEventHandler` interface:
+Depending on the value of the `EventStoreOptions.Asynchronous` options, an event handler must implement either the `IAsyncEventHandler` interface for asynchronous support, or `IEventHandler` for synchronous event handling:
 
 ```c#
 namespace Shuttle.Recall
@@ -37,6 +37,11 @@ namespace Shuttle.Recall
     public interface IEventHandler<in T> where T : class
     {
         void ProcessEvent(IEventHandlerContext<T> context);
+    }
+
+    public interface IAsyncEventHandler<in T> where T : class
+    {
+        Task ProcessEventAsync(IEventHandlerContext<T> context);
     }
 }
 ```
@@ -53,6 +58,7 @@ The `IProjectionRepository` interface is implemented by a technology-specific pa
 
 ```c#
 long GetSequenceNumber(string name);
+ValueTask<long> GetSequenceNumberAsync(string projectionName);
 ```
 
 Returns the `SequenceNumber` position of the last event that was processed for the projection with the specified `name`.
@@ -61,6 +67,7 @@ Returns the `SequenceNumber` position of the last event that was processed for t
 
 ```c#
 void SetSequenceNumber(string name, long sequenceNumber);
+Task SetSequenceNumberAsync(string projectionName, long sequenceNumber);
 ```
 
 Sets the `SequenceNumber` position of the projection with the given 'name'.
@@ -69,6 +76,7 @@ Sets the `SequenceNumber` position of the projection with the given 'name'.
 
 ```c#
 Projection Find(string name);
+Task<Projection> FindAsync(string name);
 ```
 
 Returns the `Projection` for the given `name`.
@@ -77,6 +85,7 @@ Returns the `Projection` for the given `name`.
 
 ```c#
 void Save(Projection projection);
+Task SaveAsync(Projection projection);
 ```
 
 Persists the current `projection` data.

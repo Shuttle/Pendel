@@ -33,3 +33,13 @@ services.AddCompression(builder => {
 	builder.AddNull();
 });
 ```
+
+## Usage
+
+The `ICompressionService` can be injected into any class that requires compression services:
+
+```c#
+var algorithm = compressionService.Get("algorithm-name");
+var compressed = await algorithm.CompressAsync(Encoding.UTF8.GetBytes("some data"));
+var decompressed = await algorithm.DecompressAsync(compressed);
+```

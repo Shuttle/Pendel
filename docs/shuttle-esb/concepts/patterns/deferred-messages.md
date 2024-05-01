@@ -26,7 +26,7 @@ If there is no deferred queue the message is simply returned to the work queue. 
 
 ## Deferred Queue
 
-A deferred queue may be configured for an inbox:
+A deferred queue may be configured for an inbox, and there are some additional options:
 
 ```json
 {
@@ -35,15 +35,15 @@ A deferred queue may be configured for an inbox:
       "Inbox": {
         "WorkQueueUri": "queue://configuration/server-inbox-work",
         "DeferredQueueUri": "queue://configuration/server-inbox-deferred",
-        "ErrorQueueUri": "queue://configuration/error"
+        "ErrorQueueUri": "queue://configuration/error",
+        "DeferredMessageProcessorWaitInterval": "00:00:01",
+        "DeferredMessageProcessorResetInterval": "00:01:00"
       }
     }
   }
 }
 ```
 
-An important point to remember is that a deferred queue belongs to the particular instance of the endpoint.  **A deferred queue should *never* be shared**.  This means that you should not have a deferred queue uri in more than one endpoint configuration.  Even when one may have the same work queue uri across distributed endpoints in the case of a brokered queue (such as RabbitMQ) you would *still not* use the same deferred queue.  It all has to do with how a deferred queue is processed.
-
-The deferred queue is processed in single iterations.  It is processed when the endpoint starts up and then only again when required (when a message should be returned to the work queue).
+The deferred queue is processed in single passes.  It is processed when the endpoint starts up and then only again when required.  At a minimum the deferred queue processor will run after `DeferredMessageProcessorResetInterval` (defaults to `00:01:00` - 1 minute) has passed from the previous run.  The `DeferredMessageProcessorWaitInterval` (defaults to `00:00:01` - 1 second) determines how long the deferred processor thread sleeps when a run is not yet due.
 
 Messages never route directly to a deferred queue.  Instead they always go to the work queue and if the work queue finds a `IgnoreTillDate` in the future in the `TransportMessage` then it is moved to the deferred queue and the next date to process the deferred queue is set to this `IngoreTillDate` if it is less than the current next deferred queue process date.

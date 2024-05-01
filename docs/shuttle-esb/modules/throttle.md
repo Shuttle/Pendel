@@ -1,7 +1,7 @@
 # Throttle
 
 ```
-PM> Install-Package Shuttle.Esb.Module.Throttle
+PM> Install-Package Shuttle.Esb.Throttle
 ```
 
 The Throttle module for Shuttle.Esb aborts pipeline processing when the CPU usage exceeds given percentage.
@@ -11,7 +11,7 @@ The module will attach the `ThrottleObserver` to the `OnPipelineStarting` event 
 ## Configuration
 
 ```c#
-services.AddThrottleModule(builder => 
+services.AddThrottle(builder => 
 {
 	builder.Options.CpuUsagePercentage = 65;
 	builder.Options.AbortCycleCount = 5;
