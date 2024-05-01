@@ -30,7 +30,8 @@ The default JSON settings structure is as follows:
 
 ## Options
 
-| Options                            | Default         | Description    |
-| ---                                | ---            | ---            |
-| DistributorControlWorkQueueUri    |  | The control inbox work queue uri of the distributor endpoint that this endpoint can handle messages on behalf of. |
-| ThreadAvailableNotificationInterval    | 15s    | A `TimeSpan` representing the duration to wait on an idle thread before notifying the distributor of availability *again*. |
+| Option | Default | Description |
+| --- | --- | --- |
+| `JoinTimeout` | `00:00:15` | The duration to allow the processor thread to join the main thread. |
+| `IsBackground` | `true` | Indicates whether the thread will be started as a background thread.  Background threads are instantly killed when the host process stops. |
+| `Priority` | `ThreadPriority.Normal` | Indicates the [thread priority](https://docs.microsoft.com/en-us/dotnet/api/system.threading.thread.priority?view=net-6.0). |

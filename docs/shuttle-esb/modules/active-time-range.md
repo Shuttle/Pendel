@@ -1,7 +1,7 @@
 # Active Time Range
 
 ```
-PM> Install-Package Shuttle.Esb.Module.ActiveTimeRange
+PM> Install-Package Shuttle.Esb.ActiveTimeRange
 ```
 
 The ActiveTimeRange module for Shuttle.Esb aborts pipeline processing when the current date is not within a given time range.
@@ -9,11 +9,12 @@ The ActiveTimeRange module for Shuttle.Esb aborts pipeline processing when the c
 ## Configuration
 
 ```c#
-services.AddActiveTimeRangeModule(builder => {
+services.AddActiveTimeRange(builder => {
 	builder.Options.ActiveFromTime = "10:00";
 	builder.Options.ActiveToTime = "14:00";
 });
 ```
+
 The default JSON settings structure is as follows:
 
 ```json

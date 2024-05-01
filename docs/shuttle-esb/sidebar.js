@@ -39,10 +39,6 @@ const concepts = [
                 link: '/shuttle-esb/concepts/patterns/publish-subscribe'
             },
             {
-                text: 'Message Distribution',
-                link: '/shuttle-esb/concepts/patterns/message-distribution'
-            },
-            {
                 text: 'Message Idempotence',
                 link: '/shuttle-esb/concepts/patterns/message-idempotence'
             },
@@ -100,10 +96,6 @@ const guide = [
             {
                 text: 'Dependency Injection',
                 link: '/shuttle-esb/guide/patterns/dependency-injection'
-            },
-            {
-                text: 'Message Distribution',
-                link: '/shuttle-esb/guide/patterns/message-distribution'
             },
             {
                 text: 'Message Idempotence',
@@ -318,14 +310,6 @@ const options = [
                 link: '/shuttle-esb/options/outbox'
             },
             {
-                text: 'Control Inbox',
-                link: '/shuttle-esb/options/control-inbox'
-            },
-            {
-                text: 'Worker',
-                link: '/shuttle-esb/options/worker'
-            },
-            {
                 text: 'Subscription',
                 link: '/shuttle-esb/options/subscription'
             },
@@ -370,7 +354,7 @@ const esb = [
                 link: '/shuttle-esb/modules/overview'
             },
             {
-                text: 'v13.2.0',
+                text: 'History',
                 items: [
                     {
                         text: 'changelog',

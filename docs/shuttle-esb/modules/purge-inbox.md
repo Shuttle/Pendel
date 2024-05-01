@@ -1,7 +1,7 @@
 # Purge Inbox
 
 ```
-PM> Install-Package Shuttle.Esb.Module.PurgeInbox
+PM> Install-Package Shuttle.Esb.PurgeInbox
 ```
 
 The PurgeInbox module for Shuttle.Esb clears the inbox work queue upon startup.
@@ -11,5 +11,5 @@ The module will attach the `PurgeInboxObserver` to the `OnAfterConfigure` event 
 ## Configuration
 
 ```c#
-services.AddPurgeInboxModule();
+services.AddPurgeInbox();
 ```

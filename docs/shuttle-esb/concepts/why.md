@@ -11,7 +11,6 @@ Shuttle.Esb provides the following out-of-the-box:
 - At-least once message delivery
 - Retrying failed messages
 - Request / Response
-- Message distribution
 - Publish / Subscribe
 - Message idempotence
 - Dependency injection

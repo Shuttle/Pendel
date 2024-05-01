@@ -1,7 +1,7 @@
 # Corrupt Transport Message
 
 ```
-PM> Install-Package Shuttle.Esb.Module.CorruptTransportMessage
+PM> Install-Package Shuttle.Esb.CorruptTransportMessage
 ```
 
 ## Configuration

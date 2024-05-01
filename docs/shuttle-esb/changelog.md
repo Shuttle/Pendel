@@ -1,8 +1,13 @@
 # Changelog
 
+## v14.0.0
+
+- Implemented `async`/`await` methods.
+- Removed message distribution as all major queuing mechanisms are brokers.
+
 ## v13.2.0
 
-- Fixed deferred processing.  Although working it would be sluggish.
+- Fixed deferred processing.  Although working, it would be sluggish.
 - Added `DeferredMessageProcessingAdjusted` event to `DeferredMessageProcessor` to indicate when the deferred processing has halted.
 
 ## v13.1.0

@@ -131,6 +131,8 @@ services.AddServiceBus(builder =>
 
 ### Handle any messages
 
+If you have the `ServiceBusOptions.Asynchronous` set to `false` then your message handlers should implement the `IMessageHandler` interface; else, for asynchronous support, implement the `IAsyncMessageHandler`.
+
 ``` c#
 public class RegisterMemberHandler : IAsyncMessageHandler<RegisterMember>
 {
