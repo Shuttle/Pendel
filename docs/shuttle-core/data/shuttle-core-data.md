@@ -8,6 +8,8 @@ Provides an abstraction built directly on ADO.NET which falls within the Micro O
 
 # Overview
 
+***NOTE:*** Since a database connection is represented by a `IDatabaseContext` instance it is important to understand that this instance is not thread-safe.  It is therefore important to ensure that the `IDatabaseContext` instance is not shared between threads.  See the `DatabaseContextScope` to ensure thread-safe database context flow.
+
 The `Shuttle.Core.Data` package provides a thin abstraction over ADO.NET by making use of the `DbProviderFactories`.  Even though it provides object/relational mapping mechanisms it is in no way a fully fledged ORM.
 
 ## Configuration
@@ -61,6 +63,19 @@ The default JSON settings structure is as follows:
 }
 ```
 
+# DatabaseContextScope
+
+The `DatabaseContextService` contains a collection of the `DatabaseContext` instances created by `IDatabaseContextFactory`.  However, since the `DatabaseContextService` is a singleton the same collection will be used in all thread contexts.  This includes not only the same execution context, but also "peered" execution context running in parallel.
+
+To enable an individual execution/thread context-specific collection which also enables async context flow wrap the initial database context creation in a new `DatabaseContextScope()`:
+
+``` c#
+using (new DatabaseContextScope())
+{
+	// database interaction
+})
+```
+
 # IDatabaseContextFactory
 
 In order to access a database we need a database connection.  A database connection is represented by an `IDatabaseContext` instance that may be obtained by using an instance of an `IDatabaseContextFactory` implementation.
@@ -73,6 +88,14 @@ var databaseContextFactory = provider.GetRequiredService<IDatabaseContextFactory
 using (var databaseContext = databaseContextFactory.Create("connection-name"))
 {
 	// database interaction
+}
+
+// or, in async/await implementations
+
+using (new DatabaseContextScope())
+using (var databaseContext = databaseContextFactory.Create("connection-name"))
+{
+	// database interaction that will flow across threads
 }
 ```
 
