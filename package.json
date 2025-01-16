@@ -1,6 +1,6 @@
 {
-  "name": "Pendel",
-  "version": "1.0.0",
+  "name": "pendel",
+  "version": "20.0.0",
   "description": "Shuttle Documentation.",
   "main": "index.js",
   "repository": "https://github.com/Shuttle/Pendel.git",

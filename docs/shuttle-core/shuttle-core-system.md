@@ -6,9 +6,19 @@ PM> Install-Package Shuttle.Core.System
 
 OS and system level abstractions.
 
+## ISystemClock
+
+The default implementation is `SystemClock`.
+
+``` c#
+DateTimeOffset UtcNow { get; }
+```
+
+Return the `DataTimeOffset` as the current UTC data/time.
+
 ## IEnvironmentService
 
-The default implement is `EnvironmentService`.
+The default implementation is `EnvironmentService`.
 
 ``` c#
 bool UserInteractive { get; }
@@ -24,7 +34,7 @@ The default implementation is `ProcessService`.
 IProcess GetCurrentProcess();
 ```
 
-Returns the `IProcess` abstraction for the current process.
+ Returns the `IProcess` abstraction for the current process.
 
 ## IProcess
 

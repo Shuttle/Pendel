@@ -25,6 +25,11 @@ export default defineConfig({
     },
     nav: [
       {
+        text: "Access",
+        activeMatch: `^/shuttle-access/`,
+        link: "/shuttle-access/index",
+      },
+      {
         text: "Core",
         activeMatch: `^/shuttle-core/`,
         link: "/shuttle-core/index",

@@ -1,7 +1,7 @@
-# Shuttle.Core.Transactions
+# Shuttle.Core.TransactionScope
 
 ```
-PM> Install-Package Shuttle.Core.Transactions
+PM> Install-Package Shuttle.Core.TransactionScope
 ```
 
 This package makes use of the .Net `TransactionScope` class to provide ambient transaction handling.
@@ -37,7 +37,7 @@ The default JSON settings structure is as follows::
 
 An implementation of the `ITransactionScope` interface is used to wrap a `TransactionScope`.
 
-The `DefaultTransactionScope` makes use of the standard .NET `TransactionScope` functionality.  There is also a `NullTransactionScope` that implements the null pattern so it implements the interface but does not do anything.
+The `DefaultTransactionScope` makes use of the standard .NET `TransactionScope` functionality.  There is also a `NullTransactionScope`, which is used when the transaction scope handling is disabled, that implements the null pattern so it implements the interface but does not do anything.
 
 ## Properties
 
