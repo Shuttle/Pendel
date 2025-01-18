@@ -9,7 +9,7 @@ There is no *default* implementation of the `ISubscriptionService` interface as 
 ### GetSubscribedUris
 
 ``` c#
-IEnumerable<string> GetSubscribedUris(object message)
+Task<IEnumerable<string>> GetSubscribedUrisAsync(string messageType);
 ```
 
 Returns a list of endpoint uris that have subscribed to the type name of the given message.

@@ -5,19 +5,19 @@ When an exception occurs within a pipeline an `OnPipelineException` event is rai
 ``` c#
 public class ReceiveExceptionObserver : IPipelineObserver<OnPipelineException>
 {
-    public void Execute(OnPipelineException pipelineEvent)
+    public async Task ExecuteAsync(IPipelineContext<OnPipelineException> pipelineContext)
     {
         // set by calling MarkExceptionHandled
-        if (pipelineEvent.Pipeline.ExceptionHandled) 
+        if (pipelineContext.Pipeline.ExceptionHandled) 
         {
             return;
         }
 
         // sets ExceptionHandled to true
-        pipelineEvent.Pipeline.MarkExceptionHandled(); 
+        pipelineContext.Pipeline.MarkExceptionHandled(); 
 
         // prevents further processing of the pipeline
-        pipelineEvent.Pipeline.Abort(); 
+        pipelineContext.Pipeline.Abort(); 
     }
 }
 ```

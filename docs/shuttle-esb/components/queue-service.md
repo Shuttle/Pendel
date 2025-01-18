@@ -6,9 +6,18 @@ The queue service should not be swapped out for your own implementation as it is
 
 ## Methods
 
+### Find
+
+``` c#
+IQueue? Find(Uri uri);
+```
+
+Returns an `IQueue` implementation that interacts with the queuing mechanism represented by the `scheme` in the uri if it has been created; else `null`.
+
 ### Get
 
 ``` c#
+IQueue Get(Uri uri);
 IQueue Get(string uri);
 ```
 
@@ -19,7 +28,9 @@ Should the uri scheme be `resolver` this method will invoke the configured `IUri
 ### Contains
 
 ``` c#
+bool Contains(Uri uri);
 public bool Contains(string uri);
 ```
 
 This method determines whether the queue service has a queue registered for the given URI.
+

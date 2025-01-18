@@ -101,10 +101,6 @@ const guide = [
                 text: 'Message Idempotence',
                 link: '/shuttle-esb/guide/patterns/message-idempotence'
             },
-            {
-                text: 'Process Management',
-                link: '/shuttle-esb/guide/patterns/process-management'
-            },
         ]
     },
     {
@@ -121,12 +117,8 @@ const guide = [
 const components = [
     home,
     {
-        text: 'Implementations',
+        text: 'Components',
         items: [
-            {
-                text: 'Idempotence Service',
-                link: '/shuttle-esb/components/idempotence-service'
-            },
             {
                 text: 'Identity Provider',
                 link: '/shuttle-esb/components/identity-provider'
@@ -138,10 +130,6 @@ const components = [
             {
                 text: 'Message Handler',
                 link: '/shuttle-esb/components/message-handler'
-            },
-            {
-                text: 'Message Handling Assessor',
-                link: '/shuttle-esb/components/message-handling-assessor'
             },
             {
                 text: 'Message Route Provider',
@@ -222,10 +210,6 @@ const implementations = [
                 link: '/shuttle-esb/implementations/queue/filemq'
             },
             {
-                text: 'MSMQ',
-                link: '/shuttle-esb/implementations/queue/msmq'
-            },
-            {
                 text: 'RabbitMQ',
                 link: '/shuttle-esb/implementations/queue/rabbitmq'
             },
@@ -258,7 +242,7 @@ const implementations = [
 const modules = [
     home,
     {
-        text: 'Implementations',
+        text: 'Modules',
         items: [
             {
                 text: 'Active Time Range',
@@ -314,10 +298,6 @@ const options = [
                 link: '/shuttle-esb/options/subscription'
             },
             {
-                text: 'Idempotence',
-                link: '/shuttle-esb/options/idempotence'
-            },
-            {
                 text: 'Processor Thread',
                 link: '/shuttle-esb/options/processor-thread'
             },
@@ -352,19 +332,6 @@ const esb = [
             {
                 text: 'Modules',
                 link: '/shuttle-esb/modules/overview'
-            },
-            {
-                text: 'History',
-                items: [
-                    {
-                        text: 'changelog',
-                        link: '/shuttle-esb/changelog',
-                    },
-                    {
-                        text: 'v-previous',
-                        link: 'https://shuttle.github.io/shuttle-esb-v12/',
-                    }
-                ]
             },
         ]
     },

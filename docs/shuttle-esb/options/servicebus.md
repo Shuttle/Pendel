@@ -12,7 +12,6 @@ var configuration =
 services.AddServiceBus(builder => 
 {
     // default values
-    builder.Options.Asynchronous = false;
     builder.Options.CreatePhysicalQueues = true;
     builder.Options.CacheIdentity = true;
     builder.Options.AddMessageHandlers = true;
@@ -50,7 +49,6 @@ The default JSON settings structure is as follows:
 
 | Option | Default     | Description    | 
 | ---                            | ---        | ---            | 
-| `Asynchronous` | `false` | Determines whether message handler and background processing will be performned asynchronously. |
 | `AddMessageHandlers` | `true` | If `true`, will call the `AddMessageHandlers` method on the `ServiceBusBuilder` implementation for all assemblies in the current domain; else only the handlers in `Shuttle.Esb` are registered. | 
 | `CacheIdentity` | `true` | Determines whether or not to re-use the identity returned by the `IIdentityProvider`. | 
 | `CreateQueues` | `true` | The endpoint will attempt to create all queues. | 
@@ -59,4 +57,4 @@ The default JSON settings structure is as follows:
 | `CompressionAlgorithm` | empty (no compression) | The name of the compression algorithm to use during message serialization. |
 | `EncryptionAlgorithm` | empty (no encryption) | The name of the encryption algorithm to use during message serialization. |
 
-The `IIdentityProvider` implementation is responsible for honouring the `cacheIdentity` attribute.
+The `IIdentityProvider` implementation is responsible for honouring the `CacheIdentity` attribute.

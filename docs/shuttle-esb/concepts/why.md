@@ -72,8 +72,6 @@ public class Program
                 {
                     builder.Options.Inbox.WorkQueueUri = 
                         "queue://configuration/queue-name";
-
-                    builder.Options.Asynchronous = true;
                 });
 
                 services.AddAzureStorageQueues(builder =>
@@ -107,7 +105,7 @@ There are situations where we need to _start_ something off.  Let's take the cas
 So from the client code:
 
 ``` c#
-await bus.SendAsync(new CreateOrder
+await serviceBus.SendAsync(new CreateOrder
     {
         Name = "CustomerName",
         Product = "ProductXYZ"
@@ -119,7 +117,7 @@ The call would fail if there is nowhere to send the message.
 We could publish an event such as **OrderReceived** and our ordering service could subscribe to the event.
 
 ```c#
-await bus.PublishAsync(new OrderReceived
+await serviceBus.PublishAsync(new OrderReceived
     {
         Name = "ClientName",
         Product = "ProductXYZ"
@@ -128,16 +126,16 @@ await bus.PublishAsync(new OrderReceived
 
 The call would *not* fail should there be no subscribers.  
 
-The difference lies purely in the intent of the message.  Events indicate that something has happened and it may be that there are no system interest in the event at the moment it is raised.  However, when certain actions are **required** in the system sending a command would require that the message be routed to an endpoint for processing as it isn't optional.  Of course, even when using a command approach there may still be some other system interested in knowing that an order has been received and the ordering service would still publish the event.
+The difference lies purely in the intent of the message.  Events indicate that something has happened and it may be that there are no systems interested in the event at the moment it is published.  However, when certain actions are **required** in the system, sending a command would also require that the message be routed to a specific endpoint for processing, as it isn't optional.  Of course, even when using a command approach there may still be some other system interested in knowing that an order has been received, and the order service would publish the event.
 
 ### Lower-level functions (RPC)
 
-In some situations an event will not be able to relay the intent of any particular action.  For instance, we may need to send an e-mail to a manager whenever an order is created (or when the total amount of the order exceeds a set limit).  The e-mail service responsible for sending e-mails via our smtp server will not be able to subscribe to the `OrderReceived` since the e-mail system would need to be adapted to accomodate rules from another system; which isn't what we want as it would be too closely coupled to any system that makes use of e-mails.
+In some situations an event will not be able to relay the intent of any particular action.  For instance, we may need to send an e-mail to a manager whenever an order is created, or perhaps when the total amount of the order exceeds a set limit.  The service responsible for sending e-mails via our e-mail provider (online or SMTP, for instance) will not be able to subscribe to the `OrderReceived` since the e-mail system would need to be adapted to accomodate rules from another system; which isn't what we want as it would be too closely coupled to any system that makes use of e-mails.
 
-In this case the e-mail system is responsible for sending e-mails.  Any system that would like to send a mail will need to decide when to do so.  Therefore, the ordering service would send a *command* to the e-mail service:
+In this case the e-mail system is responsible for sending e-mails.  Any system that would like to send a mail will need to decide when to do so.  Therefore, the ordering service would send a *command* to the e-mail service, e.g.:
 
 ```c#
-await bus.SendAsync(new SendMail
+await serviceBus.SendAsync(new SendMail
     {
         To = "manager@ordercompany.co.za",
         From = "orderservice@ordercompany.co.za",

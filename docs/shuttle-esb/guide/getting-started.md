@@ -26,7 +26,14 @@ internal class Program
                     .AddServiceBus(builder =>
                     {
                         builder.Options.Inbox.WorkQueueUri = "azuresq://azure/work";
-                        builder.Options.Asynchronous = true; // NOTE: we'll be using async processing
+
+                        // Delegates may also be added to the builder, including adding dependencies
+                        builder.AddMessageHandler(async (IHandlerContext<SomeMessage> context, ISomeDependency instance) =>
+                        {
+                            Console.WriteLine($@"[some-message] : guid = {context.Message.Guid}");
+
+                            await Task.CompletedTask;
+                        });
                     })
                     .AddAzureStorageQueues(builder =>
                     {
@@ -64,8 +71,6 @@ internal class Program
                         configuration
                             .GetSection(ServiceBusOptions.SectionName)
                             .Bind(builder.Options);
-
-                        builder.Options.Asynchronous = true; // NOTE: we'll be using async processing
                     })
                     .AddAzureStorageQueues(builder =>
                     {
@@ -111,7 +116,7 @@ await serviceBus.SendAsync(new RegisterMember
 
 ### Publish an event message when something interesting happens
 
-Before publishing an event one would need to register an `ISubscrtiptionService` implementation such as [Shuttle.Esb.Sql.Subscription](../implementations/subscription/sql.md).
+Before publishing an event one would need to register an `ISubscrtiptionService` implementation such as [Shuttle.Esb.Sql.Subscription](/implementations/subscription/sql.md).
 
 ``` c#
 await serviceBus.PublishAsync(new MemberRegistered
@@ -131,10 +136,8 @@ services.AddServiceBus(builder =>
 
 ### Handle any messages
 
-If you have the `ServiceBusOptions.Asynchronous` set to `false` then your message handlers should implement the `IMessageHandler` interface; else, for asynchronous support, implement the `IAsyncMessageHandler`.
-
 ``` c#
-public class RegisterMemberHandler : IAsyncMessageHandler<RegisterMember>
+public class RegisterMemberHandler : IMessageHandler<RegisterMember>
 {
     public RegisterMemberHandler(IDependency dependency)
     {
@@ -153,7 +156,7 @@ public class RegisterMemberHandler : IAsyncMessageHandler<RegisterMember>
 ```
 
 ``` c#
-public class MemberRegisteredHandler : IAsyncMessageHandler<MemberRegistered>
+public class MemberRegisteredHandler : IMessageHandler<MemberRegistered>
 {
 	public async Task ProcessMessageAsync(IHandlerContext<MemberRegistered> context)
 	{
@@ -161,3 +164,4 @@ public class MemberRegisteredHandler : IAsyncMessageHandler<MemberRegistered>
 	}
 }
 ```
+
