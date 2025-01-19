@@ -1,60 +1,75 @@
-# Sql Server
+# Sql
 
 ```
 PM> Install-Package Shuttle.Recall.Sql.Storage
 ```
 
-A Sql Server implementation of the `Shuttle.Recall` event sourcing `EventStore`.
+A Sql implementation of the `Shuttle.Recall` event sourcing `EventStore`.
 
 ## Configuration
 
+This package makes use of the [Data Access components](/shuttle-core/shuttle-core-data), which would also need to be registered.
+
 ```c#
-services.AddSqlEventStorage();
+DbProviderFactories.RegisterFactory("Microsoft.Data.SqlClient", SqlClientFactory.Instance);
+
+services
+    .AddDataAccess(builder =>
+    {
+        // will get the connection string with name 'EventStore'
+        builder.AddConnectionString("EventStore", "Microsoft.Data.SqlClient");
+    })
+    .AddSqlEventStorage(builder => 
+    {
+        builder.Options.ConnectionStringName = "EventStore";
+
+        // defaults
+        builder.Options.Schema = "dbo";
+        builder.Options.ConfigureDatabase = true;
+        builder.Options.UncommittedTolerance = TimeSpan.FromSeconds(15);
+
+        builder.UseSqlServer();
+    });
 ```
 
 ## Database
 
-In order to create the relevant database structures execute the relevant `EventStoreCreate.sql` script:
-
-```
-%userprofile%\.nuget\packages\shuttle.recall.sql.storage\{version}\scripts\{provider}\EventStoreCreate.sql
-```
+The package contains an implementation of an `IHostedService` called `EventStoreHostedService` which will create the required database structures if `ConfigureDatabase` is set to `true` (which is the default).
 
 ## Supported providers
 
 - `Microsoft.Data.SqlClient`
-- `System.Data.SqlClient`
 
-If you'd like support for another SQL-based provider please feel free to give it a bash and send a pull request if you *do* go this route.  You are welcome to create an issue and assistance will be provided where possible.
+If you'd like support for another SQL-based provider you are welcome to create an issue and assistance will be provided where possible; else a pull request would be appreciated.
 
-## IKeyStore
+## IdKeyRepository
 
-You are bound to run into situations where you have a business or other key that is required to be unique.  Given that the `IEventStore` makes use of only surrogate keys the `IKeyStore` is used to create a unique list of keys associated with a given aggregate identifier.
+You are bound to run into situations where you have a business or other key that is required to be unique.  Given that the `IEventStore` makes use of only surrogate keys the `IdKeyRepository` is used to create a unique list of keys associated with a given aggregate identifier.
 
-Since the keys used in the key store have to be unique you should ensure that they contain enough information to be unique and have the intended meaning.
+Since the keys used in the associated `IdKey` table have to be unique, you should ensure that they contain enough information to be unique and have the intended meaning.
 
 A key could be something such as `[order-number]:ord-001/2016`, `[customer-onboarding]:id-number=0000005555089`, or `[system-name/profile]:672cda1c-c3ec-4f81-a577-e64f9f14e141`.
 
 ### Contains
 
 ``` c#
-bool Contains(string key);
+ValueTask<bool> ContainsAsync(string key, CancellationToken cancellationToken = default);
 ```
 
 Returns `true` if the given `key` has an associated aggregate identifier.
 
 ---
 ``` c#
-bool Contains(Guid id);
+ValueTask<bool> ContainsAsync(Guid id, CancellationToken cancellationToken = default);
 ```
 
 Returns `true` if the given `id` is present in the key store.
 
 ---
-### Get
+### Find
 
 ``` c#
-Guid? Get(string key);
+ValueTask<Guid?> FindAsync(string key, CancellationToken cancellationToken = default);
 ```
 
 Returns the `Guid` associated with the given key; else `null`.
@@ -63,8 +78,8 @@ Returns the `Guid` associated with the given key; else `null`.
 ### Remove
 
 ``` c#
-void Remove(string key);
-void Remove(Guid id);
+Task RemoveAsync(string key, CancellationToken cancellationToken = default);
+Task RemoveAsync(Guid id, CancellationToken cancellationToken = default);
 ```
 
 When specifying the `key` the assocation with the identifier will be removed.  When specifying the `id` all keys associated with the given `id` will be removed.
@@ -73,7 +88,7 @@ When specifying the `key` the assocation with the identifier will be removed.  W
 ### Add
 
 ``` c#
-void Add(Guid id, string key);
+Task AddAsync(Guid id, string key, CancellationToken cancellationToken = default);
 ```
 
 Creates an association between the `id` and the `key`.
@@ -82,7 +97,7 @@ Creates an association between the `id` and the `key`.
 ### Add
 
 ``` c#
-void Rekey(string key, string rekey);
+Task RekeyAsync(string key, string rekey, CancellationToken cancellationToken = default);
 ```
 
 Changes `key` to a new key specified by `rekey`.

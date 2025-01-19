@@ -33,11 +33,16 @@ Please note that there are quite a few breaking changes.  These will, typically,
 
 ## Shuttle.Esb
 
+- Renamed `IAsyncMessageHandler` to `IMessageHandler`.
 - `ServiceBusOptions.Asynchronous` as `async` is now the preferred mechanism.
-- The `IAsyncMessageHandler` has changed to only `IMessageHandler`.
 - Removed all idempotence features, such as `IIdempotenceService` and `IdempotenceOptions`, as idempotence should be a module.
 - `MessageHandlerInvokeResult` removed in favour of returning `bool` from `IMessageHandlerInvoker.InvokeAsync`.
 - `IReusability` removed as handlers are obtained from the `IServiceProvider`.
 - `IMessageHandlingAssessor` removed.
 
 ## Shuttle.Recall
+
+- Renamed `IAsyncEventHandler` to `IEventHandler`.
+- Removed `EventStore.CreateEventStream`.  Using `EventStore.GetAsync` will return an empty event stream if none exists.
+- Renamed `EventStream.AddEvent` to `EventStream.Add`.
+- Removed snapshots as such funcationality should be modelled explicity, for instance using the [Closing the Books pattern](https://event-driven.io/en/closing_the_books_in_practice/).
