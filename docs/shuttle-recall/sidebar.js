@@ -3,7 +3,7 @@ const home = {
     items: [
         {
             text: 'Shuttle.Recall',
-            link: '/shuttle-recall/index'
+            link: '/shuttle-recall/home'
         },
     ]
 };
@@ -71,7 +71,7 @@ const recall = [
         items: [
             {
                 text: 'Getting started',
-                link: '/shuttle-recall/guide/getting-started'
+                link: '/shuttle-recall/getting-started'
             },
             {
                 text: 'Events',
@@ -80,6 +80,10 @@ const recall = [
             {
                 text: 'Projections',
                 link: '/shuttle-recall/projections/overview'
+            },
+            {
+                text: 'Walkthrough',
+                link: '/shuttle-recall/walkthrough'
             },
         ]
     }

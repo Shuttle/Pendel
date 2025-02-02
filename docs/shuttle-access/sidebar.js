@@ -1,0 +1,35 @@
+const home = {
+    text: '',
+    items: [
+        {
+            text: 'Shuttle.Access',
+            link: '/shuttle-access/home'
+        },
+    ]
+};
+
+const access = [
+    home,
+    {
+        items: [
+            {
+                text: 'Overview',
+                link: '/shuttle-access/overview'
+            },
+            {
+                text: 'Docker Compose',
+                link: '/shuttle-access/docker-compose'
+            },
+            {
+                text: 'Guide',
+                link: '/shuttle-access/guide'
+            }
+        ]
+    }
+]
+
+const sidebar = {
+    '/shuttle-access/': access
+}
+
+export default sidebar;

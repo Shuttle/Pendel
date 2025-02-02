@@ -32,6 +32,17 @@ services
     });
 ```
 
+## Options
+
+The `SqlStorageOptions` contains the following options:
+
+| Option | Default | Description |
+| --- | --- | --- |
+| `ConnectionStringName` | `""` | The connecting string name representing the event store. |
+| `Schema` | `dbo` | The schema that the database structure belong to. |
+| `ConfigureDatabase` | `true` | If `true` the `EventStoreHostedService` will create the database structures if they do not exist. |
+| `UncommittedTolerance` | `00:00:15` | Any uncommitted events will be set to committed.  This will prevent edge cases from leaving events uncommitted when they have been committed within a transaction.  The edge case can come about since setting the committed date on an event is invoked in the `Completed` stage of the `SaveEventStreamPipeline`, so it is handled in a separate transaction. |
+
 ## Database
 
 The package contains an implementation of an `IHostedService` called `EventStoreHostedService` which will create the required database structures if `ConfigureDatabase` is set to `true` (which is the default).

@@ -116,7 +116,7 @@ await serviceBus.SendAsync(new RegisterMember
 
 ### Publish an event message when something interesting happens
 
-Before publishing an event one would need to register an `ISubscrtiptionService` implementation such as [Shuttle.Esb.Sql.Subscription](/implementations/subscription/sql.md).
+Before publishing an event one would need to register an `ISubscrtiptionService` implementation such as [Shuttle.Esb.Sql.Subscription](/shuttle-esb/implementations/subscription/sql.md).
 
 ``` c#
 await serviceBus.PublishAsync(new MemberRegistered
