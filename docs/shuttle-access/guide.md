@@ -1,6 +1,6 @@
 # Guide
 
-This guid assumes that you are either running the [Shuttle.Access](https://github.com/Shuttle/Shuttle.Access) solution or the [docker-compose](/shuttle-access/docker-compose) containers.
+This guide assumes that you are either running the [Shuttle.Access](https://github.com/Shuttle/Shuttle.Access) solution or the [docker-compose](/shuttle-access/docker-compose) containers.
 
 ## Access
 
