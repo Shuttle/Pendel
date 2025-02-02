@@ -3,15 +3,15 @@ const home = {
   items: [
     {
       text: "Shuttle.Core",
-      link: "/shuttle-core/index",
+      link: "/shuttle-core/home",
     },
   ],
 };
 
 const sidebar = {
   "/shuttle-core/": [
+    home,
     {
-      text: "Shuttle.Core",
       items: [
         {
           text: "Cli",

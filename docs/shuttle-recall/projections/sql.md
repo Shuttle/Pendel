@@ -39,6 +39,19 @@ services
     })
 ```
 
+## Options
+
+The `SqlEventProcessingOptions` contains the following options:
+
+| Option | Default | Description |
+| --- | --- | --- |
+| `ConnectionStringName` | `""` | The connecting string name representing the projection store. |
+| `Schema` | `dbo` | The schema that the database structure belong to. |
+| `ConfigureDatabase` | `true` | If `true` the `EventProcessingHostedService` will create the database structures if they do not exist. |
+| `ProjectionJournalSize` | `1000` | The maximum number of events to retrieve as a journal batch. |
+| `ProjectionJournalChunkSize` | `500` | The maximum number of sequence numbers to save to the journal in a batch.  Sql Server has a limit. |
+| `RegisterDatabaseContextObserver` | `true` | If `true` the `DatabaseContextObserver` will be registered.  This creates ensures that a `DatabaseContext` exists in the `Handle` stage of the `EventProcessingPipeline`. |
+
 ## Database
 
 The package contains an implementation of an `IHostedService` called `EventProcessingHostedService` which will create the required database structures if `ConfigureDatabase` is set to `true` (which is the default).

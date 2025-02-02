@@ -1,3 +1,4 @@
+import { default as access } from "../shuttle-access/sidebar";
 import { default as core } from "../shuttle-core/sidebar";
 import { default as esb } from "../shuttle-esb/sidebar";
 import { default as recall } from "../shuttle-recall/sidebar";
@@ -13,7 +14,7 @@ export default defineConfig({
   themeConfig: {
     siteTitle: "Shuttle Documentation",
     search: {
-      provider: "local"
+      provider: "local",
     },
     socialLinks: [
       { icon: "github", link: "https://github.com/Shuttle/Pendel" },
@@ -27,27 +28,28 @@ export default defineConfig({
       {
         text: "Access",
         activeMatch: `^/shuttle-access/`,
-        link: "/shuttle-access/index",
+        link: "/shuttle-access/home",
       },
       {
         text: "Core",
         activeMatch: `^/shuttle-core/`,
-        link: "/shuttle-core/index",
+        link: "/shuttle-core/home",
       },
       {
         text: "Service Bus",
         activeMatch: `^/shuttle-esb/`,
-        link: "/shuttle-esb/index",
+        link: "/shuttle-esb/home",
       },
       {
         text: "Event Sourcing",
         activeMatch: `^/shuttle-recall/`,
-        link: "/shuttle-recall/index",
+        link: "/shuttle-recall/home",
       },
     ],
     sidebar: {
-      ...esb,
+      ...access,
       ...core,
+      ...esb,
       ...recall,
     },
   },

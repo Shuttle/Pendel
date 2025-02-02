@@ -3,7 +3,7 @@ const home = {
     items: [
         {
             text: 'Shuttle.Esb',
-            link: '/shuttle-esb/index'
+            link: '/shuttle-esb/home'
         },
     ]
 };

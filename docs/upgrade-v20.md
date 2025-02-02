@@ -10,6 +10,10 @@ Please note that there are quite a few breaking changes.  These will, typically,
 
 ## Shuttle.Core
 
+### Shuttle.Core.Contract
+
+- Throwing `ArgumentNullException` instead of `NullReferenceException` for `AgainstNull` and `AgainstNullOrEmptyString`.
+
 ### Shuttle.Core.Data
 
 - Removed `ScriptProvider` as query factories should rather be used.
@@ -32,6 +36,8 @@ Please note that there are quite a few breaking changes.  These will, typically,
 - Renamed `IReflectionService.GetTypesAssignableToAsync` to `IReflectionService.GetTypesCastableToAsync`.
 
 ## Shuttle.Esb
+
+> **Note**: Using `JsonSerializer` as the default.  To use XML call `services.AddSingleton<ISerializer, XmlSerializer>()` before calling `services.AddServiceBus()`.
 
 - Renamed `IAsyncMessageHandler` to `IMessageHandler`.
 - `ServiceBusOptions.Asynchronous` as `async` is now the preferred mechanism.

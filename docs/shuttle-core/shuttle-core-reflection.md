@@ -18,7 +18,7 @@ Returns a collection of assemblies that have their file name matching the given 
 Task<IEnumerable<Assembly>> GetRuntimeAssembliesAsync()
 ```
 
-Return a combination of `DependencyContext.Default.GetRuntimeAssemblyNames(Environment.OSVersion.Platform.ToString())` and `AppDomain.CurrentDomain.GetAssemblies()`.
+Returns a combination of `DependencyContext.Default.GetRuntimeAssemblyNames(Environment.OSVersion.Platform.ToString())` and `AppDomain.CurrentDomain.GetAssemblies()`.
 
 ``` c#
 Task<Type> GetTypeAsync(string typeName)
