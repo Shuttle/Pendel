@@ -1,3 +1,3 @@
 # Shuttle.Core.*
 
-Cross-cutting packages that are used to facilitate the development of .Net software.
+Cross-cutting concern packages that are used to facilitate the development of .Net software.

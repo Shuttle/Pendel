@@ -46,6 +46,32 @@ Please note that there are quite a few breaking changes.  These will, typically,
 - `IReusability` removed as handlers are obtained from the `IServiceProvider`.
 - `IMessageHandlingAssessor` removed.
 
+### Shuttle.Esb.Sql.Subscription
+
+Previuosly the SQL subscription service was registered like this:
+
+```c#
+services
+    .AddSqlSubscription()
+    .AddServiceBus(builder =>
+    {
+        builder.Options.Subscription.ConnectionStringName = "ProcessManagement";
+    });
+```
+
+It now needs to be registered like this:
+
+```c#
+services
+    .AddSqlSubscription(builder =>
+    {
+        builder.Options.ConnectionStringName = "Subscription";
+        builder.Options.Schema = "dbo"; // Optional.  Defaults to `dbo`
+
+        builder.UseSqlServer();
+    })
+```
+
 ## Shuttle.Recall
 
 - Renamed `IAsyncEventHandler` to `IEventHandler`.

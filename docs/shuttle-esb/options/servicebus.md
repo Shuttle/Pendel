@@ -58,3 +58,82 @@ The default JSON settings structure is as follows:
 | `EncryptionAlgorithm` | empty (no encryption) | The name of the encryption algorithm to use during message serialization. |
 
 The `IIdentityProvider` implementation is responsible for honouring the `CacheIdentity` attribute.
+
+## Startup
+
+Once the `ServiceBus` has been added to a `ServiceCollection` you can start it using one of the following methods:-
+
+### Hosted start
+
+```
+await Host.CreateDefaultBuilder()
+    .ConfigureServices(services =>
+    {
+        var configuration = new ConfigurationBuilder().AddJsonFile("appsettings.json").Build();
+
+        services
+            .AddSingleton<IConfiguration>(configuration)
+            .AddServiceBus(builder =>
+            {
+                configuration.GetSection(ServiceBusOptions.SectionName).Bind(builder.Options);
+
+                builder.AddMessageHandler(async (IHandlerContext<RegisterMember> context) =>
+                {
+                    Console.WriteLine();
+                    Console.WriteLine("[MEMBER REGISTERED] : user name = '{0}'", context.Message.UserName);
+                    Console.WriteLine();
+
+                    await context.SendAsync(new MemberRegistered
+                    {
+                        UserName = context.Message.UserName
+                    }, transportMessageBuilder => transportMessageBuilder.Reply());
+                });
+
+                // To suppress the registration of the `ServiceBusHostedService` use this:
+                builder.SuppressHostedService();
+            })
+            .AddAzureStorageQueues(builder =>
+            {
+                builder.AddOptions("azure", new()
+                {
+                    ConnectionString = Guard.AgainstNullOrEmptyString(configuration.GetConnectionString("azure"))
+                });
+            });
+    })
+    .Build()
+    .RunAsync(); // The `ServiceBusHostedService` will be invoked which starts the `ServiceBus`.
+```
+
+### Manual start
+
+```
+var configuration = new ConfigurationBuilder().AddJsonFile("appsettings.json").Build();
+
+var services = new ServiceCollection()
+    .AddSingleton<IConfiguration>(configuration)
+    .AddServiceBus(builder =>
+    {
+        configuration.GetSection(ServiceBusOptions.SectionName).Bind(builder.Options);
+
+        builder.AddMessageHandler(async (IHandlerContext<MemberRegistered> context) =>
+        {
+            Console.WriteLine();
+            Console.WriteLine("[RESPONSE RECEIVED] : user name = '{0}'", context.Message.UserName);
+            Console.WriteLine();
+
+            await Task.CompletedTask;
+        });
+    })
+    .AddAzureStorageQueues(builder =>
+    {
+        builder.AddOptions("azure", new()
+        {
+            ConnectionString = "UseDevelopmentStorage=true;"
+        });
+    });
+
+await using (var serviceBus = await services.BuildServiceProvider().GetRequiredService<IServiceBus>().StartAsync())
+{
+    await serviceBus.SendAsync(new InterestingMessage());
+}
+```

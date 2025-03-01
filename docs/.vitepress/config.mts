@@ -1,5 +1,6 @@
 import { default as access } from "../shuttle-access/sidebar";
 import { default as core } from "../shuttle-core/sidebar";
+import { default as extensions } from "../shuttle-extensions/sidebar";
 import { default as esb } from "../shuttle-esb/sidebar";
 import { default as recall } from "../shuttle-recall/sidebar";
 import { defineConfig } from "vitepress";
@@ -37,19 +38,25 @@ export default defineConfig({
         link: "/shuttle-core/home",
       },
       {
-        text: "Service Bus",
-        activeMatch: `^/shuttle-esb/`,
-        link: "/shuttle-esb/home",
-      },
-      {
         text: "Event Sourcing",
         activeMatch: `^/shuttle-recall/`,
         link: "/shuttle-recall/home",
+      },
+      {
+        text: "Extensions",
+        activeMatch: `^/shuttle-extensions/`,
+        link: "/shuttle-extensions/home",
+      },
+      {
+        text: "Service Bus",
+        activeMatch: `^/shuttle-esb/`,
+        link: "/shuttle-esb/home",
       },
     ],
     sidebar: {
       ...access,
       ...core,
+      ...extensions,
       ...esb,
       ...recall,
     },
