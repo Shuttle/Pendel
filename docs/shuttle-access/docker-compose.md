@@ -49,6 +49,8 @@ services:
     front-end:
         image:
             shuttle/access-vue:latest
+        environment:
+           - VITE_API_URL=http://localhost:5599
         ports:
             - "3000:80"
 ```
@@ -161,14 +163,43 @@ And we also need a `webapi-appsettings.json` file:
       ]
     },
     "OAuth": {
-      "GitHub": {
-        "clientId": "your-client-id",
-        "clientSecret": "your-client-secret",
-        "authorizationUrl": "https://github.com/login/oauth/authorize?client_id=__ClientId__&redirect_uri=__RedirectUri__&scope=__Scope__",
-        "scope": "user:email",
-        "tokenUrl": "https://github.com/login/oauth/access_token",
-        "dataUrl": "https://api.github.com/user"
-      }
+      "DefaultRedirectUri": "http://localhost:3000/oauth",
+      "Providers": [
+        {
+          "Name": "GitHub",
+          "Authorize": {
+            "ClientId": "your-client-id",
+            "Url": "https://github.com/login/oauth/authorize"
+          },
+          "Token": {
+            "ClientId": "your-client-id",
+            "ClientSecret": "your-client-secret",
+            "Url": "https://github.com/login/oauth/access_token"
+          },
+          "Data": {
+            "Url": "https://api.github.com/user"
+          },
+          "scope": "user:email"
+        },
+        {
+          "Name": "Microsoft",
+          "Authorize": {
+            "ClientId": "your-client-id",
+            "CodeChallengeMethod": "S256"
+          },
+          "Token": {
+            "ClientId": "your-client-id",
+            "ContentTypeHeader": "application/x-www-form-urlencoded",
+            "OriginHeader": "http://localhost:3000"
+          },
+          "Data": {
+            "Url": "https://graph.microsoft.com/v1.0/me",
+            "AuthorizationHeaderScheme": "Bearer",
+            "EMailPropertyName": "mail"
+          },
+          "Scope": "User.Read"
+        }
+      ]
     },
     "ServiceBus": {
       "Inbox": {
@@ -196,7 +227,6 @@ And we also need a `webapi-appsettings.json` file:
     }
   }
 }
-
 ```
 
 You will now be able to run `docker-compose up` in the folder containing the above file:
