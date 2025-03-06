@@ -23,7 +23,7 @@ Create the following entities:-
 
 ## Minimal API
 
-Create a new .NET 8.0 `ASP.NET Core Web API` project called `AccessGuide.WebApi` and remember to un-check the `Use controllers` option and to check the `Enabled OpenAPI support:
+Create a new .NET 8.0 `ASP.NET Core Web API` project called `AccessGuide.WebApi` and remember to un-check the `Use controllers` option and to check the `Enable OpenAPI support:
 
 If you run the application you should be able to invoke the `GET http://localhost:{port}/weatherforecast` endpoint to return a list of temperatur readings.
 
@@ -41,7 +41,7 @@ builder.Services.AddAccessAuthorization();
 
 // The client application needs to be able to retrieve session data from the Shuttle.Access.WebApi.
 // This means that it too needs to be authenticated.
-builder.Services.AddAccessClient(builder =>
+builder.Services.AddAccessClient(clientBuilder =>
     {
         // webApplicationBuilder.Configuration.GetSection(AccessClientOptions.SectionName).Bind(clientBuilder.Options);
         // ...with `appsettings.json` containing the following:
@@ -60,7 +60,7 @@ builder.Services.AddAccessClient(builder =>
         clientBuilder.Options.BaseAddress = "http://localhost:5599";
         clientBuilder.Options.IdentityName = "AccessGuide.WebApi";
         clientBuilder.Options.Password = "AccessGuide.WebApi:Password";
-    })
+    });
 ```
 
 ```c#
