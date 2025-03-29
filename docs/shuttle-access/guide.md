@@ -11,15 +11,17 @@ Create the following entities:-
 - These identities:
   - `guide-user` with a password of `guide-password`
   - `AccessGuide.WebApi` with a password of `AccessGuide.WebApi:Password`
-- A permission called `weather://forecast/view`
+- This permission:
+  - `weather://forecast/view`
 - A role called `Trusted Identity` and assign the following permissions:
   - `access://sessions/view`
   - `access://sessions/register`
-- A role called `Weather Reader` and assign the `weather://forecast/view` permission.
-- Assign the following roles to the `guide-user` identity:
+- A role called `Weather Reader` and assign this permission:
+  - `weather://forecast/view`
+- Assign ths role to the `guide-user` identity:
   - `Weather Reader`
-  - `Trusted Identity` (we just need this to get to the session token later on)
-- Assign the `Trusted Identity` role to the `AccessGuide.WebApi` identity.
+- Assign this role to the `AccessGuide.WebApi` identity:
+  - `Trusted Identity`
 
 ## Minimal API
 
@@ -58,8 +60,15 @@ builder.Services.AddAccessClient(clientBuilder =>
         //    }   
 
         clientBuilder.Options.BaseAddress = "http://localhost:5599";
-        clientBuilder.Options.IdentityName = "AccessGuide.WebApi";
-        clientBuilder.Options.Password = "AccessGuide.WebApi:Password";
+
+        clientBuilder.AddPasswordAuthenticationProvider(providerBuilder =>
+        {
+            // This will obtain a session for the Web API as the `AccessGuide.WebApi` identity.
+            // Since `AccessGuide.WebApi` is in the `Trusted Identity` role,
+            // the Web API is able to view and register sessions.
+            providerBuilder.Options.IdentityName = "AccessGuide.WebApi";
+            providerBuilder.Options.Password = "AccessGuide.WebApi:Password";
+        });
     });
 ```
 
@@ -118,12 +127,37 @@ builder.Services.AddSwaggerGen(options =>
 });
 ```
 
-Use the `Shuttle.Access` [front-end](http://localhost:3000/signin) to sign in using the `guide-user` identity and the navigate to the [sessions](http://localhost:3000/signin) view.
+Use the `Shuttle.Access` [Web API](http://localhost:5599/swagger/index.html) to register a session by invoking the `POST /v1/sessions` endpoint with the following body:
 
-Copy the `Token` and then use the to `Authorize` access to the `AccessGuide.WebApi` Swagger page by entering:
+```json
+{
+  "identityName": "guide-user",
+  "password": "guide-password"
+}
+```
+
+You should receive a response with the following structure:
+
+```json
+{
+  "identityName": "guide-user",
+  "permissions": [
+    "weather://forecast/view"
+  ],
+  "registrationRequested": false,
+  "result": "Registered",
+  "token": "363f6fdd-bdd4-4db5-b18c-7a9bf6f075fc",
+  "expiryDate": "2025-03-30T01:38:46.8459904+00:00",
+  "sessionTokenExchangeUrl": "",
+  "identityId": "c01c176f-1d96-486b-8677-ae91f2961980",
+  "dateRegistered": "2025-03-29T17:38:46.8292227+00:00"
+}
+```
+
+Copy the `token` and then use the to `Authorize` access to the `AccessGuide.WebApi` Swagger page by entering:
 
 ```
-Shuttle.Access token={the-token}
+Shuttle.Access token={the-token-value}
 ```
 
 When you invoke the `GET http://localhost:{port}/weatherforecast` endpoint now you should have access.

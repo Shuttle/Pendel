@@ -9,7 +9,6 @@ The quickest way to get started is to install [Docker](https://www.docker.com/ge
 We then need a specific folder, e.g. `c:\development.docker\access`, in which we can then create a `docker-compose.yml` file that contains the following content:
 
 ```
-version: "3.9"
 services:
     azurite:
         image: mcr.microsoft.com/azure-storage/azurite
@@ -51,6 +50,7 @@ services:
             shuttle/access-vue:latest
         environment:
            - VITE_API_URL=http://localhost:5599
+           - VITE_API_ALLOW_PASSWORD_AUTHENTICATION=true
         ports:
             - "3000:80"
 ```
