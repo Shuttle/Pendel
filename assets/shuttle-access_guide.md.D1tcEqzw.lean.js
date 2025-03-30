@@ -13,8 +13,11 @@ import{_ as i,c as a,a3 as n,o as e}from"./chunks/framework.C4Vvvhxx.js";const E
 <span class="line"><span style="--shiki-light:#6A737D;--shiki-dark:#6A737D;">        //        &quot;Access&quot;: {</span></span>
 <span class="line"><span style="--shiki-light:#6A737D;--shiki-dark:#6A737D;">        //          &quot;Client&quot;: {</span></span>
 <span class="line"><span style="--shiki-light:#6A737D;--shiki-dark:#6A737D;">        //            &quot;BaseAddress&quot;: &quot;http://localhost:5599&quot;,</span></span>
-<span class="line"><span style="--shiki-light:#6A737D;--shiki-dark:#6A737D;">        //            &quot;IdentityName&quot;: &quot;identity0-name&quot;,</span></span>
-<span class="line"><span style="--shiki-light:#6A737D;--shiki-dark:#6A737D;">        //            &quot;Password&quot;: &quot;password&quot;</span></span>
+<span class="line"><span style="--shiki-light:#6A737D;--shiki-dark:#6A737D;">        //              &quot;PasswordAuthenticationProvider&quot;: </span></span>
+<span class="line"><span style="--shiki-light:#6A737D;--shiki-dark:#6A737D;">        //              {</span></span>
+<span class="line"><span style="--shiki-light:#6A737D;--shiki-dark:#6A737D;">        //                &quot;IdentityName&quot;: &quot;identity0-name&quot;,</span></span>
+<span class="line"><span style="--shiki-light:#6A737D;--shiki-dark:#6A737D;">        //                &quot;Password&quot;: &quot;password&quot;</span></span>
+<span class="line"><span style="--shiki-light:#6A737D;--shiki-dark:#6A737D;">        //              }</span></span>
 <span class="line"><span style="--shiki-light:#6A737D;--shiki-dark:#6A737D;">        //          }</span></span>
 <span class="line"><span style="--shiki-light:#6A737D;--shiki-dark:#6A737D;">        //        }</span></span>
 <span class="line"><span style="--shiki-light:#6A737D;--shiki-dark:#6A737D;">        //      }</span></span>
