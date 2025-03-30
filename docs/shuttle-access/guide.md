@@ -52,8 +52,11 @@ builder.Services.AddAccessClient(clientBuilder =>
         //        "Access": {
         //          "Client": {
         //            "BaseAddress": "http://localhost:5599",
-        //            "IdentityName": "identity0-name",
-        //            "Password": "password"
+        //              "PasswordAuthenticationProvider": 
+        //              {
+        //                "IdentityName": "identity0-name",
+        //                "Password": "password"
+        //              }
         //          }
         //        }
         //      }
