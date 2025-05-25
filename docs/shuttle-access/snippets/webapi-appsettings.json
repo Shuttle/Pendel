@@ -1,0 +1,98 @@
+{
+  "Serilog": {
+    "Using": [
+      "Serilog.Sinks.Console",
+      "Serilog.Sinks.File"
+    ],
+    "MinimumLevel": {
+      "Default": "Debug",
+      "Override": {
+        "System.Net.Http": "Error"
+      }
+    },
+    "WriteTo": [
+      {
+        "Name": "Console"
+      },
+      {
+        "Name": "File",
+        "Args": {
+          "path": "./logs/.log",
+          "rollOnFileSizeLimit": true,
+          "retainedFileCountLimit": 30,
+          "fileSizeLimitBytes": 1048576,
+          "rollingInterval": "Day"
+        }
+      }
+    ]
+  },
+  "ConnectionStrings": {
+    "azure": "UseDevelopmentStorage=true;DevelopmentStorageProxyUri=http://azurite",
+    "Access": "server=database;database=Access;user id=sa;password=Pass!000;TrustServerCertificate=true"
+  },
+  "Shuttle": {
+    "OAuth": {
+      "DefaultRedirectUri": "http://localhost:3000/oauth",
+      "Providers": [
+        {
+          "Name": "GitHub",
+          "Authorize": {
+            "ClientId": "your-client-id",
+            "Url": "https://github.com/login/oauth/authorize"
+          },
+          "Token": {
+            "ClientId": "your-client-id",
+            "ClientSecret": "your-client-secret",
+            "Url": "https://github.com/login/oauth/access_token"
+          },
+          "Data": {
+            "Url": "https://api.github.com/user"
+          },
+          "scope": "user:email"
+        },
+        {
+          "Name": "Microsoft",
+          "Authorize": {
+            "ClientId": "your-client-id",
+            "CodeChallengeMethod": "S256"
+          },
+          "Token": {
+            "ClientId": "your-client-id",
+            "ContentTypeHeader": "application/x-www-form-urlencoded",
+            "OriginHeader": "http://localhost:3000"
+          },
+          "Data": {
+            "Url": "https://graph.microsoft.com/v1.0/me",
+            "AuthorizationHeaderScheme": "Bearer",
+            "EMailPropertyName": "mail"
+          },
+          "Scope": "User.Read"
+        }
+      ]
+    },
+    "ServiceBus": {
+      "Inbox": {
+        "WorkQueueUri": "azuresq://azure/access-webapi-inbox-work",
+        "DeferredQueueUri": "azuresq://azure/access-webapi-inbox-deferred",
+        "ErrorQueueUri": "azuresq://azure/shuttle-error",
+        "ThreadCount": 1,
+        "DurationToIgnoreOnFailure": [
+          "00:00:05",
+          "00:00:10",
+          "00:00:30"
+        ]
+      },
+      "MessageRoutes": [
+        {
+          "Uri": "azuresq://azure/access-server-inbox-work",
+          "Specifications": [
+            {
+              "Name": "StartsWith",
+              "Value": "Shuttle.Access.Messages"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

@@ -17,6 +17,10 @@ const access = [
                 link: '/shuttle-access/overview'
             },
             {
+                text: 'Docker',
+                link: '/shuttle-access/docker'
+            },
+            {
                 text: 'Docker Compose',
                 link: '/shuttle-access/docker-compose'
             },
