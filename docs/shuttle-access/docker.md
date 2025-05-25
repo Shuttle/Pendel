@@ -187,6 +187,8 @@ docker run \
 
 Finally, create the front-end instance:
 
+(hosted on port `3005` in this example, change as needed)
+
 ::: code-group
 ```cmd [cmd]
 docker run ^
@@ -222,10 +224,10 @@ docker run \
 
 ## Done
 
-Once all the containers have started up, you can browse to the [front-end](http://locahost:3000):
+Once all the containers have started up, you can browse to the [front-end](http://locahost:3005):
 
 ```
-http://locahost:3000
+http://locahost:3005
 ```
 
 Which should bring you to the sign-in page where `admin` is the identity as well as the password.
