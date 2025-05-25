@@ -67,16 +67,16 @@ You will now be able to run `docker-compose up` in the folder containing the abo
 > docker-compose up
 ```
 
-The various images will be downloaded and, once all the containers have started up, you can browse to the [front-end](http://locahost:3000):
+The various images will be downloaded and, once all the containers have started up, you can browse to the [front-end](http://localhost:3000):
 
 ```
-http://locahost:3000
+http://localhost:3000
 ```
 
 Which should bring you to the sign-in page where `admin` is the identity as well as the password.
 
-To view the web-api endpoints you can browse to the [swagger page](http://locahost:5599/swagger/index.html):
+To view the web-api endpoints you can browse to the [swagger page](http://localhost:5599/swagger/index.html):
 
 ```
-http://locahost:5599/swagger/index.html
+http://localhost:5599/swagger/index.html
 ```

@@ -224,16 +224,16 @@ docker run \
 
 ## Done
 
-Once all the containers have started up, you can browse to the [front-end](http://locahost:3005):
+Once all the containers have started up, you can browse to the [front-end](http://localhost:3005):
 
 ```
-http://locahost:3005
+http://localhost:3005
 ```
 
 Which should bring you to the sign-in page where `admin` is the identity as well as the password.
 
-To view the web-api endpoints you can browse to the [swagger page](http://locahost:5599/swagger/index.html):
+To view the web-api endpoints you can browse to the [swagger page](http://localhost:5599/swagger/index.html):
 
 ```
-http://locahost:5599/swagger/index.html
+http://localhost:5599/swagger/index.html
 ```
