@@ -73,7 +73,7 @@ The various images will be downloaded and, once all the containers have started 
 http://localhost:3000
 ```
 
-Which should bring you to the sign-in page where `admin` is the identity as well as the password.
+Which should bring you to the sign-in page where `shuttle-admin` is the identity as well as the password.
 
 To view the web-api endpoints you can browse to the [swagger page](http://localhost:5599/swagger/index.html):
 
