@@ -43,7 +43,17 @@ This will bind the following to the options:
 }
 ```
 
-Whenever the Web API receives an `Authorization` header for the supported schemes, it retrieves the session from the `Shuttle.Access.WebApi` sessions endpoint (`POST /v1/session/search`).  If it cannot find a session, then one is created.  To retrieve a session the identity requires the `access://sessions/view` permissions, and in order to register a new session it requires the `access://sessions/register` permission.
+There are two ways that the client endpoint can interact with the Shuttle.Access Web API via the REST client, depending on the `PassThrough` option value:
+
+```c#
+services
+    .AddAccessAuthorization(builder =>
+    {
+        builder.Options.PassThrough = <true|false>;
+    })
+```
+
+If it is `true` then the JWT that is received will be passed through to the Shuttle.Access Web API as the `Bearer` token by calling the `GET /v1/session/self` endpont; else the client endpoint should send its own JWT `Bearer` token which is retried by calling the `POST /v1/sessions/search` endpoint to find an active session.  If it cannot find a session, then one is created by the Shuttle.Access Web API.  To retrieve a session the identity requires the `access://sessions/view` permissions, and in order to register a new session it requires the `access://sessions/register` permission.
 
 The incoming token has to contain an identifier of sorts that will be used for the `Identity Name`.  The token will be inspected and the first of the `IdentityNameClaimTypes` that is located will be used as the identity name.
 
