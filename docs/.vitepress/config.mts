@@ -2,6 +2,7 @@ import { default as access } from "../shuttle-access/sidebar";
 import { default as core } from "../shuttle-core/sidebar";
 import { default as extensions } from "../shuttle-extensions/sidebar";
 import { default as esb } from "../shuttle-esb/sidebar";
+import { default as pigeon } from "../shuttle-pigeon/sidebar";
 import { default as recall } from "../shuttle-recall/sidebar";
 import { defineConfig } from "vitepress";
 
@@ -28,9 +29,19 @@ export default defineConfig({
     },
     nav: [
       {
-        text: "Access",
-        activeMatch: `^/shuttle-access/`,
-        link: "/shuttle-access/home",
+        text: "Solutions",
+        items: [
+          {
+            text: "Access",
+            activeMatch: `^/shuttle-access/`,
+            link: "/shuttle-access/home",
+          },
+          {
+            text: "Pigeon",
+            activeMatch: `^/shuttle-pigeon/`,
+            link: "/shuttle-pigeon/home",
+          },
+        ],
       },
       {
         text: "Core",
@@ -58,6 +69,7 @@ export default defineConfig({
       ...core,
       ...extensions,
       ...esb,
+      ...pigeon,
       ...recall,
     },
   },

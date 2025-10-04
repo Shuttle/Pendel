@@ -31,6 +31,10 @@ const access = [
             {
                 text: 'JSON Web Tokens (JWT)',
                 link: '/shuttle-access/json-web-tokens'
+            },
+            {
+                text: 'Rest Client',
+                link: '/shuttle-access/rest-client'
             }
         ]
     }

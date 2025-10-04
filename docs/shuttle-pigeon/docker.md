@@ -1,6 +1,6 @@
 # Running locally
 
-You may want to host Shuttle.Access locally on a more permanent basis, and without making use of `docker-compose`.
+You may want to host Shuttle.Pigeon locally on a more permanent basis, and without making use of `docker-compose`.
 
 The container below all make use of the `development` network.  If you'd like to use the below command as-is you can create the network using the following:
 
@@ -53,10 +53,10 @@ docker run \
 ```
 :::
 
-In order to create the database you would need to download the relevant `efbundle` file from the `Shuttle.Access` [releases page](https://github.com/Shuttle/Shuttle.Access/releases) and then run it against your database, e.g.:
+In order to create the database you would need to download the relevant `efbundle` file from the `Shuttle.Pigeon` [releases page](https://github.com/Shuttle/Shuttle.Pigeon/releases) and then run it against your database, e.g.:
 
 ```shell
-shuttle-access-efbundle-win-x64.exe --connection "Server=.;Database=Access;User ID=sa;Password=Pass!000;Encrypt=True;TrustServerCertificate=True;Connection Timeout=30;"
+shuttle-pigeon-efbundle-win-x64.exe --connection "Server=.;Database=Pigeon;User ID=sa;Password=Pass!000;Encrypt=True;TrustServerCertificate=True;Connection Timeout=30;"
 ```
 
 ## Azurite
@@ -102,7 +102,9 @@ docker run -d \
 
 Create a `server-appsettings.json` file with the following contents:
 
-<<< @/shuttle-access/snippets/server-appsettings.json{json}
+<<< @/shuttle-pigeon/snippets/server-appsettings.json{json}
+
+You will need to remove the `Shuttle:Pigeon:{sender}` configuration sections that you will not be using, and populate the relevant details on the active one(s).
 
 You can now create the server instance by changing the `<settings-folder>` to the relevant directory:
 
@@ -112,30 +114,30 @@ docker run ^
   --network development ^
   --restart always ^
   -e "CONFIGURATION_FOLDER=." ^
-  --name access-server ^
-  --hostname access-server ^
-  -v <settings-folder>\server-appsettings.json:/opt/shuttle.access.server/appsettings.json ^
-  -d shuttle/access-server:latest
+  --name pigeon-server ^
+  --hostname pigeon-server ^
+  -v <settings-folder>\server-appsettings.json:/opt/shuttle.pigeon.server/appsettings.json ^
+  -d shuttle/pigeon-server:latest
 ```
 ```ps [ps]
 docker run `
   --network development `
   --restart always `
   -e "CONFIGURATION_FOLDER=." `
-  --name access-server `
-  --hostname access-server `
-  -v <settings-folder>\server-appsettings.json:/opt/shuttle.access.server/appsettings.json `
-  -d shuttle/access-server:latest
+  --name pigeon-server `
+  --hostname pigeon-server `
+  -v <settings-folder>\server-appsettings.json:/opt/shuttle.pigeon.server/appsettings.json `
+  -d shuttle/pigeon-server:latest
 ```
 ```bash [bash]
 docker run \
   --network development \
   --restart always \
   -e "CONFIGURATION_FOLDER=." \
-  --name access-server \
-  --hostname access-server \
-  -v <settings-folder>\server-appsettings.json:/opt/shuttle.access.server/appsettings.json \
-  -d shuttle/access-server:latest
+  --name pigeon-server \
+  --hostname pigeon-server \
+  -v <settings-folder>\server-appsettings.json:/opt/shuttle.pigeon.server/appsettings.json \
+  -d shuttle/pigeon-server:latest
 ```
 :::
 
@@ -143,7 +145,7 @@ docker run \
 
 Create a `webapi-appsettings.json` file with the following contents:
 
-<<< @/shuttle-access/snippets/webapi-appsettings.json{json}
+<<< @/shuttle-pigeon/snippets/webapi-appsettings.json{json}
 
 You can now create the web API instance by changing the `<settings-folder>` to the relevant directory:
 
@@ -153,87 +155,40 @@ docker run ^
   --network development ^
   --restart always ^
   -e "CONFIGURATION_FOLDER=." ^
-  -p 5599:8080 ^
-  --name access-webapi ^
-  --hostname access-webapi ^
-  -v <setting-folder>\webapi-appsettings.json:/opt/shuttle.access.webapi/appsettings.json ^
-  -d shuttle/access-webapi:latest
+  -p 5268:8080 ^
+  --name pigeon-webapi ^
+  --hostname pigeon-webapi ^
+  -v <setting-folder>\webapi-appsettings.json:/opt/shuttle.pigeon.webapi/appsettings.json ^
+  -d shuttle/pigeon-webapi:latest
 ```
 ```ps [ps]
 docker run `
   --network development `
   --restart always `
   -e "CONFIGURATION_FOLDER=." `
-  -p 5599:8080 `
-  --name access-webapi `
-  --hostname access-webapi `
-  -v <setting-folder>\webapi-appsettings.json:/opt/shuttle.access.webapi/appsettings.json `
-  -d shuttle/access-webapi:latest
+  -p 5268:8080 `
+  --name pigeon-webapi `
+  --hostname pigeon-webapi `
+  -v <setting-folder>\webapi-appsettings.json:/opt/shuttle.pigeon.webapi/appsettings.json `
+  -d shuttle/pigeon-webapi:latest
 ```
 ```bash [bash]
 docker run \
   --network development \
   --restart always \
   -e "CONFIGURATION_FOLDER=." \
-  -p 5599:8080 \
-  --name access-webapi \
-  --hostname access-webapi \
-  -v <setting-folder>\webapi-appsettings.json:/opt/shuttle.access.webapi/appsettings.json \
-  -d shuttle/access-webapi:latest
-```
-:::
-
-## Front-end
-
-Finally, create the front-end instance:
-
-(hosted on port `3005` in this example, change as needed)
-
-::: code-group
-```cmd [cmd]
-docker run ^
-  --network development ^
-  --restart always ^
-  -e "VITE_API_URL=http://localhost:5599" ^
-  -p 3005:80 ^
-  --name access-front-end ^
-  --hostname access-front-end ^
-  -d shuttle/access-vue:latest
-```
-```ps [ps]
-docker run `
-  --network development `
-  --restart always `
-  -e "VITE_API_URL=http://localhost:5599" `
-  -p 3005:80 `
-  --name access-front-end `
-  --hostname access-front-end `
-  -d shuttle/access-vue:latest
-```
-```bash [bash]
-docker run \
-  --network development \
-  --restart always \
-  -e "VITE_API_URL=http://localhost:5599" \
-  -p 3005:80 \
-  --name access-front-end \
-  --hostname access-front-end \
-  -d shuttle/access-vue:latest
+  -p 5268:8080 \
+  --name pigeon-webapi \
+  --hostname pigeon-webapi \
+  -v <setting-folder>\webapi-appsettings.json:/opt/shuttle.pigeon.webapi/appsettings.json \
+  -d shuttle/pigeon-webapi:latest
 ```
 :::
 
 ## Done
 
-Once all the containers have started up, you can browse to the [front-end](http://localhost:3005):
+To view the web-api endpoints you can browse to the [swagger page](http://localhost:5268/swagger/index.html):
 
 ```
-http://localhost:3005
-```
-
-Which should bring you to the sign-in page where `shutle-admin` is the identity as well as the password.
-
-To view the web-api endpoints you can browse to the [swagger page](http://localhost:5599/swagger/index.html):
-
-```
-http://localhost:5599/swagger/index.html
+http://localhost:5268/swagger/index.html
 ```

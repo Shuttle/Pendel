@@ -7,3 +7,7 @@
     --vp-button-brand-bg: var(--vp-c-brand-light);
     --vp-button-brand-hover-bg: var(--vp-c-brand-lighter);
 }
+
+html {
+    overflow-y: scroll !important;
+}

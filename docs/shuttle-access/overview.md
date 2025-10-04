@@ -4,7 +4,13 @@ The following is a brief overview of the solution.
 
 ## Database
 
-A Sql Server database is used for the event store and projections and may be deployed using the [SqlPackage](https://learn.microsoft.com/en-us/sql/tools/sqlpackage/sqlpackage?view=sql-server-ver16) command-line utility to apply the `dacpac` that is produced when compiling the [Shuttle.Access.Database](https://github.com/Shuttle/Shuttle.Access/tree/master/Shuttle.Access.Database) project which is part of the [Shuttle.Access](https://github.com/Shuttle/Shuttle.Access/tree/master) solution.
+A Sql Server database is used for the event store and projections.
+
+In order to create the database you would need to download the relevant `efbundle` file from the `Shuttle.Access` [releases page](https://github.com/Shuttle/Shuttle.Access/releases) and then run it against your database, e.g.:
+
+```shell
+shuttle-access-efbundle-win-x64.exe --connection "Server=.;Database=Access;User ID=sa;Password=Pass!000;Encrypt=True;TrustServerCertificate=True;Connection Timeout=30;"
+```
 
 ## Server
 
@@ -14,7 +20,7 @@ All projections are also handled by the application.
 
 ## Web API
 
-A the web API is hosted by the `Shuttle.Access.WebApi` minimal API application.
+The web API is hosted by the `Shuttle.Access.WebApi` minimal API application.
 
 ## Rest Client
 
