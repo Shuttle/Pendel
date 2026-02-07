@@ -9,9 +9,6 @@ hero:
     - theme: alt
       text: View on GitHub
       link: https://github.com/Shuttle/Pendel
-    - theme: brand
-      text: v21.0.0 Upgrade Guide
-      link: /upgrade-v21
 
 features:
   - title: Framework Support

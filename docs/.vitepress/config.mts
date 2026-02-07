@@ -58,6 +58,20 @@ export default defineConfig({
         activeMatch: `^/shuttle-hopper/`,
         link: "/shuttle-hopper/home",
       },
+      {
+        text: "21.0.1-beta",
+        items: [
+          {
+            text: "pre-v21",
+            link: "https://shuttle.github.io/pendel-pre-v21/",
+          },
+          {
+            text: "Upgrade guide",
+            activeMatch: `^/upgrade-v21`,
+            link: "/upgrade-v21",
+          },
+        ],
+      },
     ],
     sidebar: {
       ...access,
