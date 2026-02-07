@@ -36,7 +36,7 @@ public interface IMessageRouteProvider
 
 ## Implementation
 
-The `MessageRouteProvider` is registered if no `IMessageRouteProvider` has been registered and makes use of the [message routing options](/shuttle-esb/options/message-routes) to determine where to send messages:
+The `MessageRouteProvider` is registered if no `IMessageRouteProvider` has been registered and makes use of the [message routing options](/shuttle-hopper/options/message-routes) to determine where to send messages:
 
 Each implementation of `IMessageRouteProvider` can determine the routes however it needs to, from the given message type.  A typical scenario, and the way the `MessageRouteProvider` works, is to use the full type name to determine the destination.
 

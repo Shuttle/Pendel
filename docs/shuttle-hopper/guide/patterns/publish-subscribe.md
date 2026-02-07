@@ -281,7 +281,7 @@ Whenever the `Publish` method is invoked on the `ServiceBus` instance the regist
 }
 ```
 
-The Sql Server implementation of the `ISubscriptionService` that we are using by default will try to find a connection string with a name of **Subscription**.  However, you can override this.  See the [documentation](/shuttle-esb/implementations/subscription/sql) for details about how to do this.
+The Sql Server implementation of the `ISubscriptionService` that we are using by default will try to find a connection string with a name of **Subscription**.  However, you can override this.  See the [documentation](/shuttle-hopper/implementations/subscription/sql) for details about how to do this.
 
 ### RegisterMemberHandler
 

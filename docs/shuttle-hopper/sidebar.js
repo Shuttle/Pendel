@@ -3,7 +3,7 @@ const home = {
     items: [
         {
             text: 'Shuttle.Esb',
-            link: '/shuttle-esb/home'
+            link: '/shuttle-hopper/home'
         },
     ]
 };
@@ -15,11 +15,11 @@ const concepts = [
         items: [
             {
                 text: 'Why?',
-                link: '/shuttle-esb/concepts/why'
+                link: '/shuttle-hopper/concepts/why'
             },
             {
                 text: 'Autonomous Business Components',
-                link: '/shuttle-esb/concepts/autonomous-business-components'
+                link: '/shuttle-hopper/concepts/autonomous-business-components'
             },
         ]
     },
@@ -28,27 +28,27 @@ const concepts = [
         items: [
             {
                 text: 'Stream Processing',
-                link: '/shuttle-esb/concepts/patterns/stream-processing'
+                link: '/shuttle-hopper/concepts/patterns/stream-processing'
             },
             {
                 text: 'Request / Response',
-                link: '/shuttle-esb/concepts/patterns/request-response'
+                link: '/shuttle-hopper/concepts/patterns/request-response'
             },
             {
                 text: 'Publish / Subscribe',
-                link: '/shuttle-esb/concepts/patterns/publish-subscribe'
+                link: '/shuttle-hopper/concepts/patterns/publish-subscribe'
             },
             {
                 text: 'Message Idempotence',
-                link: '/shuttle-esb/concepts/patterns/message-idempotence'
+                link: '/shuttle-hopper/concepts/patterns/message-idempotence'
             },
             {
                 text: 'Deferred Messages',
-                link: '/shuttle-esb/concepts/patterns/deferred-messages'
+                link: '/shuttle-hopper/concepts/patterns/deferred-messages'
             },
             {
                 text: 'Message Routing',
-                link: '/shuttle-esb/concepts/patterns/message-routing'
+                link: '/shuttle-hopper/concepts/patterns/message-routing'
             },
         ]
     },
@@ -57,7 +57,7 @@ const concepts = [
         items: [
             {
                 text: 'Bounded Contexts',
-                link: '/shuttle-esb/concepts/essentials/bounded-contexts'
+                link: '/shuttle-hopper/concepts/essentials/bounded-contexts'
             },
         ]
     },
@@ -70,7 +70,7 @@ const guide = [
         items: [
             {
                 text: 'Getting Started',
-                link: '/shuttle-esb/guide/getting-started'
+                link: '/shuttle-hopper/guide/getting-started'
             },
         ]
     },
@@ -79,27 +79,27 @@ const guide = [
         items: [
             {
                 text: 'Stream Processing',
-                link: '/shuttle-esb/guide/patterns/stream-processing'
+                link: '/shuttle-hopper/guide/patterns/stream-processing'
             },
             {
                 text: 'Request / Response',
-                link: '/shuttle-esb/guide/patterns/request-response'
+                link: '/shuttle-hopper/guide/patterns/request-response'
             },
             {
                 text: 'Publish / Subscribe',
-                link: '/shuttle-esb/guide/patterns/publish-subscribe'
+                link: '/shuttle-hopper/guide/patterns/publish-subscribe'
             },
             {
                 text: 'Deferred Messages',
-                link: '/shuttle-esb/guide/patterns/deferred-messages'
+                link: '/shuttle-hopper/guide/patterns/deferred-messages'
             },
             {
                 text: 'Dependency Injection',
-                link: '/shuttle-esb/guide/patterns/dependency-injection'
+                link: '/shuttle-hopper/guide/patterns/dependency-injection'
             },
             {
                 text: 'Message Idempotence',
-                link: '/shuttle-esb/guide/patterns/message-idempotence'
+                link: '/shuttle-hopper/guide/patterns/message-idempotence'
             },
         ]
     },
@@ -108,7 +108,7 @@ const guide = [
         items: [
             {
                 text: 'Exception Handling',
-                link: '/shuttle-esb/guide/essentials/exception-handling'
+                link: '/shuttle-hopper/guide/essentials/exception-handling'
             },
         ]
     },
@@ -121,51 +121,51 @@ const components = [
         items: [
             {
                 text: 'Identity Provider',
-                link: '/shuttle-esb/components/identity-provider'
+                link: '/shuttle-hopper/components/identity-provider'
             },
             {
                 text: 'Message Handler Invoker',
-                link: '/shuttle-esb/components/message-handler-invoker'
+                link: '/shuttle-hopper/components/message-handler-invoker'
             },
             {
                 text: 'Message Handler',
-                link: '/shuttle-esb/components/message-handler'
+                link: '/shuttle-hopper/components/message-handler'
             },
             {
                 text: 'Message Route Provider',
-                link: '/shuttle-esb/components/message-route-provider'
+                link: '/shuttle-hopper/components/message-route-provider'
             },
             {
                 text: 'Message Sender',
-                link: '/shuttle-esb/components/message-sender'
+                link: '/shuttle-hopper/components/message-sender'
             },
             {
                 text: 'Queue Factory Service',
-                link: '/shuttle-esb/components/queue-factory-service'
+                link: '/shuttle-hopper/components/queue-factory-service'
             },
             {
                 text: 'Queue Service',
-                link: '/shuttle-esb/components/queue-service'
+                link: '/shuttle-hopper/components/queue-service'
             },
             {
                 text: 'Policy',
-                link: '/shuttle-esb/components/service-bus-policy'
+                link: '/shuttle-hopper/components/service-bus-policy'
             },
             {
                 text: 'Subscription Service',
-                link: '/shuttle-esb/components/subscription-service'
+                link: '/shuttle-hopper/components/subscription-service'
             },
             {
                 text: 'Transport Message',
-                link: '/shuttle-esb/components/transport-message'
+                link: '/shuttle-hopper/components/transport-message'
             },
             {
                 text: 'Transport Message Builder',
-                link: '/shuttle-esb/components/transport-message-builder'
+                link: '/shuttle-hopper/components/transport-message-builder'
             },
             {
                 text: 'Transport Header',
-                link: '/shuttle-esb/components/transport-header'
+                link: '/shuttle-hopper/components/transport-header'
             },
         ]
     },
@@ -177,7 +177,7 @@ const implementations = [
         items: [
             {
                 text: 'Overview',
-                link: '/shuttle-esb/implementations/overview'
+                link: '/shuttle-hopper/implementations/overview'
             },
         ]
     },
@@ -186,11 +186,11 @@ const implementations = [
         items: [
             {
                 text: 'Kafka',
-                link: '/shuttle-esb/implementations/stream/kafka'
+                link: '/shuttle-hopper/implementations/stream/kafka'
             },
             {
                 text: 'Azure Event Hubs',
-                link: '/shuttle-esb/implementations/stream/azureeh'
+                link: '/shuttle-hopper/implementations/stream/azureeh'
             },
         ]
     },
@@ -199,23 +199,19 @@ const implementations = [
         items: [
             {
                 text: 'Amazon SQS',
-                link: '/shuttle-esb/implementations/queue/amazonsqs'
+                link: '/shuttle-hopper/implementations/queue/amazonsqs'
             },
             {
                 text: 'Azure Storage Queues',
-                link: '/shuttle-esb/implementations/queue/azuresq'
-            },
-            {
-                text: 'File',
-                link: '/shuttle-esb/implementations/queue/filemq'
+                link: '/shuttle-hopper/implementations/queue/azuresq'
             },
             {
                 text: 'RabbitMQ',
-                link: '/shuttle-esb/implementations/queue/rabbitmq'
+                link: '/shuttle-hopper/implementations/queue/rabbitmq'
             },
             {
-                text: 'SQL',
-                link: '/shuttle-esb/implementations/queue/sql'
+                text: 'SQL Server',
+                link: '/shuttle-hopper/implementations/queue/sql-server'
             },
         ]
     },
@@ -223,20 +219,11 @@ const implementations = [
         text: 'Subscription',
         items: [
             {
-                text: 'SQL',
-                link: '/shuttle-esb/implementations/subscription/sql'
+                text: 'SQL Server',
+                link: '/shuttle-hopper/implementations/subscription/sql-server'
             },
         ]
-    },
-    {
-        text: 'Idempotence',
-        items: [
-            {
-                text: 'SQL',
-                link: '/shuttle-esb/implementations/idempotence/sql'
-            },
-        ]
-    },
+    }
 ];
 
 const modules = [
@@ -246,27 +233,27 @@ const modules = [
         items: [
             {
                 text: 'Active Time Range',
-                link: '/shuttle-esb/modules/active-time-range'
+                link: '/shuttle-hopper/modules/active-time-range'
             },
             {
                 text: 'Corrupt Transport Message',
-                link: '/shuttle-esb/modules/corrupt-transport-message'
+                link: '/shuttle-hopper/modules/corrupt-transport-message'
             },
             {
                 text: 'Message Forwarding',
-                link: '/shuttle-esb/modules/message-forwarding'
+                link: '/shuttle-hopper/modules/message-forwarding'
             },
             {
                 text: 'Purge Inbox',
-                link: '/shuttle-esb/modules/purge-inbox'
+                link: '/shuttle-hopper/modules/purge-inbox'
             },
             {
                 text: 'Purge Queues',
-                link: '/shuttle-esb/modules/purge-queues'
+                link: '/shuttle-hopper/modules/purge-queues'
             },
             {
                 text: 'Throttle',
-                link: '/shuttle-esb/modules/throttle'
+                link: '/shuttle-hopper/modules/throttle'
             },
         ]
     },
@@ -279,27 +266,27 @@ const options = [
         items: [
             {
                 text: 'Service Bus',
-                link: '/shuttle-esb/options/servicebus'
+                link: '/shuttle-hopper/options/servicebus'
             },
             {
                 text: 'Inbox',
-                link: '/shuttle-esb/options/inbox'
+                link: '/shuttle-hopper/options/inbox'
             },
             {
                 text: 'Message Routes',
-                link: '/shuttle-esb/options/message-routes'
+                link: '/shuttle-hopper/options/message-routes'
             },
             {
                 text: 'Outbox',
-                link: '/shuttle-esb/options/outbox'
+                link: '/shuttle-hopper/options/outbox'
             },
             {
                 text: 'Subscription',
-                link: '/shuttle-esb/options/subscription'
+                link: '/shuttle-hopper/options/subscription'
             },
             {
                 text: 'Processor Thread',
-                link: '/shuttle-esb/options/processor-thread'
+                link: '/shuttle-hopper/options/processor-thread'
             },
         ]
     },
@@ -311,40 +298,40 @@ const esb = [
         items: [
             {
                 text: 'Concepts',
-                link: '/shuttle-esb/concepts/why'
+                link: '/shuttle-hopper/concepts/why'
             },
             {
                 text: 'Getting started',
-                link: '/shuttle-esb/guide/getting-started'
+                link: '/shuttle-hopper/guide/getting-started'
             },
             {
                 text: 'Options',
-                link: '/shuttle-esb/options/servicebus'
+                link: '/shuttle-hopper/options/servicebus'
             },
             {
                 text: 'Components',
-                link: '/shuttle-esb/components/overview'
+                link: '/shuttle-hopper/components/overview'
             },
             {
                 text: 'Implementations',
-                link: '/shuttle-esb/implementations/overview'
+                link: '/shuttle-hopper/implementations/overview'
             },
             {
                 text: 'Modules',
-                link: '/shuttle-esb/modules/overview'
+                link: '/shuttle-hopper/modules/overview'
             },
         ]
     },
 ];
 
 const sidebar = {
-    '/shuttle-esb/': esb,
-    '/shuttle-esb/concepts/': concepts,
-    '/shuttle-esb/guide/': guide,
-    '/shuttle-esb/components/': components,
-    '/shuttle-esb/options/': options,
-    '/shuttle-esb/implementations/': implementations,
-    '/shuttle-esb/modules/': modules
+    '/shuttle-hopper/': esb,
+    '/shuttle-hopper/concepts/': concepts,
+    '/shuttle-hopper/guide/': guide,
+    '/shuttle-hopper/components/': components,
+    '/shuttle-hopper/options/': options,
+    '/shuttle-hopper/implementations/': implementations,
+    '/shuttle-hopper/modules/': modules
 }
 
 export default sidebar;
