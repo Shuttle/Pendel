@@ -1,6 +1,6 @@
 {
   "name": "pendel",
-  "version": "20.0.0",
+  "version": "21.0.1-beta",
   "description": "Shuttle Documentation.",
   "main": "index.js",
   "repository": "https://github.com/Shuttle/Pendel.git",
@@ -15,5 +15,10 @@
     "@types/node": "^22.15.21",
     "vitepress": "^1.6.3",
     "vue": "^3.5.14"
+  },
+  "dependencies": {
+    "@mdi/svg": "^7.4.47",
+    "@tailwindcss/vite": "^4.1.18",
+    "tailwindcss": "^4.1.18"
   }
 }

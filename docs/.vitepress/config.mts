@@ -1,10 +1,11 @@
 import { default as access } from "../shuttle-access/sidebar";
 import { default as core } from "../shuttle-core/sidebar";
 import { default as extensions } from "../shuttle-extensions/sidebar";
-import { default as esb } from "../shuttle-esb/sidebar";
+import { default as esb } from "../shuttle-hopper/sidebar";
 import { default as pigeon } from "../shuttle-pigeon/sidebar";
 import { default as recall } from "../shuttle-recall/sidebar";
 import { defineConfig } from "vitepress";
+import tailwindcss from "@tailwindcss/vite";
 
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
@@ -49,19 +50,28 @@ export default defineConfig({
         link: "/shuttle-core/home",
       },
       {
-        text: "Event Sourcing",
+        text: "Recall",
         activeMatch: `^/shuttle-recall/`,
         link: "/shuttle-recall/home",
       },
       {
-        text: "Extensions",
-        activeMatch: `^/shuttle-extensions/`,
-        link: "/shuttle-extensions/home",
+        text: "Hopper",
+        activeMatch: `^/shuttle-hopper/`,
+        link: "/shuttle-hopper/home",
       },
       {
-        text: "Service Bus",
-        activeMatch: `^/shuttle-esb/`,
-        link: "/shuttle-esb/home",
+        text: "21.0.1-beta",
+        items: [
+          {
+            text: "pre-v21",
+            link: "https://shuttle.github.io/pendel-pre-v21/",
+          },
+          {
+            text: "Upgrade guide",
+            activeMatch: `^/upgrade-v21`,
+            link: "/upgrade-v21",
+          },
+        ],
       },
     ],
     sidebar: {
@@ -73,4 +83,9 @@ export default defineConfig({
       ...recall,
     },
   },
+  vite: {
+      plugins: [
+    tailwindcss(),
+  ],
+  }
 });

@@ -13,10 +13,6 @@ const extensions = [
   {
     text: "Extensions",
     items: [
-      {
-        text: "EF Core",
-        link: "/shuttle-extensions/shuttle-extensions-efcore",
-      },
     ],
   },
 ];

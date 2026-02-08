@@ -36,8 +36,8 @@ const events = [
         text: 'Implementations',
         items: [
             {
-                text: 'SQL',
-                link: '/shuttle-recall/events/sql'
+                text: 'SQL Server',
+                link: '/shuttle-recall/events/sql-server'
             },
         ]
     },
@@ -58,8 +58,8 @@ const projections = [
         text: 'Implementations',
         items: [
             {
-                text: 'SQL',
-                link: '/shuttle-recall/projections/sql'
+                text: 'SQL Server',
+                link: '/shuttle-recall/projections/sql-server'
             },
         ]
     },
