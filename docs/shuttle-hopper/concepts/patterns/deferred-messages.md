@@ -5,11 +5,11 @@ A deferred message is one that cannot, or should not, be immediately processed. 
 ```json
 {
   "Shuttle": {
-    "ServiceBus": {
+    "Hopper": {
       "Inbox": {
-        "WorkQueueUri": "queue://configuration/server-inbox-work",
-        "ErrorQueueUri": "queue://configuration/error",
-        "DurationToIgnoreOnFailure": [
+        "WorkTransportUri": "queue://configuration/server-inbox-work",
+        "ErrorTransportUri": "queue://configuration/error",
+        "IgnoreOnFailureDurations": [
           "00:00:10",
           "00:00:30",
           "00:01:00"
@@ -22,21 +22,21 @@ A deferred message is one that cannot, or should not, be immediately processed. 
 
 The first failure will cause the message to wait for 10 seconds before being tried again.
 
-If there is no deferred queue the message is simply returned to the work queue.  However, the work queue is designed such that processing can occur as quickly as possible so having deferred messages in the work queue will result in queue thrashing.  Having deferred messages in the work queue should be avoided for all but the simplest samples.
+If there is no deferred transport the message is simply returned to the work transport.  However, the work transport is designed such that processing can occur as quickly as possible so having deferred messages in the work transport will result in transport thrashing.  Having deferred messages in the work transport should be avoided for all but the simplest samples.
 
-## Deferred Queue
+## Deferred Transport
 
-A deferred queue may be configured for an inbox, and there are some additional options:
+A deferred transport may be configured for an inbox, and there are some additional options:
 
 ```json
 {
   "Shuttle": {
-    "ServiceBus": {
+    "Hopper": {
       "Inbox": {
-        "WorkQueueUri": "queue://configuration/server-inbox-work",
-        "DeferredQueueUri": "queue://configuration/server-inbox-deferred",
-        "ErrorQueueUri": "queue://configuration/error",
-        "DeferredMessageProcessorWaitInterval": "00:00:01",
+        "WorkTransportUri": "queue://configuration/server-inbox-work",
+        "DeferredTransportUri": "queue://configuration/server-inbox-deferred",
+        "ErrorTransportUri": "queue://configuration/error",
+        "DeferredMessageProcessorIdleDuration": "00:00:01",
         "DeferredMessageProcessorResetInterval": "00:01:00"
       }
     }
@@ -44,6 +44,6 @@ A deferred queue may be configured for an inbox, and there are some additional o
 }
 ```
 
-The deferred queue is processed in single passes.  It is processed when the endpoint starts up and then only again when required.  At a minimum the deferred queue processor will run after `DeferredMessageProcessorResetInterval`, which defaults to `00:01:00` (1 minute), has passed from the previous run.  The `DeferredMessageProcessorWaitInterval`, which defaults to `00:00:01` (1 second), determines how long the deferred processor thread sleeps when a run is not yet due.
+The deferred transport is processed in single passes.  It is processed when the endpoint starts up and then only again when required.  At a minimum the deferred transport processor will run after `DeferredMessageProcessorResetInterval`, which defaults to `00:01:00` (1 minute), has passed from the previous run.  The `DeferredMessageProcessorIdleDuration`, which defaults to `00:00:01` (1 second), determines how long the deferred processor thread sleeps when a run is not yet due.
 
-Messages never route directly to a deferred queue.  Instead they always go to the work queue and if the work queue finds a `IgnoreTillDate` in the `TransportMessage` which is in the future it is moved to the deferred queue and the next date to process the deferred queue is set to this `IngoreTillDate` if it is less than the current next deferred queue process date.
+Messages never route directly to a deferred transport.  Instead they always go to the work transport and if the work transport finds an `IgnoreTillDate` in the `TransportMessage` which is in the future it is moved to the deferred transport and the next date to process the deferred transport is set to this `IgnoreTillDate` if it is less than the current next deferred transport process date.

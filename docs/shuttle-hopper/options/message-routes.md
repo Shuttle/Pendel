@@ -5,7 +5,7 @@ var configuration =
     new ConfigurationBuilder()
         .AddJsonFile("appsettings.json").Build();
 
-services.AddServiceBus(builder => 
+services.AddHopper(builder => 
 {
     builder.Options.MessageRoutes = new List<MessageRouteOptions>
     {
@@ -37,7 +37,6 @@ services.AddServiceBus(builder =>
                     Value = "DoSomethingCommand"
                 }
             }
-        }
         },
         new()
         {
@@ -50,7 +49,6 @@ services.AddServiceBus(builder =>
                     Value = ".+[Cc]ommand.+"
                 }
             }
-        }
         },
         new()
         {
@@ -68,9 +66,9 @@ services.AddServiceBus(builder =>
     
     // or bind from configuration
     configuration
-        .GetSection(ServiceBusOptions.SectionName)
+        .GetSection(HopperOptions.SectionName)
         .Bind(builder.Options);
-})
+});
 ```
 
 The default JSON settings structure is as follows:
@@ -78,7 +76,7 @@ The default JSON settings structure is as follows:
 ```json
 {
   "Shuttle": {
-    "ServiceBus": {
+    "Hopper": {
       "MessageRoutes": [
         {
           "Uri": "queue://configuration/inbox-work-a",
@@ -101,7 +99,6 @@ The default JSON settings structure is as follows:
               "Value": "DoSomethingCommand"
             }
           ]
-        }
         },
         {
           "Uri": "queue://configuration/inbox-work-c",
@@ -111,7 +108,6 @@ The default JSON settings structure is as follows:
               "Value": ".+[Cc]ommand.+"
             }
           ]
-        }
         },
         {
           "Uri": "queue://configuration/inbox-work-d",

@@ -1,20 +1,20 @@
 # Getting Started
 
-Start a new **Console Application** project.  We'll need to install one of the support queue implementations.  For this example we'll use `Shuttle.Esb.AzureStorageQueues` which can be hosted locally using [Azurite](https://learn.microsoft.com/en-us/azure/storage/common/storage-use-azurite):
+Start a new **Console Application** project.  We'll need to install one of the support queue implementations.  For this example we'll use `Shuttle.Hopper.AzureStorageQueues` which can be hosted locally using [Azurite](https://learn.microsoft.com/en-us/azure/storage/common/storage-use-azurite):
 
-```
-PM> Install-Package Shuttle.Esb.AzureStorageQueues
+```bash
+dotnet add package Shuttle.Hopper.AzureStorageQueues
 ```
 
 We'll also make use of the [.NET generic host](https://docs.microsoft.com/en-us/aspnet/core/fundamentals/host/generic-host):
 
-```
-PM> Install-Package Microsoft.Extensions.Hosting
+```bash
+dotnet add package Microsoft.Extensions.Hosting
 ```
 
 Next we'll implement our endpoint in order to start listening on our queue:
 
-``` c#
+```c#
 internal class Program
 {
     static async Task Main(string[] args)
@@ -23,7 +23,7 @@ internal class Program
             .ConfigureServices(services =>
             {
                 services
-                    .AddServiceBus(builder =>
+                    .AddHopper(builder =>
                     {
                         builder.Options.Inbox.WorkQueueUri = "azuresq://azure/work";
 
@@ -35,7 +35,7 @@ internal class Program
                             await Task.CompletedTask;
                         });
                     })
-                    .AddAzureStorageQueues(builder =>
+                    .UseAzureStorageQueues(builder =>
                     {
                         builder.AddOptions("azure", new AzureStorageQueueOptions
                         {
@@ -66,13 +66,13 @@ internal class Program
 
                 services
                     .AddSingleton<IConfiguration>(configuration)
-                    .AddServiceBus(builder =>
+                    .AddHopper(builder =>
                     {
                         configuration
-                            .GetSection(ServiceBusOptions.SectionName)
+                            .GetSection(HopperOptions.SectionName)
                             .Bind(builder.Options);
                     })
-                    .AddAzureStorageQueues(builder =>
+                    .UseAzureStorageQueues(builder =>
                     {
                         builder.AddOptions("azure", new AzureStorageQueueOptions
                         {
@@ -95,9 +95,9 @@ The `appsettings.json` file would be as follows (remember to set to `Copy always
     "azure": "UseDevelopmentStorage=true;"
   },
   "Shuttle": {
-    "ServiceBus": {
+    "Hopper": {
       "Inbox": {
-        "WorkQueueUri": "azuresq://azure/work",
+        "WorkQueueUri": "azuresq://azure/work"
       }
     }
   }
@@ -106,7 +106,7 @@ The `appsettings.json` file would be as follows (remember to set to `Copy always
 
 ### Send a command message for processing
 
-``` c#
+```c#
 await serviceBus.SendAsync(new RegisterMember
 {
     UserName = "user-name",
@@ -116,9 +116,9 @@ await serviceBus.SendAsync(new RegisterMember
 
 ### Publish an event message when something interesting happens
 
-Before publishing an event one would need to register an `ISubscrtiptionService` implementation such as [Shuttle.Esb.Sql.Subscription](/shuttle-hopper/implementations/subscription/sql.md).
+Before publishing an event one would need to register an `ISubscriptionService` implementation such as [Shuttle.Hopper.SqlServer.Subscription](/shuttle-hopper/implementations/subscription/sql-server.md).
 
-``` c#
+```c#
 await serviceBus.PublishAsync(new MemberRegistered
 {
     UserName = "user-name"
@@ -127,8 +127,8 @@ await serviceBus.PublishAsync(new MemberRegistered
 
 ### Subscribe to those interesting events
 
-``` c#
-services.AddServiceBus(builder =>
+```c#
+services.AddHopper(builder =>
 {
     builder.AddSubscription<MemberRegistered>();
 });
@@ -136,7 +136,7 @@ services.AddServiceBus(builder =>
 
 ### Handle any messages
 
-``` c#
+```c#
 public class RegisterMemberHandler : IMessageHandler<RegisterMember>
 {
     public RegisterMemberHandler(IDependency dependency)
@@ -155,7 +155,7 @@ public class RegisterMemberHandler : IMessageHandler<RegisterMember>
 }
 ```
 
-``` c#
+```c#
 public class MemberRegisteredHandler : IMessageHandler<MemberRegistered>
 {
 	public async Task ProcessMessageAsync(IHandlerContext<MemberRegistered> context)

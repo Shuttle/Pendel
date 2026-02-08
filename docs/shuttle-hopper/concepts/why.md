@@ -1,12 +1,12 @@
 # Why use a service bus?
 
-A service bus provides a mechanism to decouple systems.  One system should not have any knowledge of the internal workings of another.  The way a service bus manages to do this is by using a messaging infrastructure in the form of queues.
+A service bus provides a mechanism to decouple systems.  One system should not have any knowledge of the internal workings of another.  The way a service bus manages to do this is by using a messaging infrastructure in the form of transports (e.g. queues or streams).
 
 You certainly can code directly against the messaging infrastructure and you will find that there are pros and cons w.r.t. each transport.  There are many decisions that you will need to make along the way and this is where a service bus will make your implementation somewhat easier.
 
 Developing directly against a messaging system will inevitably lead to various abstractions that you will require to handle the various scenarios that arise from a distributed system.
 
-Shuttle.Esb provides the following out-of-the-box:
+Shuttle.Hopper provides the following out-of-the-box:
 
 - At-least once message delivery
 - Retrying failed messages
@@ -16,19 +16,19 @@ Shuttle.Esb provides the following out-of-the-box:
 - Dependency injection
 - Stream processing
 
-A service bus will buy you quite a bit out-of-the-box whereas coding against the queues directly may be a bit of work to get going.
+A service bus will buy you quite a bit out-of-the-box whereas coding against the transports directly may be a bit of work to get going.
 
-The following provides a quick overview of some service bus concepts as implemented in Shuttle.Esb that may help you along the way.
+The following provides a quick overview of some service bus concepts as implemented in Shuttle.Hopper that may help you along the way.
 
 ## Core
 
-The basic parts of Shuttle.Esb consist of:
+The basic parts of Shuttle.Hopper consist of:
 
 * Messages
-* Queues / Streams
-* Service bus
+* Transports (Queues / Streams)
+* Service bus (`IServiceBus`)
 
-Every service bus instance is associated with, and therefore processes, only one input queue.  This is the inbox.  All messages received in the inbox are processed by the associated service bus instance.
+Every service bus instance is associated with, and therefore processes, only one input transport.  This is the inbox.  All messages received in the inbox are processed by the associated service bus instance.
 
 ## Messages
 
@@ -46,13 +46,13 @@ public class MemberActivated // events are past tense
 }
 ```
 
-## Queues / Streams
+## Transports
 
-Messages are processed by message handlers that are invoked by Shuttle.Esb.  When a service bus is started it receives messages from an inbox queue.  Messages have to end up in the relevant queue to be processed.  The inbox configuration is specified using `ServiceBusOptions.Inbox`.
+Messages are processed by message handlers that are invoked by Shuttle.Hopper.  When a service bus is started it receives messages from an inbox transport.  Messages have to end up in the relevant transport to be processed.  The inbox configuration is specified using `HopperOptions.Inbox`.
 
 The approach taken is an **at-least-once** delivery mechanism.  This differs from an **exactly-once** delivery in that edge cases may result in a message being processed more than once.  For **exactly-once** delivery edge cases may result in message loss which is impossible to find.  A duplicate message is easier to handle than no message at all.
 
-It is important to note that all queue implementation retrieve messages in a non-destructive way and should always be implemented with acknowledgement in mind.  As soon as a message is retrieved from the queue it should be possible to either acknowledge the message to release the message back onto the queue.  However, this is slightly different for stream implementations.  An acknowledgement would indicate to the stream that the client/group has moved past that point in the stream.
+It is important to note that all queue implementations retrieve messages in a non-destructive way and should always be implemented with acknowledgement in mind.  As soon as a message is retrieved from the queue it should be possible to either acknowledge the message, or release the message back onto the queue.  However, this is slightly different for stream implementations.  An acknowledgement would indicate to the stream that the client/group has moved past that point in the stream.
 
 ## Service bus
 
@@ -68,13 +68,13 @@ public class Program
             {
                 services.AddSingleton<IDependency, Implementation>();
 
-                services.AddServiceBus(builder =>
+                services.AddHopper(builder =>
                 {
-                    builder.Options.Inbox.WorkQueueUri = 
-                        "queue://configuration/queue-name";
+                    builder.Options.Inbox.WorkTransportUri = 
+                        new Uri("queue://configuration/queue-name");
                 });
 
-                services.AddAzureStorageQueues(builder =>
+                services.UseAzureStorageQueues(builder =>
                 {
                     builder.AddOptions("azure", new AzureStorageQueueOptions
                     {
@@ -96,7 +96,7 @@ A `ServiceBusHostedService` instance is created and started on application start
 
 A command message is used to tell another system or component what to do.  This implies that the calling system is aware of the behaviour of the called system.  There is, therefore, a high degree of behavioural coupling.
 
-A command message always _**belongs**_ to a single endpoint.  Sending a command will never result in the message going to more than **one** queue.
+A command message always _**belongs**_ to a single endpoint.  Sending a command will never result in the message going to more than **one** transport.
 
 ### Starting a process
 
@@ -150,9 +150,9 @@ An event message is used to notify any subscribed endpoints that something signi
 
 ### Document message
 
-A document message is used to simply send data to an endpoint.  As with the event message it carries no intent and the recipient may do with it as it pleases.  This does not meean that data will be sent to an endpoint for no reason.  An endpoint may request a document from some service, or data is automatically sent to some endpoint since it may be a requirement.
+A document message is used to simply send data to an endpoint.  As with the event message it carries no intent and the recipient may do with it as it pleases.  This does not mean that data will be sent to an endpoint for no reason.  An endpoint may request a document from some service, or data is automatically sent to some endpoint since it may be a requirement.
 
-_Document messages are not implemented in Shuttle.Esb_.
+_Document messages are not implemented in Shuttle.Hopper_.
 
 ## Coupling
 
@@ -170,7 +170,7 @@ Should *ServiceA* require *ServiceB* to be available for *ServiceA* to function 
 
 A synchronous web-service call is an example of high temporal coupling.
 
-Now you may be wondering how *ServiceA* can continue to operate even though it requires *ServiceB* to perform some function.  The answer is asynchronous communication using queues.  One may argue that a web-service call may be made asynchronously but there is a difference.  *ServiceA* may go down before a required response is received resulting in the web-service call failing.
+Now you may be wondering how *ServiceA* can continue to operate even though it requires *ServiceB* to perform some function.  The answer is asynchronous communication using transports.  One may argue that a web-service call may be made asynchronously but there is a difference.  *ServiceA* may go down before a required response is received resulting in the web-service call failing.
 
 With messages, things always move in one direction at a time.  *ServiceA* to *ServiceB* is one operation and will eventually complete.  *ServiceB* to *ServiceA* is another movement and will eventually complete.
 

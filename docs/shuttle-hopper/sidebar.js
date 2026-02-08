@@ -2,7 +2,7 @@ const home = {
     text: '',
     items: [
         {
-            text: 'Shuttle.Esb',
+            text: 'Shuttle.Hopper',
             link: '/shuttle-hopper/home'
         },
     ]
@@ -226,39 +226,6 @@ const implementations = [
     }
 ];
 
-const modules = [
-    home,
-    {
-        text: 'Modules',
-        items: [
-            {
-                text: 'Active Time Range',
-                link: '/shuttle-hopper/modules/active-time-range'
-            },
-            {
-                text: 'Corrupt Transport Message',
-                link: '/shuttle-hopper/modules/corrupt-transport-message'
-            },
-            {
-                text: 'Message Forwarding',
-                link: '/shuttle-hopper/modules/message-forwarding'
-            },
-            {
-                text: 'Purge Inbox',
-                link: '/shuttle-hopper/modules/purge-inbox'
-            },
-            {
-                text: 'Purge Queues',
-                link: '/shuttle-hopper/modules/purge-queues'
-            },
-            {
-                text: 'Throttle',
-                link: '/shuttle-hopper/modules/throttle'
-            },
-        ]
-    },
-];
-
 const options = [
     home,
     {
@@ -283,10 +250,6 @@ const options = [
             {
                 text: 'Subscription',
                 link: '/shuttle-hopper/options/subscription'
-            },
-            {
-                text: 'Processor Thread',
-                link: '/shuttle-hopper/options/processor-thread'
             },
         ]
     },
@@ -316,10 +279,6 @@ const esb = [
                 text: 'Implementations',
                 link: '/shuttle-hopper/implementations/overview'
             },
-            {
-                text: 'Modules',
-                link: '/shuttle-hopper/modules/overview'
-            },
         ]
     },
 ];
@@ -331,7 +290,6 @@ const sidebar = {
     '/shuttle-hopper/components/': components,
     '/shuttle-hopper/options/': options,
     '/shuttle-hopper/implementations/': implementations,
-    '/shuttle-hopper/modules/': modules
 }
 
 export default sidebar;

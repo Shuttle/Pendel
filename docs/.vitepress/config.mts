@@ -5,6 +5,7 @@ import { default as esb } from "../shuttle-hopper/sidebar";
 import { default as pigeon } from "../shuttle-pigeon/sidebar";
 import { default as recall } from "../shuttle-recall/sidebar";
 import { defineConfig } from "vitepress";
+import tailwindcss from "@tailwindcss/vite";
 
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
@@ -82,4 +83,9 @@ export default defineConfig({
       ...recall,
     },
   },
+  vite: {
+      plugins: [
+    tailwindcss(),
+  ],
+  }
 });

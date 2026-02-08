@@ -1,18 +1,18 @@
-# Service Bus Options
+# Hopper Options
 
-The `ServiceBusOptions` represents the initial options that the `ServiceBus` will use to configure the relevant components.
+The `HopperOptions` represents the initial options that the `IServiceBus` will use to configure the relevant components.
 
-The options are specified in the `ServiceBusBuilder` when adding the service bus to the `IServiceCollection`:
+The options are specified in the `HopperBuilder` when adding Hopper to the `IServiceCollection`:
 
 ```c#
 var configuration = 
     new ConfigurationBuilder()
         .AddJsonFile("appsettings.json").Build();
 
-services.AddServiceBus(builder => 
+services.AddHopper(builder => 
 {
     // default values
-    builder.Options.CreatePhysicalQueues = true;
+    builder.Options.CreatePhysicalTransports = true;
     builder.Options.CacheIdentity = true;
     builder.Options.AddMessageHandlers = true;
     builder.Options.RemoveMessagesNotHandled = false;
@@ -22,9 +22,9 @@ services.AddServiceBus(builder =>
     
     // or bind from configuration
     configuration
-        .GetSection(ServiceBusOptions.SectionName)
+        .GetSection(HopperOptions.SectionName)
         .Bind(builder.Options);
-})
+});
 ```
 
 The default JSON settings structure is as follows:
@@ -32,14 +32,14 @@ The default JSON settings structure is as follows:
 ```json
 {
   "Shuttle": {
-    "ServiceBus": {
-      "CreatePhysicalQueues": true,
+    "Hopper": {
+      "CreatePhysicalTransports": true,
       "CacheIdentity": true,
       "AddMessageHandlers": true,
-      "RemoveMessagesNotHandled": true,
-      "RemoveCorruptMessages": true,
+      "RemoveMessagesNotHandled": false,
+      "RemoveCorruptMessages": false,
       "CompressionAlgorithm": "GZip",
-      "EncryptionAlgorithm": "3DES",
+      "EncryptionAlgorithm": "3DES"
     }
   }
 }
@@ -49,11 +49,11 @@ The default JSON settings structure is as follows:
 
 | Option | Default     | Description    | 
 | ---                            | ---        | ---            | 
-| `AddMessageHandlers` | `true` | If `true`, will call the `AddMessageHandlers` method on the `ServiceBusBuilder` implementation for all assemblies in the current domain; else only the handlers in `Shuttle.Esb` are registered. | 
+| `AddMessageHandlers` | `true` | If `true`, will call the `AddMessageHandlers` method on the `HopperBuilder` implementation for all assemblies in the current domain; else only the handlers in the `Shuttle.Hopper` assembly are registered. | 
 | `CacheIdentity` | `true` | Determines whether or not to re-use the identity returned by the `IIdentityProvider`. | 
-| `CreateQueues` | `true` | The endpoint will attempt to create all queues. | 
+| `CreatePhysicalTransports` | `true` | The endpoint will attempt to create all physical transport structures (e.g., queues or topics). | 
 | `RemoveMessagesNotHandled` | `false` | Indicates whether messages received on the endpoint that have no message handler should simply be removed (ignored).  If this attribute is `true` the message will simply be acknowledged; else the message will immmediately be placed in the error queue. |
-| `RemoveCorruptMessages` | `false` | A message is corrupt when the `TransportMessage` retrieved from the queue cannot be deserialized.  If `false` (default) the service bus processed will be killed.  If `true` the messae will be `Acknowledged` with no processing. |
+| `RemoveCorruptMessages` | `false` | A message is corrupt when the `TransportMessage` retrieved from the queue cannot be deserialized.  If `false` (default) the service bus process will be killed.  If `true` the message will be `Acknowledged` with no processing. |
 | `CompressionAlgorithm` | empty (no compression) | The name of the compression algorithm to use during message serialization. |
 | `EncryptionAlgorithm` | empty (no encryption) | The name of the encryption algorithm to use during message serialization. |
 
@@ -61,11 +61,11 @@ The `IIdentityProvider` implementation is responsible for honouring the `CacheId
 
 ## Startup
 
-Once the `ServiceBus` has been added to a `ServiceCollection` you can start it using one of the following methods:-
+Once Hopper has been added to a `ServiceCollection` you can start it using one of the following methods:
 
 ### Hosted start
 
-```
+```c#
 await Host.CreateDefaultBuilder()
     .ConfigureServices(services =>
     {
@@ -73,9 +73,9 @@ await Host.CreateDefaultBuilder()
 
         services
             .AddSingleton<IConfiguration>(configuration)
-            .AddServiceBus(builder =>
+            .AddHopper(builder =>
             {
-                configuration.GetSection(ServiceBusOptions.SectionName).Bind(builder.Options);
+                configuration.GetSection(HopperOptions.SectionName).Bind(builder.Options);
 
                 builder.AddMessageHandler(async (IHandlerContext<RegisterMember> context) =>
                 {
@@ -90,9 +90,9 @@ await Host.CreateDefaultBuilder()
                 });
 
                 // To suppress the registration of the `ServiceBusHostedService` use this:
-                builder.SuppressHostedService();
+                builder.SuppressServiceBusHostedService();
             })
-            .AddAzureStorageQueues(builder =>
+            .UseAzureStorageQueues(builder =>
             {
                 builder.AddOptions("azure", new()
                 {
@@ -101,19 +101,19 @@ await Host.CreateDefaultBuilder()
             });
     })
     .Build()
-    .RunAsync(); // The `ServiceBusHostedService` will be invoked which starts the `ServiceBus`.
+    .RunAsync(); // The `ServiceBusHostedService` will be invoked which starts the `IServiceBus`.
 ```
 
 ### Manual start
 
-```
+```c#
 var configuration = new ConfigurationBuilder().AddJsonFile("appsettings.json").Build();
 
 var services = new ServiceCollection()
     .AddSingleton<IConfiguration>(configuration)
-    .AddServiceBus(builder =>
+    .AddHopper(builder =>
     {
-        configuration.GetSection(ServiceBusOptions.SectionName).Bind(builder.Options);
+        configuration.GetSection(HopperOptions.SectionName).Bind(builder.Options);
 
         builder.AddMessageHandler(async (IHandlerContext<MemberRegistered> context) =>
         {
@@ -124,7 +124,7 @@ var services = new ServiceCollection()
             await Task.CompletedTask;
         });
     })
-    .AddAzureStorageQueues(builder =>
+    .UseAzureStorageQueues(builder =>
     {
         builder.AddOptions("azure", new()
         {

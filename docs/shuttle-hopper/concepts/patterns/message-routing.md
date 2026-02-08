@@ -1,14 +1,14 @@
 # Message Routing
 
-Once you have instantiated a message you need to get it to a specific endpoint.  You can let Shuttle.Esb decide this for you implicitly by configuring a routing mechanism or you can even specify the endpoint explicitly.
+Once you have instantiated a message you need to get it to a specific endpoint.  You can let Shuttle.Hopper decide this for you implicitly by configuring a routing mechanism or you can even specify the endpoint explicitly.
 
-Message routing only when sending any message.  In most cases a message would be a "command", but any message can be sent.  Messages are sent by calling the `SendAsync` method on the service bus instance:
+Message routing occurs only when sending a message.  In most cases a message would be a "command", but any message can be sent.  Messages are sent by calling the `SendAsync` method on the service bus instance:
 
 ```c#
 Task<TransportMessage> SendAsync(object message, Action<TransportMessageBuilder>? builder = null);
 ```
 
-Only messages that have no `RecipientInboxWorkQueueUri` set will be routed by the service bus; else the message will be sent to the `RecipientInboxWorkQueueUri`, e.g.:
+Only messages that have no `RecipientInboxWorkTransportUri` set will be routed by the service bus; else the message will be sent to the `RecipientInboxWorkTransportUri`, e.g.:
 
 ```c#
 await serviceBus.SendAsync(new RegisterMember
@@ -23,7 +23,7 @@ await serviceBus.SendAsync(new RegisterMember
 
 The `TransportMessage` envelope will be returned should you need access to any of the metadata available for the message.
 
-Shuttle.Esb uses an implementation of an `IMessageRouteProvider` to determine where messages are sent.
+Shuttle.Hopper uses an implementation of an `IMessageRouteProvider` to determine where messages are sent.
 
 ```c#
 public interface IMessageRouteProvider
