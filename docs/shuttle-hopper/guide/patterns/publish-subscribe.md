@@ -251,7 +251,7 @@ public class Program
 We need a store for our subscriptions.  In this example we will be using **Sql Server**.  If you are using docker you can quickly get up-and-running with the following:
 
 ```
-docker run -d --name sql -h sql -e "ACCEPT_EULA=Y" -e "SA_PASSWORD=Pass!000" -e "MSSQL_PID=Express" -p 1433:1433 -v C:\SQLServer.Data\:/var/opt/mssql/data mcr.microsoft.com/mssql/server:2019-latest
+docker run --network <network> --restart always -e "ACCEPT_EULA=Y" -e "MSSQL_SA_PASSWORD=Pass!000" -p 1433:1433 --name sqlserver --hostname sqlserver -v <data-drive>\sqlserver.data:/var/opt/mssql/data -v -d mcr.microsoft.com/mssql/server:2022-latest
 ```
 
 > Create a new database called **Shuttle**
@@ -281,7 +281,7 @@ Whenever the `Publish` method is invoked on the `ServiceBus` instance the regist
 }
 ```
 
-The Sql Server implementation of the `ISubscriptionService` that we are using by default will try to find a connection string with a name of **Subscription**.  However, you can override this.  See the [documentation](/shuttle-hopper/implementations/subscription/sql) for details about how to do this.
+The Sql Server implementation of the `ISubscriptionService` that we are using by default will try to find a connection string with a name of **Subscription**.  However, you can override this.  See the [documentation](/shuttle-hopper/implementations/subscription/sql-server) for details about how to do this.
 
 ### RegisterMemberHandler
 

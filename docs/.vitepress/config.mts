@@ -60,7 +60,7 @@ export default defineConfig({
         link: "/shuttle-hopper/home",
       },
       {
-        text: "21.0.1-beta",
+        text: "21.0.1-rc3",
         items: [
           {
             text: "pre-v21",

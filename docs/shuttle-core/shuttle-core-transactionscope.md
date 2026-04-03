@@ -13,14 +13,20 @@ dotnet add package Shuttle.Core.TransactionScope
 The relevant components may be configured using `IServiceCollection`:
 
 ```c#
-services.AddTransactionScope(builder => 
+services.AddTransactionScope(options =>
 {
-    builder.Configure(options =>
-    {
-        options.Enabled = true;
-        options.IsolationLevel = IsolationLevel.ReadCommitted;
-        options.Timeout = TimeSpan.FromSeconds(30);
-    });
+    options.Enabled = true;
+    options.IsolationLevel = IsolationLevel.ReadCommitted;
+    options.Timeout = TimeSpan.FromSeconds(30);
+});
+```
+
+If you wish to bind the options to a configuration section:
+
+```c#
+services.AddTransactionScope(options =>
+{
+    configuration.GetSection(TransactionScopeOptions.SectionName).Bind(options);
 });
 ```
 
@@ -46,7 +52,7 @@ The default JSON settings structure is as follows:
 }
 ```
 
-## ITransactionScope
+## `ITransactionScope`
 
 An implementation of the `ITransactionScope` interface is used to wrap a `TransactionScope`. The interface implements `IDisposable` for proper resource management.
 
@@ -77,7 +83,7 @@ void Dispose();
 
 Disposes the transaction scope. Should be called using a `using` statement or block.
 
-## ITransactionScopeFactory
+## `ITransactionScopeFactory`
 
 An implementation of the `ITransactionScopeFactory` interface provides instances of an `ITransactionScope` implementation. The factory is registered as a singleton service.
 
@@ -143,7 +149,7 @@ The `DefaultTransactionScope` is configured with `TransactionScopeAsyncFlowOptio
 
 ### Nested Transactions
 
-The implementation uses `TransactionScopeOption.RequiresNew`, which always creates a new transaction scope. If a transaction is already active when creating a new scope, the new scope will ignore the outer transaction to prevent nesting issues.
+The implementation uses `TransactionScopeOption.RequiresNew`, which always creates a new transaction scope. If a transaction is already active when creating a new scope, the new scope will ignore the outer transaction to prevent nesting issues. This is achieved by checking if `Transaction.Current` is not null during construction and effectively skipping the `Complete()` call on the internal `TransactionScope` if an ambient transaction is present, which will cause the internal transaction to roll back upon disposal.
 
 ### Transaction Rollback
 

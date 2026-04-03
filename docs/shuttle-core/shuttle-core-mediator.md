@@ -10,23 +10,45 @@ dotnet add package Shuttle.Core.Mediator
 
 ## Configuration
 
-In order to get all the relevant bits working you would need to register the `IMediator` dependency along with all the relevant `IParticipant` dependencies.
+Register the `IMediator` dependency along with all the relevant `IParticipant` dependencies.
 
 You can register the mediator using `IServiceCollection`:
 
 ```csharp
-services.AddMediator(builder =>
+services.AddMediator(options =>
 {
-    builder.AddParticipants(assembly);
-    builder.AddParticipant<Participant>();
-    builder.AddParticipant(participantType);
-    builder.AddParticipant<Message>(participant);
-    builder.AddParticipant(async (T message, CancellationToken cancellationToken) =>
-    {
-        await Task.CompletedTask.ConfigureAwait(false);
-    });
-});
+    options.Sending += async (sender, args) => await Task.CompletedTask;
+}).AddParticipantsFrom(assembly);
 ```
+
+The `AddMediator` method returns a `MediatorBuilder` that can be used to further configure the mediator:
+
+```csharp
+services.AddMediator()
+    .AddParticipantsFrom(assembly)
+    .AddParticipantsFrom(new[] { assembly1, assembly2 })
+    .AddParticipant<Participant>()
+    .AddParticipant(participantType)
+    
+    // The default service lifetime, Scoped, can be explicitly overidden:
+    .AddParticipant(participantType, _ => ServiceLifetime.Transient)
+    
+    // Instance registration
+    .AddParticipant(participant)
+    
+    // Delegate registration
+    .AddParticipant(async (UserCreated message, CancellationToken cancellationToken) =>
+    {
+        await Task.CompletedTask;
+    })
+
+    // Delegate registration with dependency injection
+    .AddParticipant(async (UserCreated message, IService service, CancellationToken cancellationToken) =>
+    {
+        await service.DoSomethingAsync(message);
+    });
+```
+
 
 ## Usage
 
@@ -40,7 +62,7 @@ public class UserCreated
 // Create participants
 public class EmailNotificationParticipant : IParticipant<UserCreated>
 {
-    public Task ProcessMessageAsync(UserCreated message, CancellationToken cancellationToken = default)
+    public Task HandleAsync(UserCreated message, CancellationToken cancellationToken = default)
     {
         Console.WriteLine($"Sending welcome email to {message.UserName}");
         return Task.CompletedTask;
@@ -49,7 +71,7 @@ public class EmailNotificationParticipant : IParticipant<UserCreated>
 
 public class AuditLogParticipant : IParticipant<UserCreated>
 {
-    public Task ProcessMessageAsync(UserCreated message, CancellationToken cancellationToken = default)
+    public Task HandleAsync(UserCreated message, CancellationToken cancellationToken = default)
     {
         Console.WriteLine($"Auditing user creation: {message.UserName}");
         return Task.CompletedTask;
@@ -60,7 +82,7 @@ public class AuditLogParticipant : IParticipant<UserCreated>
 await mediator.SendAsync(new UserCreated { UserName = "john.doe" });
 ```
 
-## IMediator
+## `IMediator`
 
 The core interface is the `IMediator` interface and the default implementation provided is the `Mediator` class.
 
@@ -72,30 +94,27 @@ Task SendAsync(object message, CancellationToken cancellationToken = default);
 
 The `SendAsync` method will find all participants that implement the `IParticipant<T>` with the type `T` of the message type that you are sending.
 
-## Participant implementations
+## `IParticipant` implementations
 
 ```csharp
 public interface IParticipant<in T>
 {
-    Task ProcessMessageAsync(T message, CancellationToken cancellationToken = default);
+    Task HandleAsync(T message, CancellationToken cancellationToken = default);
 }
 ```
 
-A participant would handle the message that is sent using the mediator.  There may be any number of participants that process the message. 
+A participant would handle the message that is sent using the mediator.  There may be any number of participants that process the message, but there must be **at least one** participant or delegate registered for the message type.
 
 ## Design philosophy
 
 There are no *request/response* semantics and the design philosophy here is that the message encapsulates the state that is passed along in a *pipes & filters* approach.
 
-However, you may wish to make use of one of the existing utility classes:-
+## `MediatorOptions`
 
-### RequestMessage\<TRequest\>
+The `MediatorOptions` class provides the following events:
 
-The only expectation from a `RequestMessage<TRequest>` instance is either a success or failure (along with the failure message).
-
-### RequestResponseMessage\<TRequest, TResponse\>
-
-The `RequestResponseMessage<TRequest, TResponse>` takes an initial `TRequest` object and after the mediator processing would expect that there be a `TResponse` provided using the `.WithResponse(TResponse)` method.  The same success/failure mechanism used in the `RequestMessage<TRequest>` class is also available on this class.
+- `Sending`: An `AsyncEvent<SendEventArgs>` that is raised before a message is sent to participants.
+- `Sent`: An `AsyncEvent<SendEventArgs>` that is raised after a message has been sent to all participants.
 
 ## Considerations
 

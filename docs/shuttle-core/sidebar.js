@@ -18,28 +18,12 @@ const sidebar = {
           link: "/shuttle-core/shuttle-core-cli",
         },
         {
-          text: "Compression",
-          link: "/shuttle-core/shuttle-core-compression",
-        },
-        {
           text: "Contract",
           link: "/shuttle-core/shuttle-core-contract",
         },
         {
           text: "Cron",
           link: "/shuttle-core/shuttle-core-cron",
-        },
-        {
-          text: "Data",
-          link: "/shuttle-core/shuttle-core-data",
-        },
-        {
-          text: "Dependency Injection",
-          link: "/shuttle-core/shuttle-core-dependencyinjection",
-        },
-        {
-          text: "Encryption",
-          link: "/shuttle-core/shuttle-core-encryption",
         },
         {
           text: "Mediator",

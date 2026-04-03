@@ -1,6 +1,10 @@
 # Shuttle.Core.System
 
-OS and system level abstractions.
+OS and system level abstractions that provide a way to decouple your logic from static system calls, making your code more testable.
+
+## Why?
+
+When your code calls `DateTimeOffset.UtcNow`, `Environment.UserInteractive`, or `Process.GetCurrentProcess()`, it is difficult to unit test that code because these are static calls to the operating system. By using these abstractions, you can mock the system-level behavior in your tests.
 
 ## Installation
 
@@ -8,49 +12,53 @@ OS and system level abstractions.
 dotnet add package Shuttle.Core.System
 ```
 
-Or via the NuGet Package Manager:
+## Usage
 
-```
-PM> Install-Package Shuttle.Core.System
+Register the services with your dependency injection container:
+
+```csharp
+services.AddSingleton<ISystemClock, SystemClock>();
+services.AddSingleton<IEnvironmentService, EnvironmentService>();
+services.AddSingleton<IProcessService, ProcessService>();
 ```
 
 All types are in the `Shuttle.Core.System` namespace.
 
-## ISystemClock
+## `ISystemClock`
 
 The default implementation is `SystemClock`.
 
-``` c#
+```csharp
 DateTimeOffset UtcNow { get; }
 ```
 
 Returns the `DateTimeOffset` representing the current UTC date/time.
 
-## IEnvironmentService
+## `IEnvironmentService`
 
 The default implementation is `EnvironmentService`.
 
-``` c#
+```csharp
 bool UserInteractive { get; }
 ```
 
 Returns `true` if running as a console application; otherwise `false`.
 
-## IProcessService
+## `IProcessService`
 
 The default implementation is `ProcessService`.
 
-``` c#
+```csharp
 IProcess GetCurrentProcess();
 ```
 
-Returns the `IProcess` abstraction for the current process.
+Returns an `IProcess` abstraction for the current system process.
 
-## IProcess
+## `IProcess`
 
 Represents a system process. The default implementation is `SystemProcess`.
 
-``` c#
+```csharp
 void Kill();
 ```
 

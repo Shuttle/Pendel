@@ -1,32 +1,67 @@
 # Shuttle.Core.Specification
 
+Provides a simple implementation of the specification pattern.
+
 ## Installation
 
 ```bash
 dotnet add package Shuttle.Core.Specification
 ```
 
-Provides a simple `ISpecification` interface.
+## Synchronous Specification
 
-A default `Specification` class is available that accepts a function as a callback for scenarios where an explicit `ISpecification` implementation may not be warranted:
+### `ISpecification<T>`
 
-``` c#
-public Specification(Func<T, bool> function)
-```
+A custom specification can be implemented by inheriting from the `ISpecification<T>` interface:
 
-## Asynchronous
-
-The package also provides an `IAsyncSpecification` interface:
-
-``` c#
-public interface IAsyncSpecification<in T>
+```c#
+public class MySpecification : ISpecification<MyCandidate>
 {
-    Task<bool> IsSatisfiedByAsync(T candidate);
+    public bool IsSatisfiedBy(MyCandidate candidate)
+    {
+        return candidate.IsActive && !candidate.IsDeleted;
+    }
 }
 ```
 
-A default `AsyncSpecification` class is available that accepts a function as a callback for scenarios where an explicit `IAsyncSpecification` implementation may not be warranted:
+### `Specification<T>`
 
-``` c#
-public AsyncSpecification(Func<T, Task<bool>> function)
+A default `Specification<T>` wrapper class is available that accepts a function as a callback for simple scenarios where an explicit `ISpecification<T>` implementation may not be warranted:
+
+```c#
+var specification = new Specification<MyCandidate>(candidate => candidate.IsActive && !candidate.IsDeleted);
+
+if (specification.IsSatisfiedBy(myCandidate))
+{
+    // ...
+}
+```
+
+## Asynchronous Specification
+
+### `IAsyncSpecification<T>`
+
+An asynchronous specification can be implemented by inheriting from the `IAsyncSpecification<T>` interface:
+
+```c#
+public class MyAsyncSpecification : IAsyncSpecification<MyCandidate>
+{
+    public async Task<bool> IsSatisfiedByAsync(MyCandidate candidate)
+    {
+        return await _myService.IsActiveAsync(candidate.Id);
+    }
+}
+```
+
+### `AsyncSpecification<T>`
+
+A default `AsyncSpecification<T>` wrapper class is available that accepts a function as a callback for simple scenarios where an explicit `IAsyncSpecification<T>` implementation may not be warranted:
+
+```c#
+var specification = new AsyncSpecification<MyCandidate>(async candidate => await _myService.IsActiveAsync(candidate.Id));
+
+if (await specification.IsSatisfiedByAsync(myCandidate))
+{
+    // ...
+}
 ```

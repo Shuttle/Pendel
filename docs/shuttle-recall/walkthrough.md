@@ -1,13 +1,11 @@
 # Walthrough
 
-We'll be using Sql Server for this walkthrough.  The data access to store the projection output and makes use of the [Shuttle.Core.Data](/shuttle-core/shuttle-core-data) package for data access, but this part could be replaced by any mechanism you require.
-
 ## Database
 
 If you are using docker you can quickly get up-and-running with the following:
 
 ```
-docker run -d --name sql -h sql -e "ACCEPT_EULA=Y" -e "SA_PASSWORD=Pass!000" -e "MSSQL_PID=Express" -p 1433:1433 -v C:\SQLServer.Data\:/var/opt/mssql/data mcr.microsoft.com/mssql/server:2019-latest
+docker run --network <network> --restart always -e "ACCEPT_EULA=Y" -e "MSSQL_SA_PASSWORD=Pass!000" -p 1433:1433 --name sqlserver --hostname sqlserver -v <data-drive>\sqlserver.data:/var/opt/mssql/data -v -d mcr.microsoft.com/mssql/server:2022-latest
 ```
 
 We need a database to store our events and projections.  Create a database called `RecallWalkthrough` using your tooling of choice.
@@ -95,6 +93,35 @@ public class Customer
 
 Our `Customer` aggregate can be registered, have its name change, and move.
 
+## Data
+
+Since we are going to use [Entity Framework](https://learn.microsoft.com/en-us/ef/core/) to store our projection, we need to define the `Customer` table in a way that EF Core can understand.
+
+Add a class called `CustomerDbContext` to the domain project (you'll need the `Microsoft.EntityFrameworkCore` NuGet package):
+
+```c#
+using Microsoft.EntityFrameworkCore;
+
+namespace Recall.Walkthrough;
+
+public class CustomerDbContext(DbContextOptions<CustomerDbContext> options) : DbContext(options)
+{
+    public DbSet<CustomerEntity> Customers { get; set; } = null!;
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<CustomerEntity>().ToTable("Customer").HasKey(x => x.Id);
+    }
+}
+
+public class CustomerEntity
+{
+    public Guid Id { get; set; }
+    public string Name { get; set; } = string.Empty;
+    public string Location { get; set; } = string.Empty;
+}
+```
+
 ## Server
 
 Although not a requirement for a sample such as this, having a hosted environment for the event processing does make things simpler to configure.
@@ -102,8 +129,8 @@ Although not a requirement for a sample such as this, having a hosted environmen
 Add a `Console App` to the solution called `Recall.Walkthrough.Server` and then add the following NuGet packages:
 
 ```
-Microsoft.Data.SqlClient
-Shuttle.Recall.Sql.EventProcessing
+Microsoft.EntityFrameworkCore.SqlServer
+Shuttle.Recall.SqlServer.EventProcessing
 ```
 
 Also add a reference to the `Recall.Walkthrough` domain project.
@@ -115,36 +142,28 @@ Once events are stored as `PrimitiveEvent` records, the event processor will fin
 For the events on our `Customer` related to names we'll use delegates, and for the location changes we'll use an explicit event handler class (we'll add the DDL to create the `Customer` table next):
 
 ```c#
-using System.Data;
-using Shuttle.Core.Data;
+using Microsoft.EntityFrameworkCore;
 using Shuttle.Recall;
 
 namespace Recall.Walkthrough.Server;
 
 public class CustomerEventHandler : IEventHandler<Customer.Moved>
 {
-    private readonly IDatabaseContextFactory _databaseContextFactory;
+    private readonly CustomerDbContext _dbContext;
 
-    public CustomerEventHandler(IDatabaseContextFactory databaseContextFactory)
+    public CustomerEventHandler(CustomerDbContext dbContext)
     {
-        _databaseContextFactory = databaseContextFactory;
+        _dbContext = dbContext;
     }
 
     public async Task ProcessEventAsync(IEventHandlerContext<Customer.Moved> context)
     {
-        await using (var databaseContext = _databaseContextFactory.Create())
+        var customer = await _dbContext.Customers.FindAsync(context.PrimitiveEvent.Id);
+
+        if (customer != null)
         {
-            await databaseContext.ExecuteAsync(new Query(@"
-UPDATE
-    Customer
-SET
-    Location = @Location
-WHERE
-    Id = @Id
-")
-                .AddParameter(new Column<string>("Location", DbType.AnsiString), context.Event.Location)
-                .AddParameter(new Column<Guid>("Id", DbType.Guid), context.PrimitiveEvent.Id)
-            );
+            customer.Location = context.Event.Location;
+            await _dbContext.SaveChangesAsync();
         }
     }
 }
@@ -153,63 +172,25 @@ WHERE
 To create the database structures, add a class called `ServerHostedService` that contains the following code:
 
 ```c#
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Hosting;
-using Shuttle.Core.Data;
 
 namespace Recall.Walkthrough.Server;
 
 public class ServerHostedService : IHostedService
 {
-    private readonly IDatabaseContextFactory _databaseContextFactory;
+    private readonly IServiceScopeFactory _serviceScopeFactory;
 
-    public ServerHostedService(IDatabaseContextFactory databaseContextFactory)
+    public ServerHostedService(IServiceScopeFactory serviceScopeFactory)
     {
-        _databaseContextFactory = databaseContextFactory;
+        _serviceScopeFactory = serviceScopeFactory;
     }
 
     public async Task StartAsync(CancellationToken cancellationToken)
     {
-        await using (var databaseContext = _databaseContextFactory.Create())
+        using (var scope = _serviceScopeFactory.CreateScope())
         {
-            await databaseContext.ExecuteAsync(new Query(@"
-IF NOT EXISTS 
-(
-    SELECT 
-        NULL
-    FROM 
-        sys.objects 
-    WHERE 
-        object_id = OBJECT_ID(N'[dbo].[Customer]') 
-    AND 
-        type = N'U'
-)
-BEGIN
-    CREATE TABLE [dbo].[Customer] 
-    (
-        [Id] UNIQUEIDENTIFIER NOT NULL,
-        [Name] VARCHAR (200) NOT NULL,
-        [Location] VARCHAR (200) NULL
-    );
-END
-
-IF NOT EXISTS
-(
-    SELECT
-        NULL
-    FROM 
-        information_schema.table_constraints  
-    WHERE 
-        constraint_type = 'PRIMARY KEY'   
-    AND 
-        table_name = 'Customer'
-)
-BEGIN
-    ALTER TABLE [dbo].[Customer] ADD CONSTRAINT [PK_Customer] PRIMARY KEY CLUSTERED 
-    (
-	    [Id] ASC
-    ) WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, SORT_IN_TEMPDB = OFF, IGNORE_DUP_KEY = OFF, ONLINE = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
-END
-"), cancellationToken: cancellationToken);
+            await scope.ServiceProvider.GetRequiredService<CustomerDbContext>().Database.EnsureCreatedAsync(cancellationToken);
         }
     }
 
@@ -223,15 +204,12 @@ END
 We are now ready to configure the services, along with the `SqlClientFactory` provider factory which is used internally by the `Shuttle.Data.Core` package:
 
 ```c#
-using System.Data;
-using Microsoft.Data.SqlClient;
-using System.Data.Common;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Shuttle.Core.Data;
 using Shuttle.Recall;
-using Shuttle.Recall.Sql.EventProcessing;
-using Shuttle.Recall.Sql.Storage;
+using Shuttle.Recall.SqlServer.EventProcessing;
+using Shuttle.Recall.SqlServer.Storage;
 
 namespace Recall.Walkthrough.Server;
 
@@ -239,81 +217,53 @@ internal class Program
 {
     private static async Task Main(string[] args)
     {
-        DbProviderFactories.RegisterFactory("Microsoft.Data.SqlClient", SqlClientFactory.Instance);
-
         await Host.CreateDefaultBuilder()
             .ConfigureServices(services =>
             {
+                var connectionString = "Server=.;Database=RecallWalkthrough;User ID=sa;Password=Pass!000;Trust Server Certificate=true";
+
                 services
                     .AddHostedService<ServerHostedService>()
-                    .AddDataAccess(builder =>
+                    .AddDbContext<CustomerDbContext>(builder =>
                     {
-                        builder.AddConnectionString(
-                            "RecallWalkthrough",
-                            "Microsoft.Data.SqlClient",
-                            "Server=.;Database=RecallWalkthrough;User ID=sa;Password=Pass!000;Trust Server Certificate=true");
-                        builder.Options.DatabaseContextFactory.DefaultConnectionStringName = "RecallWalkthrough";
+                        builder.UseSqlServer(connectionString);
                     })
-                    .AddSqlEventStorage(builder =>
+                    .AddRecall(recallBuilder =>
                     {
-                        builder.Options.ConnectionStringName = "RecallWalkthrough";
-                        builder.Options.Schema = "recall";
-
-                        builder.UseSqlServer();
-                    })
-                    .AddSqlEventProcessing(builder =>
-                    {
-                        builder.Options.ConnectionStringName = "RecallWalkthrough";
-                        builder.Options.Schema = "recall";
-                        builder.Options.RegisterDatabaseContextObserver = false; // we'll handle connections
-
-                        builder.UseSqlServer();
-                    })
-                    .AddEventStore(builder =>
-                    {
-                        builder.Options.ProjectionThreadCount = 1;
-
-                        builder.AddProjection("Customer")
-                            .AddEventHandler(async (IEventHandlerContext<Customer.Registered> context, IDatabaseContextFactory databaseContextFactory) =>
+                        recallBuilder
+                            .UseSqlServerEventStorage(builder =>
                             {
-                                await using (var databaseContext = databaseContextFactory.Create())
-                                {
-                                    await databaseContext.ExecuteAsync(new Query(@"
-INSERT INTO [dbo].[Customer]
-(
-    Id,
-    Name
-)
-VALUES
-(
-    @Id,
-    @Name
-)
-")
-                                        .AddParameter(new Column<string>("Name", DbType.AnsiString), context.Event.Name)
-                                        .AddParameter(new Column<Guid>("Id", DbType.Guid), context.PrimitiveEvent.Id)
-                                    );
-                                }
+                                builder.Options.ConnectionString = connectionString;
+                                builder.Options.Schema = "recall";
                             })
-                            .AddEventHandler(async (IEventHandlerContext<Customer.Renamed> context, IDatabaseContextFactory databaseContextFactory) =>
+                            .UseSqlServerEventProcessing(builder =>
                             {
-                                await using (var databaseContext = databaseContextFactory.Create())
+                                builder.Options.ConnectionString = connectionString;
+                                builder.Options.Schema = "recall";
+                            })
+                            .AddProjection("Customer")
+                            .AddEventHandler(async (IEventHandlerContext<Customer.Registered> context, CustomerDbContext dbContext) =>
+                            {
+                                await dbContext.Customers.AddAsync(new CustomerEntity
                                 {
-                                    await databaseContext.ExecuteAsync(new Query(@"
-UPDATE
-    Customer
-SET
-    Name = @Name
-WHERE
-    Id = @Id
-")
-                                        .AddParameter(new Column<string>("Name", DbType.AnsiString), context.Event.Name)
-                                        .AddParameter(new Column<Guid>("Id", DbType.Guid), context.PrimitiveEvent.Id)
-                                    );
+                                    Id = context.PrimitiveEvent.Id,
+                                    Name = context.Event.Name
+                                });
+
+                                await dbContext.SaveChangesAsync();
+                            })
+                            .AddEventHandler(async (IEventHandlerContext<Customer.Renamed> context, CustomerDbContext dbContext) =>
+                            {
+                                var customer = await dbContext.Customers.FindAsync(context.PrimitiveEvent.Id);
+
+                                if (customer != null)
+                                {
+                                    customer.Name = context.Event.Name;
+                                    await dbContext.SaveChangesAsync();
                                 }
                             });
 
-                        builder.AddProjection("Address").AddEventHandler<CustomerEventHandler>();
+                        recallBuilder.AddProjection("Address").AddEventHandler<CustomerEventHandler>();
                     });
             })
             .Build()
@@ -329,17 +279,13 @@ That should take care of our event processing.  We now need to move to producing
 Add a new `Console App` called `Recall.Walkthrough.Shell` and then add the following NuGet packages:
 
 ```
-Microsoft.Data.SqlClient
-Shuttle.Recall.Sql.Storage
+Shuttle.Recall.SqlServer.Storage
 ```
 
 ```c#
-using Microsoft.Data.SqlClient;
-using System.Data.Common;
 using Microsoft.Extensions.DependencyInjection;
-using Shuttle.Core.Data;
 using Shuttle.Recall;
-using Shuttle.Recall.Sql.Storage;
+using Shuttle.Recall.SqlServer.Storage;
 
 namespace Recall.Walkthrough.Shell;
 
@@ -347,34 +293,20 @@ internal class Program
 {
     static async Task Main(string[] args)
     {
-        DbProviderFactories.RegisterFactory("Microsoft.Data.SqlClient", SqlClientFactory.Instance);
+        var connectionString = "Server=.;Database=RecallWalkthrough;User ID=sa;Password=Pass!000;Trust Server Certificate=true";
 
         var serviceProvider = new ServiceCollection()
-            .AddDataAccess(builder =>
+            .AddRecall(recallBuilder =>
             {
-                builder.AddConnectionString(
-                    "RecallWalkthrough",
-                    "Microsoft.Data.SqlClient",
-                    "Server=.;Database=RecallWalkthrough;User ID=sa;Password=Pass!000;Trust Server Certificate=true");
-                builder.Options.DatabaseContextFactory.DefaultConnectionStringName = "RecallWalkthrough";
+                recallBuilder.UseSqlServerEventStorage(builder =>
+                {
+                    builder.Options.ConnectionString = connectionString;
+                    builder.Options.Schema = "recall";
+                });
             })
-            .AddSqlEventStorage(builder =>
-            {
-                builder.Options.ConnectionStringName = "RecallWalkthrough";
-                builder.Options.Schema = "recall";
-
-                builder.UseSqlServer();
-            })
-            .AddEventStore()
             .BuildServiceProvider();
 
         var eventStore = serviceProvider.GetRequiredService<IEventStore>();
-
-        // In a hosted environment the `Shuttle.Recall.Sql.Storage.EventStoreHostedService` will register
-        // a `DatabaseContextObserver` that will create a `DatabaseContext` when one is not present.
-        // We could instantiate the `EventStoreHostedService` but let's create the connection directly.
-
-        var databaseContextFactory = serviceProvider.GetRequiredService<IDatabaseContextFactory>();
 
         var ids = new List<Guid>();
 
@@ -390,25 +322,19 @@ internal class Program
             eventStream.Add(customer.MovedTo($"Moved-1-Customer-{i}-{eventStream.Id}"));
             eventStream.Add(customer.MovedTo($"Moved-2-Customer-{i}-{eventStream.Id}"));
 
-            await using (databaseContextFactory.Create())
-            {
-                await eventStore.SaveAsync(eventStream);
-            }
+            await eventStore.SaveAsync(eventStream);
 
             ids.Add(eventStream.Id);
         }
 
-        await using (databaseContextFactory.Create())
+        foreach (var id in ids)
         {
-            foreach (var id in ids)
-            {
-                var eventStream = await eventStore.GetAsync(id);
-                var customer = new Customer(id);
+            var eventStream = await eventStore.GetAsync(id);
+            var customer = new Customer(id);
 
-                eventStream.Apply(customer);
+            eventStream.Apply(customer);
 
-                Console.WriteLine($"[customer]: id = '{customer.Id}' / name = '{customer.Name}' (rename count = {customer.RenameCount}) / location = '{customer.Location}' (move count = '{customer.MoveCount}')");
-            }
+            Console.WriteLine($"[customer]: id = '{customer.Id}' / name = '{customer.Name}' (rename count = {customer.RenameCount}) / location = '{customer.Location}' (move count = '{customer.MoveCount}')");
         }
     }
 }
