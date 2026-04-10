@@ -6,25 +6,25 @@ In general, all major components in the Shuttle space have a `semver` version nu
 
 Please note that there are quite a few breaking changes.
 
-## Shuttle.Core
+## Shuttle
 
-### Shuttle.Core.Contract
+### Shuttle.Contract
 
 - Throwing `ArgumentNullException` instead of `NullReferenceException` for `AgainstNull` and `AgainstNullOrEmptyString`.
 
-### Shuttle.Core.Data
+### Shuttle.Data
 
 > **Note**: This package has been deprecated.
 
-### Shuttle.Core.Mediator
+### Shuttle.Mediator
 
 - All participants now registered as `Scoped` by default.
 
-### Shuttle.Core.Pipelines
+### Shuttle.Pipelines
 
 - The `CancellationToken` has been removed from `IPipelineContext` and been added to `IPipelineObserver<T>.ExecuteAsync(IPipelineContext<T> pipelineContext, CancellationToken cancellation = default)`.
 
-### Shuttle.Core.Reflection
+### Shuttle.Reflection
 
 -
 

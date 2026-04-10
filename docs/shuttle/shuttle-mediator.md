@@ -1,11 +1,11 @@
-# Shuttle.Core.Mediator
+# Shuttle.Mediator
 
-The Shuttle.Core.Mediator package provides a [mediator pattern](https://en.wikipedia.org/wiki/Mediator_pattern) implementation.
+The Shuttle.Mediator package provides a [mediator pattern](https://en.wikipedia.org/wiki/Mediator_pattern) implementation.
 
 ## Installation
 
 ```bash
-dotnet add package Shuttle.Core.Mediator
+dotnet add package Shuttle.Mediator
 ```
 
 ## Configuration
@@ -118,6 +118,6 @@ The `MediatorOptions` class provides the following events:
 
 ## Considerations
 
-If you have a rather predictable sequential workflow and you require something with faster execution then you may wish to consider the [Shuttle.Core.Pipelines](http://shuttle.github.io/shuttle-core/shuttle-core-pipelines) package.  
+If you have a rather predictable sequential workflow and you require something with faster execution then you may wish to consider the [Shuttle.Pipelines](http://shuttle.github.io/shuttle/shuttle-pipelines) package.  
 
 Performing a benchmark for your use-case would be able to indicate the more suitable option.

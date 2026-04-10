@@ -1,11 +1,11 @@
-# Shuttle.Core.Specification
+# Shuttle.Specification
 
 Provides a simple implementation of the specification pattern.
 
 ## Installation
 
 ```bash
-dotnet add package Shuttle.Core.Specification
+dotnet add package Shuttle.Specification
 ```
 
 ## Synchronous Specification

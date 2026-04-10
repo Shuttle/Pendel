@@ -1,4 +1,4 @@
-# Shuttle.Core.System
+# Shuttle.Platform
 
 OS and system level abstractions that provide a way to decouple your logic from static system calls, making your code more testable.
 
@@ -9,7 +9,7 @@ When your code calls `DateTimeOffset.UtcNow`, `Environment.UserInteractive`, or 
 ## Installation
 
 ```bash
-dotnet add package Shuttle.Core.System
+dotnet add package Shuttle.Platform
 ```
 
 ## Usage
@@ -22,7 +22,7 @@ services.AddSingleton<IEnvironmentService, EnvironmentService>();
 services.AddSingleton<IProcessService, ProcessService>();
 ```
 
-All types are in the `Shuttle.Core.System` namespace.
+All types are in the `Shuttle.Platform` namespace.
 
 ## `ISystemClock`
 

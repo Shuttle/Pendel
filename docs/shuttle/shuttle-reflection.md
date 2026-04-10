@@ -1,11 +1,11 @@
-# Shuttle.Core.Reflection
+# Shuttle.Reflection
 
 Provides various methods to facilitate reflection handling.
 
 ## Installation
 
 ```bash
-dotnet add package Shuttle.Core.Reflection
+dotnet add package Shuttle.Reflection
 ```
 
 ## Assembly Extensions

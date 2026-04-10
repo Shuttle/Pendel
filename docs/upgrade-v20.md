@@ -8,26 +8,26 @@ Also, only the lastest LTS version of `dotnet` will be supported going forward.
 
 Please note that there are quite a few breaking changes.  These will, typically, require minimal rework or "search & replace" to fix but it is still going to take some work.
 
-## Shuttle.Core
+## Shuttle
 
-### Shuttle.Core.Contract
+### Shuttle.Contract
 
 - Throwing `ArgumentNullException` instead of `NullReferenceException` for `AgainstNull` and `AgainstNullOrEmptyString`.
 
-### Shuttle.Core.Data
+### Shuttle.Data
 
 - Removed `ScriptProvider` as query factories should rather be used.
 
-### Shuttle.Core.Mediator
+### Shuttle.Mediator
 
 - Renamed `IAsyncParticipant` to `IParticipant`.
 
-### Shuttle.Core.Pipelines
+### Shuttle.Pipelines
 
 - `IPipelineObserver`: changed `Task ExecuteAsync(TPipelineEvent pipelineEvent)` to `Task ExecuteAsync(IPipelineContext<TPipelineEvent> pipelineContext)`.
 - Pipeline events no longer need to inherit from `PipelineEvent`; and it has been removed.
 
-### Shuttle.Core.Reflection
+### Shuttle.Reflection
 
 - Removed `IReflectionService.AssemblyPath`.
 - Removed `IReflectionService.FindAssemblyNamedAsync`.

@@ -1,11 +1,11 @@
-# Shuttle.Core.Serialization
+# Shuttle.Serialization
 
-The `Shuttle.Core.Serialization` package provides a consistent interface for serializing and deserializing objects.
+The `Shuttle.Serialization` package provides a consistent interface for serializing and deserializing objects.
 
 ## Installation
 
 ```bash
-dotnet add package Shuttle.Core.Serialization
+dotnet add package Shuttle.Serialization
 ```
 
 ## Interface

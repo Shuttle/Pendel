@@ -1,5 +1,5 @@
 import { default as access } from "../shuttle-access/sidebar";
-import { default as core } from "../shuttle-core/sidebar";
+import { default as core } from "../shuttle/sidebar";
 import { default as extensions } from "../shuttle-extensions/sidebar";
 import { default as esb } from "../shuttle-hopper/sidebar";
 import { default as pigeon } from "../shuttle-pigeon/sidebar";
@@ -45,9 +45,9 @@ export default defineConfig({
         ],
       },
       {
-        text: "Core",
-        activeMatch: `^/shuttle-core/`,
-        link: "/shuttle-core/home",
+        text: "Shuttle",
+        activeMatch: `^/shuttle/`,
+        link: "/shuttle/home",
       },
       {
         text: "Recall",

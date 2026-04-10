@@ -1,11 +1,11 @@
-# Shuttle.Core.TransactionScope
+# Shuttle.TransactionScope
 
 This package makes use of the .Net `TransactionScope` class to provide ambient transaction handling.
 
 ## Installation
 
 ```bash
-dotnet add package Shuttle.Core.TransactionScope
+dotnet add package Shuttle.TransactionScope
 ```
 
 ## Configuration

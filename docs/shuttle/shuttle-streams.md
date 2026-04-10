@@ -1,11 +1,11 @@
-# Shuttle.Core.Streams
+# Shuttle.Streams
 
-`Shuttle.Core.Streams` provides essential `Stream` extension methods to simplify common operations like copying and byte array conversion.
+`Shuttle.Streams` provides essential `Stream` extension methods to simplify common operations like copying and byte array conversion.
 
 ## Installation
 
 ```bash
-dotnet add package Shuttle.Core.Streams
+dotnet add package Shuttle.Streams
 ```
 
 ## Stream Extensions
@@ -34,7 +34,7 @@ If the source stream is a `MemoryStream` and its internal buffer is accessible, 
 ## Usage
 
 ```csharp
-using Shuttle.Core.Streams;
+using Shuttle.Streams;
 
 // ... inside an async method ...
 

@@ -32,7 +32,7 @@ using System.Data.Common;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Shuttle.Core.Data;
+using Shuttle.Data;
 using Shuttle.Recall;
 using Shuttle.Recall.Sql.Storage;
 

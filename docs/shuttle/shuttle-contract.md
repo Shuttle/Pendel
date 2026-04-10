@@ -1,11 +1,11 @@
-# Shuttle.Core.Contract
+# Shuttle.Contract
 
 A guard implementation that performs assertions/assumptions to prevent invalid code execution.
 
 ## Installation
 
 ```bash
-dotnet add package Shuttle.Core.Contract
+dotnet add package Shuttle.Contract
 ```
 
 # Guard

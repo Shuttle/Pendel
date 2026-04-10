@@ -213,7 +213,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Shuttle.Core.Contract;
+using Shuttle.Contract;
 using Shuttle.DependencyInjection.EMail;
 using Shuttle.Esb;
 using Shuttle.Esb.AzureStorageQueues;
@@ -279,7 +279,7 @@ public class Program
 ``` c#
 using System;
 using System.Threading.Tasks;
-using Shuttle.Core.Contract;
+using Shuttle.Contract;
 using Shuttle.DependencyInjection.EMail;
 using Shuttle.DependencyInjection.Messages;
 using Shuttle.Esb;
