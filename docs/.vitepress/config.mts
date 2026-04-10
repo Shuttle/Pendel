@@ -46,18 +46,81 @@ export default defineConfig({
       },
       {
         text: "Shuttle",
-        activeMatch: `^/shuttle/`,
-        link: "/shuttle/home",
-      },
-      {
-        text: "Recall",
-        activeMatch: `^/shuttle-recall/`,
-        link: "/shuttle-recall/home",
-      },
-      {
-        text: "Hopper",
-        activeMatch: `^/shuttle-hopper/`,
-        link: "/shuttle-hopper/home",
+        activeMatch: `^/shuttle`,
+        items: [
+          {
+            items: [
+              {
+                text: "Hopper",
+                link: "/shuttle-hopper/home",
+              },
+            ],
+          },
+          {
+            items: [
+              {
+                text: "Mediator",
+                link: "/shuttle/shuttle-mediator",
+              },
+            ],
+          },
+          {
+            items: [
+              {
+                text: "Recall",
+                link: "/shuttle-recall/home",
+              },
+            ],
+          },
+          {
+            items: [
+              {
+                text: "Cli",
+                link: "/shuttle/shuttle-cli",
+              },
+              {
+                text: "Contract",
+                link: "/shuttle/shuttle-contract",
+              },
+              {
+                text: "Cron",
+                link: "/shuttle/shuttle-cron",
+              },
+              {
+                text: "Pipelines",
+                link: "/shuttle/shuttle-pipelines",
+              },
+              {
+                text: "Platform",
+                link: "/shuttle/shuttle-platform",
+              },
+              {
+                text: "Reflection",
+                link: "/shuttle/shuttle-reflection",
+              },
+              {
+                text: "Serialization",
+                link: "/shuttle/shuttle-serialization",
+              },
+              {
+                text: "Specification",
+                link: "/shuttle/shuttle-specification",
+              },
+              {
+                text: "Streams",
+                link: "/shuttle/shuttle-streams",
+              },
+              {
+                text: "Threading",
+                link: "/shuttle/shuttle-threading",
+              },
+              {
+                text: "TransactionScope",
+                link: "/shuttle/shuttle-transactionscope",
+              },
+            ],
+          },
+        ],
       },
       {
         text: "21.0.1-rc3",
@@ -84,8 +147,6 @@ export default defineConfig({
     },
   },
   vite: {
-      plugins: [
-    tailwindcss(),
-  ],
-  }
+    plugins: [tailwindcss()],
+  },
 });
