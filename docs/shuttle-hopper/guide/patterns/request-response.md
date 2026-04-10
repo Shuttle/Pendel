@@ -78,8 +78,8 @@ using System;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Shuttle.Esb;
-using Shuttle.Esb.AzureStorageQueues;
+using Shuttle.Hopper;
+using Shuttle.Hopper.AzureStorageQueues;
 using Shuttle.RequestResponse.Messages;
 
 namespace Shuttle.RequestResponse.Client;
@@ -93,10 +93,10 @@ internal class Program
 
         var services = new ServiceCollection()
             .AddSingleton<IConfiguration>(configuration)
-            .AddServiceBus(builder =>
+            .AddHopper(options =>
             {
-                configuration.GetSection(ServiceBusOptions.SectionName)
-                    .Bind(builder.Options);
+                configuration.GetSection(HopperOptions.SectionName)
+                    .Bind(options);
             })
             .AddAzureStorageQueues(builder =>
             {
@@ -109,19 +109,24 @@ internal class Program
         Console.WriteLine("Type some characters and then press [enter] to submit; an empty line submission stops execution:");
         Console.WriteLine();
 
-        await using (var serviceBus = await services.BuildServiceProvider()
-                         .GetRequiredService<IServiceBus>().StartAsync())
-        {
-            string? userName;
+        var serviceProvider = services.BuildServiceProvider();
+        var busControl = serviceProvider.GetRequiredService<IBusControl>();
 
-            while (!string.IsNullOrEmpty(userName = Console.ReadLine()))
+        await busControl.StartAsync();
+
+        var serviceBus = serviceProvider.GetRequiredService<IBus>();
+
+        string? userName;
+
+        while (!string.IsNullOrEmpty(userName = Console.ReadLine()))
+        {
+            await serviceBus.SendAsync(new RegisterMember
             {
-                await serviceBus.SendAsync(new RegisterMember
-                {
-                    UserName = userName
-                }, c => c.WillExpire(DateTime.Now.AddSeconds(5)));
-            }
+                UserName = userName
+            }, c => c.WillExpire(DateTime.Now.AddSeconds(5)));
         }
+
+        await busControl.StopAsync();
     }
 }
 ```
@@ -133,10 +138,10 @@ internal class Program
 ```json
 {
   "Shuttle": {
-    "ServiceBus": {
+    "Hopper": {
       "Inbox": {
-        "WorkQueueUri": "azuresq://azure/shuttle-client-work",
-        "ErrorQueueUri": "azuresq://azure/shuttle-error",
+        "WorkTransportUri": "azuresq://azure/shuttle-client-work",
+        "ErrorTransportUri": "azuresq://azure/shuttle-error",
         "ThreadCount": 1
       }, 
       "MessageRoutes": [
@@ -155,7 +160,7 @@ internal class Program
 }
 ```
 
-This tells the service bus that all messages sent having a type name starting with `Shuttle.RequestResponse.Messages` should be routed to endpoint `azuresq://azure/shuttle-server-work`.
+This tells the endpoint that all messages sent having a type name starting with `Shuttle.RequestResponse.Messages` should be routed to endpoint `azuresq://azure/shuttle-server-work`.
 
 ### MemberRegisteredHandler
 
@@ -164,7 +169,7 @@ This tells the service bus that all messages sent having a type name starting wi
 ``` c#
 using System;
 using System.Threading.Tasks;
-using Shuttle.Esb;
+using Shuttle.Hopper;
 using Shuttle.RequestResponse.Messages;
 
 namespace Shuttle.RequestResponse.Client;
@@ -186,7 +191,7 @@ public class MemberRegisteredHandler : IMessageHandler<MemberRegistered>
 
 > Add a new `Console Application` to the solution called `Shuttle.RequestResponse.Server`.
 
-> Install the `Shuttle.Esb.AzureStorageQueues` nuget package.
+> Install the `Shuttle.Hopper.AzureStorageQueues` nuget package.
 
 This will provide access to the Azure Storage Queues `IQueue` implementation and also include the required dependencies.
 
@@ -210,8 +215,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Shuttle.Contract;
-using Shuttle.Esb;
-using Shuttle.Esb.AzureStorageQueues;
+using Shuttle.Hopper;
+using Shuttle.Hopper.AzureStorageQueues;
 
 namespace Shuttle.RequestResponse.Server;
 
@@ -220,17 +225,15 @@ internal class Program
     private static async Task Main()
     {
         await Host.CreateDefaultBuilder()
-            .ConfigureServices(services =>
+            .ConfigureServices((hostContext, services) =>
             {
-                var configuration = new ConfigurationBuilder()
-                    .AddJsonFile("appsettings.json").Build();
+                var configuration = hostContext.Configuration;
 
                 services
-                    .AddSingleton<IConfiguration>(configuration)
-                    .AddServiceBus(builder =>
+                    .AddHopper(options =>
                     {
-                        configuration.GetSection(ServiceBusOptions.SectionName)
-                            .Bind(builder.Options);
+                        configuration.GetSection(HopperOptions.SectionName)
+                            .Bind(options);
                     })
                     .AddAzureStorageQueues(builder =>
                     {
@@ -256,10 +259,10 @@ internal class Program
     "azure": "UseDevelopmentStorage=true;"
   },
   "Shuttle": {
-    "ServiceBus": {
+    "Hopper": {
       "Inbox": {
-        "WorkQueueUri": "azuresq://azure/shuttle-server-work",
-        "ErrorQueueUri": "azuresq://azure/shuttle-error"
+        "WorkTransportUri": "azuresq://azure/shuttle-server-work",
+        "ErrorTransportUri": "azuresq://azure/shuttle-error"
       }
     }
   }
@@ -268,12 +271,12 @@ internal class Program
 
 ### RegisterMemberHandler
 
-> Add a new class called `RegisterMemberHandler` that implements the `IMessageHandler<RegisterMemberCommand>` interface as follows:
+> Add a new class called `RegisterMemberHandler` that implements the `IMessageHandler<RegisterMember>` interface as follows:
 
 ``` c#
 using System;
 using System.Threading.Tasks;
-using Shuttle.Esb;
+using Shuttle.Hopper;
 using Shuttle.RequestResponse.Messages;
 
 namespace Shuttle.RequestResponse.Server;
@@ -293,6 +296,7 @@ public class RegisterMemberHandler : IMessageHandler<RegisterMember>
     }
 }
 ```
+
 
 ## Run
 

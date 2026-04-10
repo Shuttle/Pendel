@@ -1,5 +1,5 @@
 import { mdiArrowLeft } from '@mdi/js'
-import { useIcon } from '@/.vitepress/theme/composables/icon'
+import { useIcon } from '../.vitepress/theme/composables/icon'
 
 const home = {
     text: 'Hopper',
@@ -143,16 +143,16 @@ const components = [
                 link: '/shuttle-hopper/components/message-sender'
             },
             {
-                text: 'Queue Factory Service',
-                link: '/shuttle-hopper/components/queue-factory-service'
+                text: 'Transport Factory Service',
+                link: '/shuttle-hopper/components/transport-factory-service'
             },
             {
-                text: 'Queue Service',
-                link: '/shuttle-hopper/components/queue-service'
+                text: 'Transport Service',
+                link: '/shuttle-hopper/components/transport-service'
             },
             {
                 text: 'Policy',
-                link: '/shuttle-hopper/components/service-bus-policy'
+                link: '/shuttle-hopper/components/bus-policy'
             },
             {
                 text: 'Subscription Service',
@@ -235,8 +235,8 @@ const options = [
         text: 'Options',
         items: [
             {
-                text: 'Service Bus',
-                link: '/shuttle-hopper/options/servicebus'
+                text: 'Hopper',
+                link: '/shuttle-hopper/options/hopper'
             },
             {
                 text: 'Inbox',
@@ -272,7 +272,7 @@ const esb = [
             },
             {
                 text: 'Options',
-                link: '/shuttle-hopper/options/servicebus'
+                link: '/shuttle-hopper/options/hopper'
             },
             {
                 text: 'Components',

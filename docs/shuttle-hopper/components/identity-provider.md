@@ -14,4 +14,4 @@ IIdentity Get();
 
 The method will return the `IIdentity` instance to use.
 
-*Note*: the `IIdentityProvider` implementation is responsible for honouring the `ServiceBusOptions.CacheIdentity` property.
+*Note*: the `IIdentityProvider` implementation is responsible for honouring the `HopperOptions.CacheIdentity` property.

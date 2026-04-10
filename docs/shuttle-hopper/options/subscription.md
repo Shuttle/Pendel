@@ -5,26 +5,17 @@ The `SubscriptionOptions` configured as `HopperOptions.Subscription` represent c
 Any implementation of the `ISubscriptionService` interface should make use of these options to register, or ensure, any subscriptions:
 
 ```c#
-services.AddHopper(builder => 
+services.AddHopper(options => 
 {
-    builder.Options.Subscription.Mode = SubscriptionMode.Standard; // default
+    options.Subscription.Mode = SubscriptionMode.Standard; // default
     
-    // add subscription to message types directly; else below options on builder
-    builder.Options.Subscription.MessageTypes.Add(typeof(Event1).FullName);
-
-    // using type
-    builder.AddSubscription(typeof(Event1));
-    builder.AddSubscription(typeof(Event2));
-
-    // using a full type name
-    builder.AddSubscription(typeof(Event1).FullName);
-    builder.AddSubscription(typeof(Event2).FullName);
-
-    // using a generic
-    builder.AddSubscription<Event1>();
-    builder.AddSubscription<Event2>();
-});
+    // add subscription to message types directly:
+    options.Subscription.MessageTypes.Add(typeof(Event1).FullName);
+})
+.AddSubscription<Event1>()
+.AddSubscription(typeof(Event2));
 ```
+
 
 And the JSON configuration structure:
 

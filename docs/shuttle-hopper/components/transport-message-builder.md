@@ -5,38 +5,68 @@
 ### Headers
 
 ``` c#
-public List<TransportHeader> Headers { get; private set; }
+public List<TransportHeader> Headers { get; }
 ```
 
-Contains the list of name/value pair transport headers.  Whenever a `TransportMessageReceived` is available the received transport headers are also included.
+Contains the list of name/value pair transport headers.
+
+### HasRecipient
+
+``` c#
+public bool HasRecipient { get; }
+```
+
+Returns `true` if the transport message has a `RecipientInboxWorkTransportUri`; else `false`.
+
+### ShouldReply
+
+``` c#
+public bool ShouldReply { get; }
+```
+
+### ShouldSendToSelf
+
+``` c#
+public bool ShouldSendToSelf { get; }
+```
 
 ## Methods
 
-### Local
+### ToSelf
 
 ``` c#
-public TransportMessageBuilder Local();
+public TransportMessageBuilder ToSelf();
 ```
 
-This sets the `RecipientInboxWorkQueueUri` tot he local inbox work queue uri.  If there is no inbox an expection is thrown.
+This sets the `ShouldSendToSelf` flag.  During dispatch the `RecipientInboxWorkTransportUri` will be set to the local inbox work transport uri.
 
-### Reply
+### AsReply
 
 ``` c#
-public TransportMessageBuilder Reply();
+public TransportMessageBuilder AsReply();
 ```
 
-This sets the `RecipientInboxWorkQueueUri` to the `SenderInboxWorkQueueUri` of the transport message that was received.  This method, therefore, is only available in a [HandlerContext].  If no transport message received instance is available or if the received transport message does not have a `SenderInboxWorkQueueUri` property (the sender has no inbox) an exception is thrown.
+This sets the `ShouldReply` flag.  During dispatch the `RecipientInboxWorkTransportUri` will be set to the `SenderInboxWorkTransportUri` of the transport message that was received.
 
 ### WithRecipient
 
 ``` c#
-public TransportMessageBuilder WithRecipient(IQueue queue);
+public TransportMessageBuilder WithRecipient(ITransport transport);
 public TransportMessageBuilder WithRecipient(Uri uri);
 public TransportMessageBuilder WithRecipient(string uri);
 ```
 
-This sets the `RecipientInboxWorkQueueUri` explicitly and no routing will be applied.
+This sets the `RecipientInboxWorkTransportUri` explicitly and no routing will be applied.
+
+### WithSender
+
+``` c#
+public TransportMessageBuilder WithSender(ITransport transport);
+public TransportMessageBuilder WithSender(Uri uri);
+public TransportMessageBuilder WithSender(string uri);
+```
+
+This sets the `SenderInboxWorkTransportUri` explicitly.
 
 ### WithCorrelationId
 
@@ -46,46 +76,40 @@ public TransportMessageBuilder WithCorrelationId(string correlationId);
 
 Sets the correlation id for the message.
 
-### Defer
+### DeferUntil
 
 ``` c#
-public TransportMessageBuilder Defer(DateTime ignoreTillDate);
+public TransportMessageBuilder DeferUntil(DateTimeOffset ignoreUntil);
 ```
 
-Ignores the `TransportMessage` until the given date/time has been reached.  The `TransportMessage` is sent immediately and it is up to the receiving endpoint to decide how to defer it.  It is recommended that you configure a deferred queue.
+Ignores the `TransportMessage` until the given date/time has been reached.  
 
-Without a dedicated deferred queue the work queue will contain the deferred message.  This may slow down processing as a deferred message is not regarded as work.  If the queue contains too many deferred messages the queue processing will become very slow and unresponsive.
-
-### WillExpire
+### DeferFor
 
 ``` c#
-public TransportMessageBuilder WillExpire(DateTime expiryDate);
+public TransportMessageBuilder DeferFor(TimeSpan delay);
 ```
 
-The message will only remain valid until this date is reached.  After this is will not be processed but rather immediately acknowledged.  The queuing mechanism may also, should it support message expiry, remove the message internally from the queue.
+Ignores the `TransportMessage` for the given duration.
+
+### ExpiresAt
+
+``` c#
+public TransportMessageBuilder ExpiresAt(DateTimeOffset expiresAt);
+```
+
+The message will only remain valid until this date is reached.
+
+### ExpiresIn
+
+``` c#
+public TransportMessageBuilder ExpiresIn(TimeSpan after);
+```
+
+The message will only remain valid for the given duration.
 
 ### WithPriority
 
 ``` c#
 public TransportMessageBuilder WithPriority(int priority);
 ```
-
-### WithEncryption
-
-``` c#
-public TransportMessageBuilder WithEncryption(string encryption);
-```
-
-### WithCompression
-
-``` c#
-public TransportMessageBuilder WithCompression(string compression);
-```
-
-### HasRecipient
-
-``` c#
-public bool HasRecipient { get; }
-```
-
-Returns `true` if the transport message has a `RecipientInboxWorkQueueUri`; else `false`.

@@ -23,17 +23,15 @@ internal class Program
             .ConfigureServices(services =>
             {
                 services
-                    .AddHopper(builder =>
+                    .AddHopper(options =>
                     {
-                        builder.Options.Inbox.WorkQueueUri = "azuresq://azure/work";
+                        options.Inbox.WorkTransportUri = new Uri("azuresq://azure/work");
+                    })
+                    .AddMessageHandler(async (IHandlerContext<SomeMessage> context, ISomeDependency instance) =>
+                    {
+                        Console.WriteLine($@"[some-message] : guid = {context.Message.Guid}");
 
-                        // Delegates may also be added to the builder, including adding dependencies
-                        builder.AddMessageHandler(async (IHandlerContext<SomeMessage> context, ISomeDependency instance) =>
-                        {
-                            Console.WriteLine($@"[some-message] : guid = {context.Message.Guid}");
-
-                            await Task.CompletedTask;
-                        });
+                        await Task.CompletedTask;
                     })
                     .UseAzureStorageQueues(builder =>
                     {
@@ -66,11 +64,11 @@ internal class Program
 
                 services
                     .AddSingleton<IConfiguration>(configuration)
-                    .AddHopper(builder =>
+                    .AddHopper(options =>
                     {
                         configuration
                             .GetSection(HopperOptions.SectionName)
-                            .Bind(builder.Options);
+                            .Bind(options);
                     })
                     .UseAzureStorageQueues(builder =>
                     {
@@ -97,7 +95,7 @@ The `appsettings.json` file would be as follows (remember to set to `Copy always
   "Shuttle": {
     "Hopper": {
       "Inbox": {
-        "WorkQueueUri": "azuresq://azure/work"
+        "WorkTransportUri": "azuresq://azure/work"
       }
     }
   }
@@ -128,10 +126,7 @@ await serviceBus.PublishAsync(new MemberRegistered
 ### Subscribe to those interesting events
 
 ```c#
-services.AddHopper(builder =>
-{
-    builder.AddSubscription<MemberRegistered>();
-});
+services.AddHopper().AddSubscription<MemberRegistered>();
 ```
 
 ### Handle any messages

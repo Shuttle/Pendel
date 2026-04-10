@@ -5,7 +5,7 @@
 ### Message
 
 ``` c#
-public System.Byte[] Message { get; set; }
+public byte[] Message { get; set; }
 ```
 
 The actual message stream returned from the [Serializer] represented as a byte array.
@@ -13,7 +13,7 @@ The actual message stream returned from the [Serializer] represented as a byte a
 ### MessageReceivedId
 
 ``` c#
-public System.Guid MessageReceivedId { get; set; }
+public Guid MessageReceivedId { get; set; }
 ```
 
 This is the Id of the message that was being processed when the message was sent.  So if message with `MessageId` *ABC123* was received and you sent another message that will have a new `MessageId` of, say, *DEF321* then the `MessageReceivedId` of the new message with `MessageId`: *DEF321* will be *ABC123*.
@@ -21,7 +21,7 @@ This is the Id of the message that was being processed when the message was sent
 ### MessageId
 
 ``` c#
-public System.Guid MessageId { get; set; }
+public Guid MessageId { get; set; }
 ```
 
 The unique Id of this message.
@@ -32,20 +32,20 @@ The unique Id of this message.
 public string CorrelationId { get; set; }
 ```
 
-The `CorrelationId` is not used by the core Shuttle.Esb and you are free to use it to correlate your messages.
+The `CorrelationId` is not used by the core Shuttle.Hopper and you are free to use it to correlate your messages.
 
-### SenderInboxWorkQueueUri
+### SenderInboxWorkTransportUri
 
 ``` c#
-public string SenderInboxWorkQueueUri { get; set; }
+public string SenderInboxWorkTransportUri { get; set; }
 ```
 
 The `Uri` of the inbox of the endpoint where the message originated.  If the sender did not have an inbox then this value will be empty.
 
-### RecipientInboxWorkQueueUri
+### RecipientInboxWorkTransportUri
 
 ``` c#
-public string RecipientInboxWorkQueueUri { get; set; }
+public string RecipientInboxWorkTransportUri { get; set; }
 ```
 
 The `Uri` of the inbox of the destination endpoint of this message.
@@ -56,21 +56,23 @@ The `Uri` of the inbox of the destination endpoint of this message.
 public string PrincipalIdentityName { get; set; }
 ```
 
-The name of `WindowsIdentity` that dispatched the message.  May be *Anonymous*.
+The name of the identity that dispatched the message.  May be *Anonymous*.
 
-### IgnoreTillDate
+### IgnoreUntil
 
 ``` c#
-public System.DateTime IgnoreTillDate { get; set; }
+public DateTimeOffset IgnoreUntil { get; set; }
 ```
 
 The message will not be processed while the current date is before this date.
 
-### ExpiryDate
+### ExpiresAt
 
 ``` c#
-public System.DateTime ExpiryDate { get; set; }
+public DateTimeOffset ExpiresAt { get; set; }
 ```
+
+Determines the date that the message will expire.  It will not be processed after this date.  The default value is `DateTimeOffset.MaxValue`.
 
 ### Priority
 
@@ -78,12 +80,10 @@ public System.DateTime ExpiryDate { get; set; }
 public int Priority { get; set; }
 ```
 
-Determines the date that the message will expire.  It will not be processed after this date.  The default value is `DateTime.MaxValue`..
-
-### SendDate
+### SentAt
 
 ``` c#
-public System.DateTime SendDate { get; set; }
+public DateTimeOffset SentAt { get; set; }
 ```
 
 The date that the message was sent.
@@ -112,26 +112,10 @@ public string AssemblyQualifiedName { get; set; }
 
 The `AssemblyQualifiedName` of the message type represented by the `Message` property.
 
-### EncryptionAlgorithm
-
-``` c#
-public string EncryptionAlgorithm { get; set; }
-```
-
-The name of the encryption algorithm used to encrypt the message; else empty.
-
-### CompressionAlgorithm 
-
-``` c#
-public string CompressionAlgorithm { get; set; }
-```
-
-The name of the compression algorithm used to compress the message; else empty.
-
 ### Headers
 
 ``` c#
-public List<Shuttle.Esb.TransportHeader> Headers { get; set; }
+public List<TransportHeader> Headers { get; set; }
 ```
 
 An arbitrary list of `TransportHeader` objects that may be used to carry information not contained in the `Message` property.

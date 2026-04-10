@@ -2,29 +2,29 @@
 
 An implementation of the `IMessageRouteProvider` interface is used to obtain a list of the uris that a message should be routed to.
 
-The `MessageRouteProvider` implementation makes use if the `ServiceBusOptions` to determine the routing.  You could implement this interface for custom routing such as a centrally managed database containing the routing.
+The `MessageRouteProvider` implementation makes use of the `HopperOptions` to determine the routing.  You could implement this interface for custom routing such as a centrally managed database containing the routing.
 
 ## Methods
 
-### GetRouteUris
+### GetRouteUrisAsync
 
 ``` c#
-Task<IEnumerable<string>> GetRouteUrisAsync(string messageType)
+Task<IEnumerable<string>> GetRouteUrisAsync(string messageType, CancellationToken cancellationToken = default);
 ```
 
 The method will return the list of uris that the message type should be routed to.  All qualifying routes should be added to the resulting collection of uris.
 
-### Add
+### AddAsync
 
 ``` c#
-void Add(IMessageRoute messageRoute);
+Task AddAsync(IMessageRoute messageRoute, CancellationToken cancellationToken = default);
 ```
 
 The method will add a new `IMessageRoute` instance.
 
 ## Specifications
 
-For each message route you need to specify the specification to apply to the value.  The [specification](http://en.wikipedia.org/wiki/Specification_pattern) will determine wether the route will be added.
+For each message route you need to specify the specification to apply to the value.  The [specification](http://en.wikipedia.org/wiki/Specification_pattern) will determine whether the route will be added.
 
 ### StartsWithMessageRouteSpecification
 

@@ -16,15 +16,13 @@ dotnet add package Shuttle.Hopper.SqlServer.Subscription
 
 In order to use Sql Server for subscriptions, you can use the `UseSqlServerSubscription` extension method:
 
-```c#
-services.AddHopper(builder =>
-{
-    builder.UseSqlServerSubscription(options =>
+services.AddHopper()
+    .UseSqlServerSubscription(options =>
     {
         options.ConnectionString = "server=.;database=shuttle;user id=sa;password=Pass!000";
     });
-});
 ```
+
 
 The default JSON settings structure is as follows:
 

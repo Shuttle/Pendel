@@ -53,7 +53,7 @@ And the relevant **behaviour** would include:
 
 Even though a physical seat is one thing it can mean very different things to different people.  This is where a *Bounded Context* comes in.  You may even find that a similar concept is called something else in each context.  You may find that an `Employee` in the *HR* BC is called a `User` in the *Identity & Access Control* BC, or an `Author` in the *Collaboration* BC. 
 
-As behaviour is invoked on various objects within each BC the other BCs may need to be informed.  To accomplish this one would need some communication mechanism based on an *Event Driven Architecture*.  That is, of course, where a service bus like Shuttle.Esb would come in handy.
+As behaviour is invoked on various objects within each BC the other BCs may need to be informed.  To accomplish this one would need some communication mechanism based on an *Event Driven Architecture*.  That is, of course, where a service bus like Shuttle.Hopper would come in handy.
 
 The *Financial Management* BC could publish an `AssetRegistered` event and the other BCs would subscribe to that event and then determine if they need to register the asset number as an item they are interested in.
 

@@ -17,9 +17,8 @@ The URI structure is `azuresq://configuration-name/queue-name`.
 If `ConnectionString` is specified the `StorageAccount` setting will be ignored.  When `StorageAccount` is specified the `DefaultAzureCredential` will be used to authenticate.
 
 ```c#
-services.AddHopper(hopperBuilder =>
-{
-    hopperBuilder.UseAzureStorageQueues(builder =>
+services.AddHopper()
+    .UseAzureStorageQueues(builder =>
     {
         var azureStorageQueueOptions = new AzureStorageQueueOptions
         {
@@ -31,8 +30,8 @@ services.AddHopper(hopperBuilder =>
 
         builder.AddOptions("azure", azureStorageQueueOptions);
     });
-});
 ```
+
 
 The default JSON settings structure is as follows:
 

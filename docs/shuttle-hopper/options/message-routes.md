@@ -5,9 +5,9 @@ var configuration =
     new ConfigurationBuilder()
         .AddJsonFile("appsettings.json").Build();
 
-services.AddHopper(builder => 
+services.AddHopper(options => 
 {
-    builder.Options.MessageRoutes = new List<MessageRouteOptions>
+    options.MessageRoutes = new List<MessageRouteOptions>
     {
         new()
         {
@@ -67,7 +67,7 @@ services.AddHopper(builder =>
     // or bind from configuration
     configuration
         .GetSection(HopperOptions.SectionName)
-        .Bind(builder.Options);
+        .Bind(options);
 });
 ```
 
@@ -123,3 +123,4 @@ The default JSON settings structure is as follows:
   }
 }
 ```
+

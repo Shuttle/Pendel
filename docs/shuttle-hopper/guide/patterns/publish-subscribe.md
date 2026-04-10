@@ -80,8 +80,8 @@ using System;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Shuttle.Esb;
-using Shuttle.Esb.AzureStorageQueues;
+using Shuttle.Hopper;
+using Shuttle.Hopper.AzureStorageQueues;
 using Shuttle.PublishSubscribe.Messages;
 
 namespace Shuttle.PublishSubscribe.Client
@@ -97,10 +97,10 @@ namespace Shuttle.PublishSubscribe.Client
 
             services.AddSingleton<IConfiguration>(configuration);
 
-            services.AddServiceBus(builder =>
+            services.AddHopper(options =>
             {
-                configuration.GetSection(ServiceBusOptions.SectionName)
-                    .Bind(builder.Options);
+                configuration.GetSection(HopperOptions.SectionName)
+                    .Bind(options);
             });
 
             services.AddAzureStorageQueues(builder =>
@@ -114,19 +114,24 @@ namespace Shuttle.PublishSubscribe.Client
             Console.WriteLine("Type some characters and then press [enter] to submit; an empty line submission stops execution:");
             Console.WriteLine();
 
-            await using (var serviceBus = await services.BuildServiceProvider()
-                             .GetRequiredService<IServiceBus>().StartAsync())
-            {
-                string userName;
+            var serviceProvider = services.BuildServiceProvider();
+            var busControl = serviceProvider.GetRequiredService<IBusControl>();
 
-                while (!string.IsNullOrEmpty(userName = Console.ReadLine() ?? string.Empty))
+            await busControl.StartAsync();
+
+            var serviceBus = serviceProvider.GetRequiredService<IBus>();
+
+            string userName;
+
+            while (!string.IsNullOrEmpty(userName = Console.ReadLine() ?? string.Empty))
+            {
+                await serviceBus.SendAsync(new RegisterMember
                 {
-                    await serviceBus.SendAsync(new RegisterMember
-                    {
-                        UserName = userName
-                    });
-                }
+                    UserName = userName
+                });
             }
+
+            await busControl.StopAsync();
         }
     }
 }
@@ -139,7 +144,7 @@ namespace Shuttle.PublishSubscribe.Client
 ```json
 {
   "Shuttle": {
-    "ServiceBus": {
+    "Hopper": {
       "MessageRoutes": [
         {
           "Uri": "azuresq://azure/shuttle-server-work",
@@ -156,13 +161,13 @@ namespace Shuttle.PublishSubscribe.Client
 }
 ```
 
-This tells the service bus that all messages sent having a type name starting with `Shuttle.PublishSubscribe.Messages` should be sent to endpoint `azuresq://azure/shuttle-server-work`.
+This tells the endpoint that all messages sent having a type name starting with `Shuttle.PublishSubscribe.Messages` should be sent to endpoint `azuresq://azure/shuttle-server-work`.
 
 ## Server
 
 > Add a new `Console Application` to the solution called `Shuttle.PublishSubscribe.Server`.
 
-> Install the `Shuttle.Esb.AzureStorageQueues` nuget package.
+> Install the `Shuttle.Hopper.AzureStorageQueues` nuget package.
 
 This will provide access to the Azure Storage Queues `IQueue` implementation and also include the required dependencies.
 
@@ -174,7 +179,7 @@ This allows a console application to be hosted using the .NET generic host.
 
 This will provide the ability to read the `appsettings.json` file.
 
-> Install the `Shuttle.Esb.Sql.Subscription` nuget package.
+> Install the `Shuttle.Hopper.SqlServer.Subscription` nuget package.
 
 This will provide access to the Sql-based `ISubscriptionService` implementation.
 
@@ -197,9 +202,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Shuttle.Contract;
 using Shuttle.Data;
-using Shuttle.Esb;
-using Shuttle.Esb.AzureStorageQueues;
-using Shuttle.Esb.Sql.Subscription;
+using Shuttle.Hopper;
+using Shuttle.Hopper.AzureStorageQueues;
+using Shuttle.Hopper.SqlServer.Subscription;
 
 namespace Shuttle.PublishSubscribe.Server;
 
@@ -210,27 +215,23 @@ public class Program
         DbProviderFactories.RegisterFactory("Microsoft.Data.SqlClient", SqlClientFactory.Instance);
 
         await Host.CreateDefaultBuilder()
-            .ConfigureServices(services =>
+            .ConfigureServices((hostContext, services) =>
             {
-                var configuration = new ConfigurationBuilder()
-                    .AddJsonFile("appsettings.json").Build();
+                var configuration = hostContext.Configuration;
 
                 services
-                    .AddSingleton<IConfiguration>(configuration)
                     .AddDataAccess(builder =>
                     {
                         builder.AddConnectionString("Subscription", "Microsoft.Data.SqlClient");
                     })
-                    .AddSqlSubscription(builder =>
+                    .AddHopper(options =>
                     {
-                        builder.Options.ConnectionStringName = "Subscription";
-
-                        builder.UseSqlServer();
+                        configuration.GetSection(HopperOptions.SectionName)
+                            .Bind(options);
                     })
-                    .AddServiceBus(builder =>
+                    .UseSqlServerSubscription(options =>
                     {
-                        configuration.GetSection(ServiceBusOptions.SectionName)
-                            .Bind(builder.Options);
+                        options.ConnectionString = configuration.GetConnectionString("Subscription");
                     })
                     .AddAzureStorageQueues(builder =>
                     {
@@ -256,9 +257,9 @@ docker run --network <network> --restart always -e "ACCEPT_EULA=Y" -e "MSSQL_SA_
 
 > Create a new database called **Shuttle**
 
-The implementation will create any required database structures on startup.  If you need to execute the creation scripts manually, please reference the [source code](https://github.com/Shuttle/Shuttle.Esb.Sql.Subscription).
+The implementation will create any required database structures on startup.  If you need to execute the creation scripts manually, please reference the [source code](https://github.com/Shuttle/Shuttle.Hopper.SqlServer.Subscription).
 
-Whenever the `Publish` method is invoked on the `ServiceBus` instance the registered `ISubscriptionService` instance is asked for the subscribers to the published message type.  These are retrieved from the Sql Server database for the implementation we are using.
+Whenever the `PublishAsync` method is invoked on the `IServiceBus` instance the registered `ISubscriptionService` instance is asked for the subscribers to the published message type.  These are retrieved from the Sql Server database for the implementation we are using.
 
 ### Server configuration file
 
@@ -271,10 +272,10 @@ Whenever the `Publish` method is invoked on the `ServiceBus` instance the regist
     "Subscription": "server=.;database=shuttle;user id=sa;password=Pass!000;TrustServerCertificate=True"
   },
   "Shuttle": {
-    "ServiceBus": {
+    "Hopper": {
       "Inbox": {
-        "WorkQueueUri": "azuresq://azure/shuttle-server-work",
-        "ErrorQueueUri": "azuresq://azure/shuttle-error"
+        "WorkTransportUri": "azuresq://azure/shuttle-server-work",
+        "ErrorTransportUri": "azuresq://azure/shuttle-error"
       }
     }
   }
@@ -290,7 +291,7 @@ The Sql Server implementation of the `ISubscriptionService` that we are using by
 ``` c#
 using System;
 using System.Threading.Tasks;
-using Shuttle.Esb;
+using Shuttle.Hopper;
 using Shuttle.PublishSubscribe.Messages;
 
 namespace Shuttle.PublishSubscribe.Server;
@@ -317,7 +318,7 @@ This will write out some information to the console window and publish the `Memb
 
 > Add a new `Console Application` to the solution called `Shuttle.PublishSubscribe.Subscriber`.
 
-> Install the `Shuttle.Esb.AzureStorageQueues` nuget package.
+> Install the `Shuttle.Hopper.AzureStorageQueues` nuget package.
 
 This will provide access to the Azure Storage Queues `IQueue` implementation and also include the required dependencies.
 
@@ -329,7 +330,7 @@ This allows a console application to be hosted using the .NET generic host.
 
 This will provide the ability to read the `appsettings.json` file.
 
-> Install the `Shuttle.Esb.Sql.Subscription` nuget package.
+> Install the `Shuttle.Hopper.SqlServer.Subscription` nuget package.
 
 This will provide access to the Sql-based `ISubscriptionService` implementation.
 
@@ -352,9 +353,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Shuttle.Contract;
 using Shuttle.Data;
-using Shuttle.Esb;
-using Shuttle.Esb.AzureStorageQueues;
-using Shuttle.Esb.Sql.Subscription;
+using Shuttle.Hopper;
+using Shuttle.Hopper.AzureStorageQueues;
+using Shuttle.Hopper.SqlServer.Subscription;
 using Shuttle.PublishSubscribe.Messages;
 
 namespace Shuttle.PublishSubscribe.Subscriber;
@@ -366,29 +367,24 @@ public class Program
         DbProviderFactories.RegisterFactory("Microsoft.Data.SqlClient", SqlClientFactory.Instance);
 
         await Host.CreateDefaultBuilder()
-            .ConfigureServices(services =>
+            .ConfigureServices((hostContext, services) =>
             {
-                var configuration = new ConfigurationBuilder()
-                    .AddJsonFile("appsettings.json").Build();
+                var configuration = hostContext.Configuration;
 
                 services
-                    .AddSingleton<IConfiguration>(configuration)
                     .AddDataAccess(builder =>
                     {
                         builder.AddConnectionString("Subscription", "Microsoft.Data.SqlClient");
                     })
-                    .AddSqlSubscription(builder =>
+                    .AddHopper(options =>
                     {
-                        builder.Options.ConnectionStringName = "Subscription";
-
-                        builder.UseSqlServer();
+                        configuration.GetSection(HopperOptions.SectionName)
+                            .Bind(options);
                     })
-                    .AddServiceBus(builder =>
+                    .AddSubscription<MemberRegistered>()
+                    .UseSqlServerSubscription(options =>
                     {
-                        configuration.GetSection(ServiceBusOptions.SectionName)
-                            .Bind(builder.Options);
-
-                        builder.AddSubscription<MemberRegistered>();
+                        options.ConnectionString = configuration.GetConnectionString("Subscription");
                     })
                     .AddAzureStorageQueues(builder =>
                     {
@@ -404,7 +400,7 @@ public class Program
 }
 ```
 
-Here we add the subscription by calling the `ServiceBusBuilder.AddSubscription<T>` method.  Since we are using the Sql Server implementation of the `ISubscriptionService` interface an entry will be created in the **SubscriberMessageType** table associating the inbox work queue uri with the message type.
+Here we add the subscription by calling the `HopperBuilder.AddSubscription<T>` method.  Since we are using the Sql Server implementation of the `ISubscriptionService` interface an entry will be created in the **SubscriberMessageType** table associating the inbox work transport uri with the message type.
 
 It is important to note that in a production environment one would not typically have the subscriber register subscriptions in this manner as we do not want any arbitrary subscriber listening in on the messages being published.  For this reason the connection string should be read-only and the subscription should be registered manually or via a deployment script.  Should the subscription **not** yet exist the creation of the subscription will fail, indicating that the subscription should be registered out-of-band.
 
@@ -419,10 +415,10 @@ It is important to note that in a production environment one would not typically
     "Subscription": "server=.;database=shuttle;user id=sa;password=Pass!000;TrustServerCertificate=True"
   },
   "Shuttle": {
-    "ServiceBus": {
+    "Hopper": {
       "Inbox": {
-        "WorkQueueUri": "azuresq://azure/shuttle-subscriber-work",
-        "ErrorQueueUri": "azuresq://azure/shuttle-error"
+        "WorkTransportUri": "azuresq://azure/shuttle-subscriber-work",
+        "ErrorTransportUri": "azuresq://azure/shuttle-error"
       }
     }
   }
@@ -431,12 +427,12 @@ It is important to note that in a production environment one would not typically
 
 ### MemberRegisteredHandler
 
-> Add a new class called `MemberRegisteredHandler` that implements the `IMessageHandler<MemberRegisteredHandler>` interface as follows:
+> Add a new class called `MemberRegisteredHandler` that implements the `IMessageHandler<MemberRegistered>` interface as follows:
 
 ``` c#
 using System;
 using System.Threading.Tasks;
-using Shuttle.Esb;
+using Shuttle.Hopper;
 using Shuttle.PublishSubscribe.Messages;
 
 namespace Shuttle.PublishSubscribe.Subscriber;

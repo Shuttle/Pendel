@@ -1,5 +1,5 @@
 import { mdiArrowLeft } from '@mdi/js'
-import { useIcon } from '@/.vitepress/theme/composables/icon'
+import { useIcon } from '../.vitepress/theme/composables/icon'
 
 const home = {
     text: 'Recall',

@@ -19,9 +19,8 @@ The URI structure is `amazonsqs://configuration-name/queue-name`.
 ### Programmatic Configuration
 
 ```c#
-services.AddHopper(hopperBuilder =>
-{
-    hopperBuilder.UseAmazonSqs(builder =>
+services.AddHopper()
+    .UseAmazonSqs(builder =>
     {
         var amazonSqsOptions = new AmazonSqsOptions
         {
@@ -37,8 +36,8 @@ services.AddHopper(hopperBuilder =>
 
         builder.AddOptions("local", amazonSqsOptions);
     });
-});
 ```
+
 
 ### JSON Configuration
 

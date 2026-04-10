@@ -65,8 +65,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Shuttle.Contract;
 using Shuttle.Pipelines;
-using Shuttle.Esb;
-using Shuttle.Esb.AzureStorageQueues;
+using Shuttle.Hopper;
+using Shuttle.Hopper.AzureStorageQueues;
 using Shuttle.Idempotence.Messages;
 
 namespace Shuttle.Idempotence.Client;
@@ -80,10 +80,10 @@ internal class Program
 
         var services = new ServiceCollection()
             .AddSingleton<IConfiguration>(configuration)
-            .AddServiceBus(builder =>
+            .AddHopper(options =>
             {
-                configuration.GetSection(ServiceBusOptions.SectionName)
-                    .Bind(builder.Options);
+                configuration.GetSection(HopperOptions.SectionName)
+                    .Bind(options);
             })
             .AddAzureStorageQueues(builder =>
             {
@@ -97,34 +97,38 @@ internal class Program
         Console.WriteLine();
 
         var serviceProvider = services.BuildServiceProvider();
+        var busControl = serviceProvider.GetRequiredService<IBusControl>();
+
+        await busControl.StartAsync();
+
+        var serviceBus = serviceProvider.GetRequiredService<IBus>();
         var pipelineFactory = serviceProvider.GetRequiredService<IPipelineFactory>();
         var messageSender = serviceProvider.GetRequiredService<IMessageSender>();
         var transportMessagePipeline = pipelineFactory.GetPipeline<TransportMessagePipeline>();
 
-        await using (var serviceBus = await serviceProvider.GetRequiredService<IServiceBus>().StartAsync())
+        string userName;
+
+        while (!string.IsNullOrEmpty(userName = Console.ReadLine() ?? string.Empty))
         {
-            string userName;
-
-            while (!string.IsNullOrEmpty(userName = Console.ReadLine() ?? string.Empty))
+            var command = new RegisterMember
             {
-                var command = new RegisterMember
-                {
-                    UserName = userName
-                };
+                UserName = userName
+            };
 
-                await transportMessagePipeline.ExecuteAsync(command, null, null);
+            await transportMessagePipeline.ExecuteAsync(command, null, null);
 
-                var transportMessage = Guard.AgainstNull(transportMessagePipeline.State.GetTransportMessage());
+            var transportMessage = Guard.AgainstNull(transportMessagePipeline.State.GetTransportMessage());
 
-                for (var i = 0; i < 5; i++)
-                {
-                    await messageSender.DispatchAsync(transportMessage); // will be processed only once since message id is the same
-                }
-
-                await serviceBus.SendAsync(command); // will be processed since it has a new message id
-                await serviceBus.SendAsync(command); // will also be processed since it too has a new message id
+            for (var i = 0; i < 5; i++)
+            {
+                await messageSender.DispatchAsync(transportMessage); // will be processed only once since message id is the same
             }
+
+            await serviceBus.SendAsync(command); // will be processed since it has a new message id
+            await serviceBus.SendAsync(command); // will also be processed since it too has a new message id
         }
+
+        await busControl.StopAsync();
     }
 }
 ```
@@ -143,7 +147,7 @@ The next two `Send` operations do not use the `TransportMessage` but rather send
     "azure": "UseDevelopmentStorage=true;"
   },
   "Shuttle": {
-    "ServiceBus": {
+    "Hopper": {
       "MessageRoutes": [
         {
           "Uri": "azuresq://azure/shuttle-server-work",
@@ -160,15 +164,15 @@ The next two `Send` operations do not use the `TransportMessage` but rather send
 }
 ```
 
-This tells the service bus that all messages sent having a type name starting with `Shuttle.Idempotence.Messages` should be sent to endpoint `azuresq://azure/shuttle-server-work`.
+This tells the endpoint that all messages sent having a type name starting with `Shuttle.Idempotence.Messages` should be sent to endpoint `azuresq://azure/shuttle-server-work`.
 
 ## Server
 
 > Add a new `Console Application` to the solution called `Shuttle.Idempotence.Server`.
 
-> Install the `Shuttle.Esb.AzureStorageQueues` nuget package.
+> Install the `Shuttle.Hopper.AzureStorageQueues` nuget package.
 
-This will provide access to the Azure Storage Queues `IQueue` implementation and also include the required dependencies.
+This will provide access to the Azure Storage Queues `ITransport` implementation and also include the required dependencies.
 
 > Install the `Microsoft.Extensions.Hosting` nuget package.
 
@@ -178,7 +182,7 @@ This allows a console application to be hosted using the .NET generic host.
 
 This will provide the ability to read the `appsettings.json` file.
 
-> Install the `Shuttle.Esb.Sql.Idempotence` package. 
+> Install the `Shuttle.Hopper.SqlServer.Idempotence` package. 
 
 We will also have access to the Sql implementation of the `IIdempotenceService`.
 
@@ -201,10 +205,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Shuttle.Contract;
 using Shuttle.Data;
-using Shuttle.Esb;
-using Shuttle.Esb.AzureStorageQueues;
-using Shuttle.Esb.Idempotence;
-using Shuttle.Esb.Sql.Idempotence;
+using Shuttle.Hopper;
+using Shuttle.Hopper.AzureStorageQueues;
 
 namespace Shuttle.Idempotence.Server;
 
@@ -215,21 +217,19 @@ public class Program
         DbProviderFactories.RegisterFactory("Microsoft.Data.SqlClient", SqlClientFactory.Instance);
 
         await Host.CreateDefaultBuilder()
-            .ConfigureServices(services =>
+            .ConfigureServices((hostContext, services) =>
             {
-                var configuration = new ConfigurationBuilder()
-                    .AddJsonFile("appsettings.json").Build();
+                var configuration = hostContext.Configuration;
 
                 services
-                    .AddSingleton<IConfiguration>(configuration)
                     .AddDataAccess(builder =>
                     {
                         builder.AddConnectionString("Idempotence", "Microsoft.Data.SqlClient");
                     })
-                    .AddServiceBus(builder =>
+                    .AddHopper(options =>
                     {
-                        configuration.GetSection(ServiceBusOptions.SectionName)
-                            .Bind(builder.Options);
+                        configuration.GetSection(HopperOptions.SectionName)
+                            .Bind(options);
                     })
                     .AddIdempotence()
                     .AddSqlIdempotence(builder =>
@@ -262,7 +262,7 @@ docker run -d --name sql -h sql -e "ACCEPT_EULA=Y" -e "SA_PASSWORD=Pass!000" -e 
 
 > Create a new database called **Shuttle**
 
-The implementation will create any required database structures on startup.  If you need to execute the creation scripts manually, please reference the [source code](https://github.com/Shuttle/Shuttle.Esb.Sql.Idempotence).
+The implementation will create any required database structures on startup.  If you need to execute the creation scripts manually, please reference the [source code](https://github.com/Shuttle/Shuttle.Hopper.SqlServer.Idempotence).
 
 ### Server configuration file
 
@@ -275,11 +275,11 @@ The implementation will create any required database structures on startup.  If 
     "Idempotence": "server=.;database=shuttle;user id=sa;password=Pass!000;TrustServerCertificate=True"
   },
   "Shuttle": {
-    "ServiceBus": {
+    "Hopper": {
       "Inbox": {
-        "WorkQueueUri": "azuresq://azure/shuttle-server-work",
-        "DeferredQueueUri": "azuresq://azure/shuttle-server-deferre",
-        "ErrorQueueUri": "azuresq://azure/shuttle-error"
+        "WorkTransportUri": "azuresq://azure/shuttle-server-work",
+        "DeferredTransportUri": "azuresq://azure/shuttle-server-deferred",
+        "ErrorTransportUri": "azuresq://azure/shuttle-error"
       }
     }
   }
@@ -293,7 +293,7 @@ The implementation will create any required database structures on startup.  If 
 ``` c#
 using System;
 using System.Threading.Tasks;
-using Shuttle.Esb;
+using Shuttle.Hopper;
 using Shuttle.Idempotence.Messages;
 
 namespace Shuttle.Idempotence.Server;
@@ -310,6 +310,7 @@ public class RegisterMemberHandler : IMessageHandler<RegisterMember>
     }
 }
 ```
+
 
 This will write out some information to the console window.
 

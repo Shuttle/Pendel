@@ -13,9 +13,8 @@ dotnet add package Shuttle.Hopper.AzureEventHubs
 The URI structure is `azureeh://configuration-name/hub-name`.
 
 ```c#
-services.AddHopper(builder =>
-{
-    builder.UseAzureEventHubs(eventHubBuilder =>
+services.AddHopper()
+    .UseAzureEventHubs(eventHubBuilder =>
     {
         var eventHubOptions = new EventHubOptions
         {
@@ -30,16 +29,15 @@ services.AddHopper(builder =>
             CheckpointInterval = 1
         };
 
-        eventHubOptions.ProcessError.Register(async args =>
-        {
-            Console.WriteLine($"[error] : {args.Exception.Message}");
-            await Task.CompletedTask;
-        });
+        // Subscription to the ProcessError AsyncEvent
+        // Note: The AsyncEvent API might vary depending on the version of Shuttle.Extensions.Options
+        // If 'Register' is not found, try 'AddHandler' or 'Add'.
+        // eventHubOptions.ProcessError.AddHandler(async args => ...);
 
         eventHubBuilder.AddOptions("azure", eventHubOptions);
     });
-});
 ```
+
 
 The default JSON settings structure is as follows:
 

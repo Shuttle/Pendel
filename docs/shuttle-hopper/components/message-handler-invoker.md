@@ -1,18 +1,18 @@
 # Message Handler Invoker
 
-An implementation of the `IMessageHandlerInvoker` interface is used to invoke a mesage handler for the given message in the `PipelineEvent`.
+An implementation of the `IMessageHandlerInvoker` interface is used to invoke a message handler for the given message in the `HandleMessage` pipeline stage.
 
 If you do not specify your own implementation of the `IMessageHandlerInvoker` the default `MessageHandlerInvoker` will be used.  This invoker makes use of the `IServiceProvider` to create the required message handler.
 
 ## Methods
 
-### Invoke
+### InvokeAsync
 
 ``` c#
-ValueTask<bool> InvokeAsync(IPipelineContext<OnHandleMessage> pipelineContext);
+ValueTask<bool> InvokeAsync(IPipelineContext<HandleMessage> pipelineContext, CancellationToken cancellationToken = default);
 ```
 
-Invoke the message handler using the data contained in the given `PipelineEvent`.
+Invoke the message handler using the data contained in the given `pipelineContext`.
 
 # MessageHandlerInvoker
 
@@ -20,4 +20,4 @@ Type `MessageHandlerInvoker` implements the `IMessageHandlerInvoker` interface a
 
 If no delegate or handler can be found `false` is returned.
 
-The `IServiceProvder` is used to obtain a handler.
+The `IServiceProvider` is used to obtain a handler.

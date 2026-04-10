@@ -20,18 +20,17 @@ Currently only the `Microsoft.Data.SqlClient` provider is supported but this can
 The URI structure is `sqlserver://configuration-name/queue-name`.
 
 ```c#
-services.AddHopper(builder =>
-{
-    builder.UseSqlServerQueue(sqlServerQueueBuilder =>
+services.AddHopper()
+    .UseSqlServerQueue(builder =>
     {
-        sqlServerQueueBuilder.AddOptions("shuttle", new SqlServerQueueOptions
+        builder.AddOptions("shuttle", new SqlServerQueueOptions
         {
             ConnectionString = "server=.;database=shuttle;user id=sa;password=Pass!000;TrustServerCertificate=true",
             Schema = "dbo"
         });
     });
-});
 ```
+
 
 The default JSON settings structure is as follows:
 

@@ -5,7 +5,7 @@
 ### Key
 
 ``` c#
-public string Key { get; public set; }
+public string Key { get; set; }
 ```
 
 The unique key of the header.
@@ -13,7 +13,7 @@ The unique key of the header.
 ### Value
 
 ``` c#
-public string Value { get; public set; }
+public string Value { get; set; }
 ```
 
-The value that should be used.
+The value of the header.

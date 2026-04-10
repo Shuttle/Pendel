@@ -123,8 +123,8 @@ This will provide the ability to read the `appsettings.json` file.
 ```c#
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Shuttle.Esb;
-using Shuttle.Esb.Kafka;
+using Shuttle.Hopper;
+using Shuttle.Hopper.Kafka;
 using Shuttle.StreamProcessing.Messages;
 
 namespace Shuttle.StreamProcessing.Producer;
@@ -138,12 +138,12 @@ internal class Program
 
         var services = new ServiceCollection()
             .AddSingleton<IConfiguration>(configuration)
-            .AddServiceBus(builder =>
+            .AddHopper(options =>
             {
-                configuration.GetSection(ServiceBusOptions.SectionName)
-                    .Bind(builder.Options);
+                configuration.GetSection(HopperOptions.SectionName)
+                    .Bind(options);
             })
-            .AddKafka(builder =>
+            .UseKafka(builder =>
             {
                 builder.AddOptions("local", new()
                 {
@@ -162,33 +162,38 @@ internal class Program
         var random = new Random();
         decimal temperature = random.Next(-5, 30);
 
-        await using (var serviceBus = await services.BuildServiceProvider()
-                         .GetRequiredService<IServiceBus>().StartAsync())
+        var serviceProvider = services.BuildServiceProvider();
+        var busControl = serviceProvider.GetRequiredService<IBusControl>();
+
+        await busControl.StartAsync();
+
+        var serviceBus = serviceProvider.GetRequiredService<IBus>();
+
+        string name;
+
+        while (!string.IsNullOrEmpty(name = Console.ReadLine() ?? string.Empty))
         {
-            string name;
-
-            while (!string.IsNullOrEmpty(name = Console.ReadLine() ?? string.Empty))
+            for (var minute = 0; minute < 1440; minute++)
             {
-                for (var minute = 0; minute < 1440; minute++)
+                await serviceBus.SendAsync(new TemperatureRead
                 {
-                    await serviceBus.SendAsync(new TemperatureRead
-                    {
-                        Name = name,
-                        Minute = minute,
-                        Celsius = temperature
-                    });
+                    Name = name,
+                    Minute = minute,
+                    Celsius = temperature
+                });
 
-                    if (temperature > -5 && (random.Next(0, 100) < 50 || temperature > 29))
-                    {
-                        temperature -= random.Next(0, 100) / 100m;
-                    }
-                    else
-                    {
-                        temperature += random.Next(0, 100) / 100m;
-                    }
+                if (temperature > -5 && (random.Next(0, 100) < 50 || temperature > 29))
+                {
+                    temperature -= random.Next(0, 100) / 100m;
+                }
+                else
+                {
+                    temperature += random.Next(0, 100) / 100m;
                 }
             }
         }
+
+        await busControl.StopAsync();
     }
 }
 ```
@@ -200,7 +205,7 @@ internal class Program
 ```json
 {
   "Shuttle": {
-    "ServiceBus": {
+    "Hopper": {
       "MessageRoutes": [
         {
           "Uri": "kafka://local/stream-consumer-work",
@@ -217,15 +222,15 @@ internal class Program
 }
 ```
 
-This tells the service bus that all messages sent having a type name starting with `Shuttle.StreamProcessing.Messages` should be routed to endpoint `kafka://local/stream-consumer-work`.
+This tells the endpoint that all messages sent having a type name starting with `Shuttle.StreamProcessing.Messages` should be routed to endpoint `kafka://local/stream-consumer-work`.
 
 ## Consumer
 
 > Add a new `Console Application` to the solution called `Shuttle.StreamProcessing.Consumer`.
 
-> Install the `Shuttle.Esb.Kafka` nuget package.
+> Install the `Shuttle.Hopper.Kafka` nuget package.
 
-This will provide access to the Kafka `IQueue` implementation and also include the required dependencies.
+This will provide access to the Kafka `ITransport` implementation and also include the required dependencies.
 
 > Install the `Microsoft.Extensions.Hosting` nuget package.
 
@@ -245,8 +250,8 @@ This will provide the ability to read the `appsettings.json` file.
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Shuttle.Esb;
-using Shuttle.Esb.Kafka;
+using Shuttle.Hopper;
+using Shuttle.Hopper.Kafka;
 
 namespace Shuttle.StreamProcessing.Consumer;
 
@@ -255,19 +260,17 @@ internal class Program
     private static async Task Main()
     {
         await Host.CreateDefaultBuilder()
-            .ConfigureServices(services =>
+            .ConfigureServices((hostContext, services) =>
             {
-                var configuration = new ConfigurationBuilder()
-                    .AddJsonFile("appsettings.json").Build();
+                var configuration = hostContext.Configuration;
 
                 services
-                    .AddSingleton<IConfiguration>(configuration)
-                    .AddServiceBus(builder =>
+                    .AddHopper(options =>
                     {
-                        configuration.GetSection(ServiceBusOptions.SectionName)
-                            .Bind(builder.Options);
+                        configuration.GetSection(HopperOptions.SectionName)
+                            .Bind(options);
                     })
-                    .AddKafka(builder =>
+                    .UseKafka(builder =>
                     {
                         builder.AddOptions("local", new()
                         {
@@ -293,9 +296,9 @@ internal class Program
 ```json
 {
   "Shuttle": {
-    "ServiceBus": {
+    "Hopper": {
       "Inbox": {
-        "WorkQueueUri": "kafka://local/stream-consumer-work"
+        "WorkTransportUri": "kafka://local/stream-consumer-work"
       }
     }
   }
@@ -304,10 +307,10 @@ internal class Program
 
 ### TemperatureReadHandler
 
-> Add a new class called `TemperatureReadHandler` that implements the `IMessageHandler<TemperatureReadHandler>` interface as follows:
+> Add a new class called `TemperatureReadHandler` that implements the `IMessageHandler<TemperatureRead>` interface as follows:
 
 ``` c#
-using Shuttle.Esb;
+using Shuttle.Hopper;
 using Shuttle.StreamProcessing.Messages;
 
 namespace Shuttle.StreamProcessing.Consumer;
@@ -322,6 +325,7 @@ public class TemperatureReadHandler : IMessageHandler<TemperatureRead>
     }
 }
 ```
+
 
 ## Run
 

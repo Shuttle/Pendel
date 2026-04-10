@@ -64,8 +64,8 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Shuttle.Deferred.Messages;
-using Shuttle.Esb;
-using Shuttle.Esb.AzureStorageQueues;
+using Shuttle.Hopper;
+using Shuttle.Hopper.AzureStorageQueues;
 
 namespace Shuttle.Deferred.Client;
 
@@ -78,10 +78,10 @@ internal class Program
 
         var services = new ServiceCollection()
             .AddSingleton<IConfiguration>(configuration)
-            .AddServiceBus(builder =>
+            .AddHopper(options =>
             {
-                configuration.GetSection(ServiceBusOptions.SectionName)
-                    .Bind(builder.Options);
+                configuration.GetSection(HopperOptions.SectionName)
+                    .Bind(options);
             })
             .AddAzureStorageQueues(builder =>
             {
@@ -94,19 +94,24 @@ internal class Program
         Console.WriteLine("Type some characters and then press [enter] to submit; an empty line submission stops execution:");
         Console.WriteLine();
 
-        await using (var serviceBus = await services.BuildServiceProvider()
-                         .GetRequiredService<IServiceBus>().StartAsync())
-        {
-            string userName;
+        var serviceProvider = services.BuildServiceProvider();
+        var busControl = serviceProvider.GetRequiredService<IBusControl>();
 
-            while (!string.IsNullOrEmpty(userName = Console.ReadLine() ?? string.Empty))
+        await busControl.StartAsync();
+
+        var serviceBus = serviceProvider.GetRequiredService<IBus>();
+
+        string userName;
+
+        while (!string.IsNullOrEmpty(userName = Console.ReadLine() ?? string.Empty))
+        {
+            await serviceBus.SendAsync(new RegisterMember
             {
-                await serviceBus.SendAsync(new RegisterMember
-                {
-                    UserName = userName
-                }, builder => builder.Defer(DateTime.Now.AddSeconds(5)));
-            }
+                UserName = userName
+            }, builder => builder.Defer(DateTime.Now.AddSeconds(5)));
         }
+
+        await busControl.StopAsync();
     }
 }
 ```
@@ -120,7 +125,7 @@ The message sent will have its `IgnoreTilleDate` (on the `TransportMessage`) set
 ```json
 {
   "Shuttle": {
-    "ServiceBus": {
+    "Hopper": {
       "MessageRoutes": [
         {
           "Uri": "azuresq://azure/shuttle-server-work",
@@ -137,15 +142,15 @@ The message sent will have its `IgnoreTilleDate` (on the `TransportMessage`) set
 }
 ```
 
-This tells the service bus that all messages sent having a type name starting with `Shuttle.Deferred.Messages` should be sent to endpoint `azuresq://azure/shuttle-server-work`.
+This tells the endpoint that all messages sent having a type name starting with `Shuttle.Deferred.Messages` should be sent to endpoint `azuresq://azure/shuttle-server-work`.
 
 ## Server
 
 > Add a new `Console Application` to the solution called `Shuttle.Deferred.Server`.
 
-> Install the `Shuttle.Esb.AzureStorageQueues` nuget package.
+> Install the `Shuttle.Hopper.AzureStorageQueues` nuget package.
 
-This will provide access to the Azure Storage Queues `IQueue` implementation and also include the required dependencies.
+This will provide access to the Azure Storage Queues `ITransport` implementation and also include the required dependencies.
 
 > Install the `Microsoft.Extensions.Hosting` nuget package.
 
@@ -166,8 +171,8 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Shuttle.Esb;
-using Shuttle.Esb.AzureStorageQueues;
+using Shuttle.Hopper;
+using Shuttle.Hopper.AzureStorageQueues;
 
 namespace Shuttle.Deferred.Server;
 
@@ -176,18 +181,15 @@ public class Programs
     public static async Task Main()
     {
         await Host.CreateDefaultBuilder()
-            .ConfigureServices(services =>
+            .ConfigureServices((hostContext, services) =>
             {
-                var configuration = new ConfigurationBuilder()
-                    .AddJsonFile("appsettings.json").Build();
+                var configuration = hostContext.Configuration;
 
                 services
-                    .AddSingleton<IConfiguration>(configuration)
-                    .AddHostedService<DeferredHostedService>()
-                    .AddServiceBus(builder =>
+                    .AddHopper(options =>
                     {
-                        configuration.GetSection(ServiceBusOptions.SectionName)
-                            .Bind(builder.Options);
+                        configuration.GetSection(HopperOptions.SectionName)
+                            .Bind(options);
                     })
                     .AddAzureStorageQueues(builder =>
                     {
@@ -213,11 +215,11 @@ public class Programs
     "azure": "UseDevelopmentStorage=true;"
   },
   "Shuttle": {
-    "ServiceBus": {
+    "Hopper": {
       "Inbox": {
-        "WorkQueueUri": "azuresq://azure/shuttle-server-work",
-        "DeferredQueueUri": "azuresq://azure/shuttle-server-deferred",
-        "ErrorQueueUri": "azuresq://azure/shuttle-error"
+        "WorkTransportUri": "azuresq://azure/shuttle-server-work",
+        "DeferredTransportUri": "azuresq://azure/shuttle-server-deferred",
+        "ErrorTransportUri": "azuresq://azure/shuttle-error"
       }
     }
   }
@@ -232,7 +234,7 @@ public class Programs
 using System;
 using System.Threading.Tasks;
 using Shuttle.Deferred.Messages;
-using Shuttle.Esb;
+using Shuttle.Hopper;
 
 namespace Shuttle.Deferred.Server;
 
@@ -246,6 +248,7 @@ public class RegisterMemberHandler : IMessageHandler<RegisterMember>
     }
 }
 ```
+
 
 ## Run
 

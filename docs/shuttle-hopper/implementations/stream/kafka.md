@@ -21,9 +21,8 @@ docker compose up -d
 The URI structure is `kafka://configuration-name/topic-name`.
 
 ```c#
-services.AddHopper(builder =>
-{
-    builder.UseKafka(kafkaBuilder =>
+services.AddHopper()
+    .UseKafka(builder =>
     {
         var kafkaOptions = new KafkaOptions
         {
@@ -43,17 +42,15 @@ services.AddHopper(builder =>
             EnableIdempotence = true
         };
 
-        kafkaBuilder.AddOptions("local", kafkaOptions);
+        builder.AddOptions("local", kafkaOptions);
     });
-});
 ```
 
 The documentation for the `Confluent.Kafka` `ConsumerConfig` and `ProducerConfig` can be consulted for specific options. If there are any options that are not exposed via the `KafkaOptions` class, they can be set by providing the relevant configuration object:
 
 ```c#
-services.AddHopper(builder =>
-{
-    builder.UseKafka(kafkaBuilder =>
+services.AddHopper()
+    .UseKafka(builder =>
     {
         var kafkaOptions = new KafkaOptions
         {
@@ -69,9 +66,8 @@ services.AddHopper(builder =>
             }
         };
 
-        kafkaBuilder.AddOptions("local", kafkaOptions);
+        builder.AddOptions("local", kafkaOptions);
     });
-});
 ```
 
 The default JSON settings structure is as follows:

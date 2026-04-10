@@ -17,11 +17,10 @@ If you need to install RabbitMQ you can <a target='_blank' href='https://www.rab
 The URI structure is `rabbitmq://configuration-name/queue-name`.
 
 ```c#
-services.AddHopper(builder =>
-{
-    builder.UseRabbitMQ(rabbitMQBuilder =>
+services.AddHopper()
+    .UseRabbitMQ(builder =>
     {
-        rabbitMQBuilder.AddOptions("local", new RabbitMQOptions
+        builder.AddOptions("local", new RabbitMQOptions
         {
             ConnectionFactory = new RabbitMQ.Client.ConnectionFactory(),
             Host = "127.0.0.1",
@@ -39,8 +38,8 @@ services.AddHopper(builder =>
             Durable = true
         });
     });
-});
 ```
+
 
 The default JSON settings structure is as follows:
 
