@@ -1,8 +1,11 @@
+import { mdiArrowLeft } from '@mdi/js'
+import { useIcon } from '@/.vitepress/theme/composables/icon'
+
 const home = {
-    text: '',
+    text: 'Hopper',
     items: [
         {
-            text: 'Shuttle.Hopper',
+            text: `${useIcon(mdiArrowLeft)} Back`,
             link: '/shuttle-hopper/home'
         },
     ]
@@ -257,7 +260,7 @@ const options = [
 
 const esb = [
     {
-        text: 'Service Bus',
+        text: 'Hopper',
         items: [
             {
                 text: 'Concepts',

@@ -1,8 +1,11 @@
+import { mdiArrowLeft } from '@mdi/js'
+import { useIcon } from '@/.vitepress/theme/composables/icon'
+
 const home = {
-    text: '',
+    text: 'Recall',
     items: [
         {
-            text: 'Shuttle.Recall',
+            text: `${useIcon(mdiArrowLeft)} Back`,
             link: '/shuttle-recall/home'
         },
     ]

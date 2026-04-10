@@ -1,0 +1,1 @@
+export const useIcon = (path: string) => `<svg viewBox="0 0 24 24" style="width:1.25rem;height:1.25rem;fill:currentColor;display:inline-block;vertical-align:text-bottom;margin-right:4px;"><path d="${path}" /></svg>`

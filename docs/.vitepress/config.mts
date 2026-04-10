@@ -1,11 +1,12 @@
 import { default as access } from "../shuttle-access/sidebar";
 import { default as core } from "../shuttle/sidebar";
 import { default as extensions } from "../shuttle-extensions/sidebar";
-import { default as esb } from "../shuttle-hopper/sidebar";
+import { default as hopper } from "../shuttle-hopper/sidebar";
 import { default as pigeon } from "../shuttle-pigeon/sidebar";
 import { default as recall } from "../shuttle-recall/sidebar";
 import { defineConfig } from "vitepress";
 import tailwindcss from "@tailwindcss/vite";
+import { fileURLToPath, URL } from 'node:url'
 
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
@@ -141,12 +142,20 @@ export default defineConfig({
       ...access,
       ...core,
       ...extensions,
-      ...esb,
+      ...hopper,
       ...pigeon,
       ...recall,
     },
   },
   vite: {
+    resolve: {
+      alias: [
+        {
+          find: '@',
+          replacement: fileURLToPath(new URL('../', import.meta.url))
+        }
+      ]
+    },
     plugins: [tailwindcss()],
   },
 });
