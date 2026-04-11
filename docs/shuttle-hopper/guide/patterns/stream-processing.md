@@ -1,7 +1,7 @@
 # Stream Processing
 
 ::: info
-Remember that you can download the samples from the <a href="https://github.com/Shuttle/Shuttle.Esb.Samples" target="_blank">GitHub repository</a>.
+Remember that you can download the samples from the <a href="https://github.com/Shuttle/Shuttle.Hopper.Samples" target="_blank">GitHub repository</a>.
 :::
 
 This sample makes use of [Kafka](https://kafka.apache.org/) for the streams.
@@ -72,7 +72,7 @@ Once you have opened the `Shuttle.StreamProcessing.sln` solution in Visual Studi
 
 ## Implementation
 
-In order to get any processing done in Shuttle.Esb a message will need to be produced and sent to a stream, usually represented by a topic, for processing.
+In order to get any processing done in Shuttle.Hopper a message will need to be produced and sent to a stream, usually represented by a topic, for processing.
 
 In this guide we'll create the following projects:
 
@@ -106,9 +106,9 @@ namespace Shuttle.StreamProcessing.Messages
 
 > Add a new `Console Application` to the solution called `Shuttle.StreamProcessing.Producer`.
 
-> Install the `Shuttle.Esb.Kafka` nuget package.
+> Install the `Shuttle.Hopper.Kafka` nuget package.
 
-This will provide access to the Kafka `IQueue` implementation and also include the required dependencies.
+This will provide access to the Kafka `ITransport` implementation and also include the required dependencies.
 
 > Install the `Microsoft.Extensions.Configuration.Json` nuget package.
 
@@ -145,14 +145,14 @@ internal class Program
             })
             .UseKafka(builder =>
             {
-                builder.AddOptions("local", new()
+                builder.Configure("local", options =>
                 {
-                    BootstrapServers = "localhost:9092",
-                    EnableAutoCommit = true,
-                    EnableAutoOffsetStore = true,
-                    NumPartitions = 1,
-                    UseCancellationToken = false,
-                    ConsumeTimeout = TimeSpan.FromMilliseconds(25)
+                    options.BootstrapServers = "localhost:9092";
+                    options.EnableAutoCommit = true;
+                    options.EnableAutoOffsetStore = true;
+                    options.NumPartitions = 1;
+                    options.UseCancellationToken = false;
+                    options.ConsumeTimeout = TimeSpan.FromMilliseconds(25);
                 });
             });
 
@@ -167,7 +167,7 @@ internal class Program
 
         await busControl.StartAsync();
 
-        var serviceBus = serviceProvider.GetRequiredService<IBus>();
+        var bus = serviceProvider.GetRequiredService<IBus>();
 
         string name;
 
@@ -175,7 +175,7 @@ internal class Program
         {
             for (var minute = 0; minute < 1440; minute++)
             {
-                await serviceBus.SendAsync(new TemperatureRead
+                await bus.SendAsync(new TemperatureRead
                 {
                     Name = name,
                     Minute = minute,
@@ -272,14 +272,14 @@ internal class Program
                     })
                     .UseKafka(builder =>
                     {
-                        builder.AddOptions("local", new()
+                        builder.Configure("local", options =>
                         {
-                            BootstrapServers = "localhost:9092",
-                            EnableAutoCommit = true,
-                            EnableAutoOffsetStore = true,
-                            NumPartitions = 1,
-                            UseCancellationToken = false,
-                            ConsumeTimeout = TimeSpan.FromMilliseconds(25)
+                            options.BootstrapServers = "localhost:9092";
+                            options.EnableAutoCommit = true;
+                            options.EnableAutoOffsetStore = true;
+                            options.NumPartitions = 1;
+                            options.UseCancellationToken = false;
+                            options.ConsumeTimeout = TimeSpan.FromMilliseconds(25);
                         });
                     });
             })
@@ -315,9 +315,9 @@ using Shuttle.StreamProcessing.Messages;
 
 namespace Shuttle.StreamProcessing.Consumer;
 
-public class TemperatureReadHandler : IMessageHandler<TemperatureRead>
+public class TemperatureReadHandler : IContextMessageHandler<TemperatureRead>
 {
-    public async Task ProcessMessageAsync(IHandlerContext<TemperatureRead> context)
+    public async Task HandleAsync(IHandlerContext<TemperatureRead> context, CancellationToken cancellationToken = default)
     {
         Console.WriteLine($"[TEMPERATURE READ] : name = '{context.Message.Name}' / minute = {context.Message.Minute} / celsius = {context.Message.Celsius:F}");
 

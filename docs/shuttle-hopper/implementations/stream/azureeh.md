@@ -16,25 +16,18 @@ The URI structure is `azureeh://configuration-name/hub-name`.
 services.AddHopper()
     .UseAzureEventHubs(eventHubBuilder =>
     {
-        var eventHubOptions = new EventHubOptions
+        eventHubBuilder.Configure("azure", options =>
         {
-            ConnectionString = "Endpoint=sb://{hub-namespace}.servicebus.windows.net/;SharedAccessKeyName={key-name};SharedAccessKey={key};EntityPath={hub-name}",
-            ProcessEvents = true,
-            ConsumerGroup = "$Default",
-            BlobStorageConnectionString = "{BlobStorageConnectionString}",
-            BlobContainerName = "{BlobContainerName}",
-            OperationTimeout = TimeSpan.FromSeconds(30),
-            ConsumeTimeout = TimeSpan.FromSeconds(30),
-            DefaultStartingPosition = EventPosition.Latest,
-            CheckpointInterval = 1
-        };
-
-        // Subscription to the ProcessError AsyncEvent
-        // Note: The AsyncEvent API might vary depending on the version of Shuttle.Extensions.Options
-        // If 'Register' is not found, try 'AddHandler' or 'Add'.
-        // eventHubOptions.ProcessError.AddHandler(async args => ...);
-
-        eventHubBuilder.AddOptions("azure", eventHubOptions);
+            options.ConnectionString = "Endpoint=sb://{hub-namespace}.servicebus.windows.net/;SharedAccessKeyName={key-name};SharedAccessKey={key};EntityPath={hub-name}";
+            options.ProcessEvents = true;
+            options.ConsumerGroup = "$Default";
+            options.BlobStorageConnectionString = "{BlobStorageConnectionString}";
+            options.BlobContainerName = "{BlobContainerName}";
+            options.OperationTimeout = TimeSpan.FromSeconds(30);
+            options.ConsumeTimeout = TimeSpan.FromSeconds(30);
+            options.DefaultStartingPosition = EventPosition.Latest;
+            options.CheckpointInterval = 1;
+        });
     });
 ```
 

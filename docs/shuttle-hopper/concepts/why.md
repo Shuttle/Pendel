@@ -24,11 +24,9 @@ The following provides a quick overview of some service bus concepts as implemen
 
 The basic parts of Shuttle.Hopper consist of:
 
-* Messages
-* Transports (Queues / Streams)
-* Service bus (`IServiceBus`)
-
-Every service bus instance is associated with, and therefore processes, only one input transport.  This is the inbox.  All messages received in the inbox are processed by the associated service bus instance.
+* **Messages**: Plain data transfer objects (POCOs).
+* **Queue and stream transports**: Messages are sent to and processed from these transports and the implementation implements the relevant transport interface.
+* **Service bus (`IBus`): The bus instance is associated with, and therefore processes, only one input transport.  This is the inbox.
 
 ## Messages
 
@@ -76,9 +74,9 @@ public class Program
 
                 services.UseAzureStorageQueues(builder =>
                 {
-                    builder.AddOptions("azure", new AzureStorageQueueOptions
+                    builder.Configure("azure", options =>
                     {
-                        ConnectionString = "UseDevelopmentStorage=true;"
+                        options.ConnectionString = "UseDevelopmentStorage=true;";
                     });
                 });
             })
@@ -88,7 +86,7 @@ public class Program
 }
 ```
 
-A `ServiceBusHostedService` instance is created and started on application startup and disposed on exit.  A service bus can be hosted in any type of application but the most typical scenario is to host them as services/units.  Although you _can_ write your own service to host your service bus it is not a requirement since you may want to make use of the [.NET Generic Host](https://docs.microsoft.com/en-us/dotnet/core/extensions/generic-host).
+A `BusHostedService` implementation will start the bus on application startup and dispose on exit when the `AutoStart` property on the `HopperOptions` is set to `true`.
 
 ## Message Types
 
@@ -105,7 +103,7 @@ There are situations where we need to _start_ something off.  Let's take the cas
 So from the client code:
 
 ``` c#
-await serviceBus.SendAsync(new CreateOrder
+await bus.SendAsync(new CreateOrder
     {
         Name = "CustomerName",
         Product = "ProductXYZ"
@@ -117,7 +115,7 @@ The call would fail if there is nowhere to send the message.
 We could publish an event such as **OrderReceived** and our ordering service could subscribe to the event.
 
 ```c#
-await serviceBus.PublishAsync(new OrderReceived
+await bus.PublishAsync(new OrderReceived
     {
         Name = "ClientName",
         Product = "ProductXYZ"
@@ -135,7 +133,7 @@ In some situations an event will not be able to relay the intent of any particul
 In this case the e-mail system is responsible for sending e-mails.  Any system that would like to send a mail will need to decide when to do so.  Therefore, the ordering service would send a *command* to the e-mail service, e.g.:
 
 ```c#
-await serviceBus.SendAsync(new SendMail
+await bus.SendAsync(new SendMail
     {
         To = "manager@ordercompany.co.za",
         From = "orderservice@ordercompany.co.za",

@@ -1,6 +1,6 @@
 # Idempotence
 
-This sample makes use of [Shuttle.Esb.AzureStorageQueues](https://github.com/Shuttle/Shuttle.Esb.AzureStorageQueues) for the message queues.  Local Azure Storage Queues should be provided by [Azurite](https://learn.microsoft.com/en-us/azure/storage/common/storage-use-azurite).
+This sample makes use of [Shuttle.Hopper.AzureStorageQueues](https://github.com/Shuttle/Shuttle.Hopper.AzureStorageQueues) for the message transports.  Local Azure Storage Queues should be provided by [Azurite](https://learn.microsoft.com/en-us/azure/storage/common/storage-use-azurite).
 
 Once you have opened the `Shuttle.Idempotence.sln` solution in Visual Studio set the following projects as startup projects:
 
@@ -44,9 +44,9 @@ public class RegisterMember
 
 > Add a new `Console Application` to the solution called `Shuttle.Idempotence.Client`.
 
-> Install the `Shuttle.Esb.AzureStorageQueues` nuget package.
+> Install the `Shuttle.Hopper.AzureStorageQueues` nuget package.
 
-This will provide access to the Azure Storage Queues `IQueue` implementation and also include the required dependencies.
+This will provide access to the Azure Storage Queues `ITransport` implementation and also include the required dependencies.
 
 > Install the `Microsoft.Extensions.Configuration.Json` nuget package.
 
@@ -85,11 +85,11 @@ internal class Program
                 configuration.GetSection(HopperOptions.SectionName)
                     .Bind(options);
             })
-            .AddAzureStorageQueues(builder =>
+            .UseAzureStorageQueues(builder =>
             {
-                builder.AddOptions("azure", new()
+                builder.Configure("azure", options =>
                 {
-                    ConnectionString = Guard.AgainstNullOrEmptyString(configuration.GetConnectionString("azure"))
+                    options.ConnectionString = Guard.AgainstNullOrEmptyString(configuration.GetConnectionString("azure"));
                 });
             });
 
@@ -101,7 +101,7 @@ internal class Program
 
         await busControl.StartAsync();
 
-        var serviceBus = serviceProvider.GetRequiredService<IBus>();
+        var bus = serviceProvider.GetRequiredService<IBus>();
         var pipelineFactory = serviceProvider.GetRequiredService<IPipelineFactory>();
         var messageSender = serviceProvider.GetRequiredService<IMessageSender>();
         var transportMessagePipeline = pipelineFactory.GetPipeline<TransportMessagePipeline>();
@@ -115,7 +115,7 @@ internal class Program
                 UserName = userName
             };
 
-            await transportMessagePipeline.ExecuteAsync(command, null, null);
+            await transportMessagePipeline.ExecuteAsync(command, null);
 
             var transportMessage = Guard.AgainstNull(transportMessagePipeline.State.GetTransportMessage());
 
@@ -124,8 +124,8 @@ internal class Program
                 await messageSender.DispatchAsync(transportMessage); // will be processed only once since message id is the same
             }
 
-            await serviceBus.SendAsync(command); // will be processed since it has a new message id
-            await serviceBus.SendAsync(command); // will also be processed since it too has a new message id
+            await bus.SendAsync(command); // will be processed since it has a new message id
+            await bus.SendAsync(command); // will also be processed since it too has a new message id
         }
 
         await busControl.StopAsync();
@@ -238,11 +238,11 @@ public class Program
 
                         builder.UseSqlServer();
                     })
-                    .AddAzureStorageQueues(builder =>
+                    .UseAzureStorageQueues(builder =>
                     {
-                        builder.AddOptions("azure", new()
+                        builder.Configure("azure", options =>
                         {
-                            ConnectionString = Guard.AgainstNullOrEmptyString(configuration.GetConnectionString("azure"))
+                            options.ConnectionString = Guard.AgainstNullOrEmptyString(configuration.GetConnectionString("azure"));
                         });
                     });
             })
@@ -298,9 +298,9 @@ using Shuttle.Idempotence.Messages;
 
 namespace Shuttle.Idempotence.Server;
 
-public class RegisterMemberHandler : IMessageHandler<RegisterMember>
+public class RegisterMemberHandler : IContextMessageHandler<RegisterMember>
 {
-    public async Task ProcessMessageAsync(IHandlerContext<RegisterMember> context)
+    public async Task HandleAsync(IHandlerContext<RegisterMember> context, CancellationToken cancellationToken = default)
     {
         Console.WriteLine();
         Console.WriteLine($"[MEMBER REGISTERED] : user name = '{context.Message.UserName}' / message id = '{context.TransportMessage.MessageId}'");

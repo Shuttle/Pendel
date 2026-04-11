@@ -35,9 +35,9 @@ internal class Program
                     })
                     .UseAzureStorageQueues(builder =>
                     {
-                        builder.AddOptions("azure", new AzureStorageQueueOptions
+                        builder.Configure("azure", options =>
                         {
-                            ConnectionString = "UseDevelopmentStorage=true;"
+                            options.ConnectionString = "UseDevelopmentStorage=true;";
                         });
                     });
             })
@@ -72,10 +72,10 @@ internal class Program
                     })
                     .UseAzureStorageQueues(builder =>
                     {
-                        builder.AddOptions("azure", new AzureStorageQueueOptions
+                        builder.Configure("azure", options =>
                         {
-                            ConnectionString = configuration
-                                .GetConnectionString("azure")
+                            options.ConnectionString = configuration
+                                .GetConnectionString("azure");
                         });
                     });
             })
@@ -105,7 +105,7 @@ The `appsettings.json` file would be as follows (remember to set to `Copy always
 ### Send a command message for processing
 
 ```c#
-await serviceBus.SendAsync(new RegisterMember
+await bus.SendAsync(new RegisterMember
 {
     UserName = "user-name",
     EMailAddress = "user@domain.com"
@@ -117,7 +117,7 @@ await serviceBus.SendAsync(new RegisterMember
 Before publishing an event one would need to register an `ISubscriptionService` implementation such as [Shuttle.Hopper.SqlServer.Subscription](/shuttle-hopper/implementations/subscription/sql-server.md).
 
 ```c#
-await serviceBus.PublishAsync(new MemberRegistered
+await bus.PublishAsync(new MemberRegistered
 {
     UserName = "user-name"
 });
@@ -132,13 +132,13 @@ services.AddHopper().AddSubscription<MemberRegistered>();
 ### Handle any messages
 
 ```c#
-public class RegisterMemberHandler : IMessageHandler<RegisterMember>
+public class RegisterMemberHandler : IContextMessageHandler<RegisterMember>
 {
     public RegisterMemberHandler(IDependency dependency)
     {
     }
 
-	public async Task ProcessMessageAsync(IHandlerContext<RegisterMember> context)
+    public async Task HandleAsync(IHandlerContext<RegisterMember> context, CancellationToken cancellationToken = default)
 	{
         // perform member registration
 
@@ -146,17 +146,19 @@ public class RegisterMemberHandler : IMessageHandler<RegisterMember>
 		{
 			UserName = context.Message.UserName
 		});
-	}
+    }
 }
 ```
 
 ```c#
-public class MemberRegisteredHandler : IMessageHandler<MemberRegistered>
+public class MemberRegisteredHandler : IContextMessageHandler<MemberRegistered>
 {
-	public async Task ProcessMessageAsync(IHandlerContext<MemberRegistered> context)
-	{
+    public async Task HandleAsync(IHandlerContext<MemberRegistered> context, CancellationToken cancellationToken = default)
+    {
         // processing
-	}
+
+        await Task.CompletedTask;
+    }
 }
 ```
 

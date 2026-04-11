@@ -1,10 +1,10 @@
 # Dependency Injection
 
 ::: info
-Remember that you can download the samples from the <a href="https://github.com/Shuttle/Shuttle.Esb.Samples" target="_blank">GitHub repository</a>.
+Remember that you can download the samples from the <a href="https://github.com/Shuttle/Shuttle.Hopper.Samples" target="_blank">GitHub repository</a>.
 :::
 
-This sample makes use of [Shuttle.Esb.AzureStorageQueues](https://github.com/Shuttle/Shuttle.Esb.AzureStorageQueues) for the message queues.  Local Azure Storage Queues should be provided by [Azurite](https://learn.microsoft.com/en-us/azure/storage/common/storage-use-azurite).
+This sample makes use of [Shuttle.Hopper.AzureStorageQueues](https://github.com/Shuttle/Shuttle.Hopper.AzureStorageQueues) for the message transports.  Local Azure Storage Queues should be provided by [Azurite](https://learn.microsoft.com/en-us/azure/storage/common/storage-use-azurite).
 
 Once you have opened the `Shuttle.DependencyInjection.sln` solution in Visual Studio set the following projects as startup projects:
 
@@ -45,9 +45,9 @@ public class RegisterMember
 
 > Add a new `Console Application` to the solution called `Shuttle.DependencyInjection.Client`.
 
-> Install the `Shuttle.Esb.AzureStorageQueues` nuget package.
+> Install the `Shuttle.Hopper.AzureStorageQueues` nuget package.
 
-This will provide access to the Azure Storage Queues `IQueue` implementation and also include the required dependencies.
+This will provide access to the Azure Storage Queues `ITransport` implementation and also include the required dependencies.
 
 > Install the `Microsoft.Extensions.Configuration.Json` nuget package.
 
@@ -84,11 +84,11 @@ internal class Program
                 configuration.GetSection(HopperOptions.SectionName)
                     .Bind(options);
             })
-            .AddAzureStorageQueues(builder =>
+            .UseAzureStorageQueues(builder =>
             {
-                builder.AddOptions("azure", new()
+                builder.Configure("azure", options =>
                 {
-                    ConnectionString = "UseDevelopmentStorage=true;"
+                    options.ConnectionString = "UseDevelopmentStorage=true;";
                 });
             });
 
@@ -100,13 +100,13 @@ internal class Program
 
         await busControl.StartAsync();
 
-        var serviceBus = serviceProvider.GetRequiredService<IBus>();
+        var bus = serviceProvider.GetRequiredService<IBus>();
 
         string userName;
 
         while (!string.IsNullOrEmpty(userName = Console.ReadLine() ?? string.Empty))
         {
-            await serviceBus.SendAsync(new RegisterMember
+            await bus.SendAsync(new RegisterMember
             {
                 UserName = userName
             });
@@ -197,7 +197,7 @@ public class EMailService : IEMailService
 
 > Install the `Shuttle.Hopper.AzureStorageQueues` nuget package.
 
-This will provide access to the Azure Storage Queues `IQueue` implementation and also include the required dependencies.
+This will provide access to the Azure Storage Queues `ITransport` implementation and also include the required dependencies.
 
 > Install the `Microsoft.Extensions.Hosting` nuget package.
 
@@ -241,11 +241,11 @@ public class Program
                         configuration.GetSection(HopperOptions.SectionName)
                             .Bind(options);
                     })
-                    .AddAzureStorageQueues(builder =>
+                    .UseAzureStorageQueues(builder =>
                     {
-                        builder.AddOptions("azure", new()
+                        builder.Configure("azure", options =>
                         {
-                            ConnectionString = Guard.AgainstNullOrEmptyString(configuration.GetConnectionString("azure"))
+                            options.ConnectionString = Guard.AgainstNullOrEmptyString(configuration.GetConnectionString("azure"));
                         });
                     });
             })
@@ -289,7 +289,7 @@ using Shuttle.Hopper;
 
 namespace Shuttle.DependencyInjection.Server;
 
-public class RegisterMemberHandler : IMessageHandler<RegisterMember>
+public class RegisterMemberHandler : IContextMessageHandler<RegisterMember>
 {
     private readonly IEMailService _emailService;
 
@@ -298,7 +298,7 @@ public class RegisterMemberHandler : IMessageHandler<RegisterMember>
         _emailService = Guard.AgainstNull(emailService);
     }
 
-    public async Task ProcessMessageAsync(IHandlerContext<RegisterMember> context)
+    public async Task HandleAsync(IHandlerContext<RegisterMember> context, CancellationToken cancellationToken = default)
     {
         Console.WriteLine();
         Console.WriteLine($"[MEMBER REGISTERED] : user name = '{context.Message.UserName}'");

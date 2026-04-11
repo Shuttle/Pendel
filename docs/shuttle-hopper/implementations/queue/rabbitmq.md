@@ -20,22 +20,22 @@ The URI structure is `rabbitmq://configuration-name/queue-name`.
 services.AddHopper()
     .UseRabbitMQ(builder =>
     {
-        builder.AddOptions("local", new RabbitMQOptions
+        builder.Configure("local", options =>
         {
-            ConnectionFactory = new RabbitMQ.Client.ConnectionFactory(),
-            Host = "127.0.0.1",
-            VirtualHost = "/",
-            Port = -1,
-            Username = "shuttle",
-            Password = "shuttle!",
-            PrefetchCount = 25,
-            QueueTimeout = TimeSpan.FromSeconds(1),
-            RequestedHeartbeat = TimeSpan.FromSeconds(30),
-            ConnectionCloseTimeout = TimeSpan.FromSeconds(1),
-            OperationRetryCount = 3,
-            Priority = 0,
-            Persistent = true,
-            Durable = true
+            options.ConnectionFactory = new RabbitMQ.Client.ConnectionFactory();
+            options.Host = "127.0.0.1";
+            options.VirtualHost = "/";
+            options.Port = -1;
+            options.Username = "shuttle";
+            options.Password = "shuttle!";
+            options.PrefetchCount = 25;
+            options.QueueTimeout = TimeSpan.FromSeconds(1);
+            options.RequestedHeartbeat = TimeSpan.FromSeconds(30);
+            options.ConnectionCloseTimeout = TimeSpan.FromSeconds(1);
+            options.OperationRetryCount = 3;
+            options.Priority = 0;
+            options.Persistent = true;
+            options.Durable = true;
         });
     });
 ```

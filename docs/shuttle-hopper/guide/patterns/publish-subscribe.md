@@ -1,10 +1,10 @@
 # Publish / Subscribe
 
 ::: info
-Remember that you can download the samples from the <a href="https://github.com/Shuttle/Shuttle.Esb.Samples" target="_blank">GitHub repository</a>.
+Remember that you can download the samples from the <a href="https://github.com/Shuttle/Shuttle.Hopper.Samples" target="_blank">GitHub repository</a>.
 :::
 
-This sample makes use of [Shuttle.Esb.AzureStorageQueues](https://github.com/Shuttle/Shuttle.Esb.AzureStorageQueues) for the message queues.  Local Azure Storage Queues should be provided by [Azurite](https://learn.microsoft.com/en-us/azure/storage/common/storage-use-azurite).
+This sample makes use of [Shuttle.Hopper.AzureStorageQueues](https://github.com/Shuttle/Shuttle.Hopper.AzureStorageQueues) for the message transports.  Local Azure Storage Queues should be provided by [Azurite](https://learn.microsoft.com/en-us/azure/storage/common/storage-use-azurite).
 
 Once you have opened the `Shuttle.PublishSubscribe.sln` solution in Visual Studio set the following projects as startup projects:
 
@@ -61,9 +61,9 @@ public class MemberRegistered
 
 > Add a new `Console Application` to the solution called `Shuttle.PublishSubscribe.Client`.
 
-> Install the `Shuttle.Esb.AzureStorageQueues` nuget package.
+> Install the `Shuttle.Hopper.AzureStorageQueues` nuget package.
 
-This will provide access to the Azure Storage Queues `IQueue` implementation and also include the required dependencies.
+This will provide access to the Azure Storage Queues `ITransport` implementation and also include the required dependencies.
 
 > Install the `Microsoft.Extensions.Configuration.Json` nuget package.
 
@@ -101,13 +101,12 @@ namespace Shuttle.PublishSubscribe.Client
             {
                 configuration.GetSection(HopperOptions.SectionName)
                     .Bind(options);
-            });
-
-            services.AddAzureStorageQueues(builder =>
+            })
+            .UseAzureStorageQueues(builder =>
             {
-                builder.AddOptions("azure", new AzureStorageQueueOptions
+                builder.Configure("azure", options =>
                 {
-                    ConnectionString = "UseDevelopmentStorage=true;"
+                    options.ConnectionString = "UseDevelopmentStorage=true;";
                 });
             });
 
@@ -119,13 +118,13 @@ namespace Shuttle.PublishSubscribe.Client
 
             await busControl.StartAsync();
 
-            var serviceBus = serviceProvider.GetRequiredService<IBus>();
+            var bus = serviceProvider.GetRequiredService<IBus>();
 
             string userName;
 
             while (!string.IsNullOrEmpty(userName = Console.ReadLine() ?? string.Empty))
             {
-                await serviceBus.SendAsync(new RegisterMember
+                await bus.SendAsync(new RegisterMember
                 {
                     UserName = userName
                 });
@@ -169,7 +168,7 @@ This tells the endpoint that all messages sent having a type name starting with 
 
 > Install the `Shuttle.Hopper.AzureStorageQueues` nuget package.
 
-This will provide access to the Azure Storage Queues `IQueue` implementation and also include the required dependencies.
+This will provide access to the Azure Storage Queues `ITransport` implementation and also include the required dependencies.
 
 > Install the `Microsoft.Extensions.Hosting` nuget package.
 
@@ -233,11 +232,11 @@ public class Program
                     {
                         options.ConnectionString = configuration.GetConnectionString("Subscription");
                     })
-                    .AddAzureStorageQueues(builder =>
+                    .UseAzureStorageQueues(builder =>
                     {
-                        builder.AddOptions("azure", new()
+                        builder.Configure("azure", options =>
                         {
-                            ConnectionString = Guard.AgainstNullOrEmptyString(configuration.GetConnectionString("azure"))
+                            options.ConnectionString = Guard.AgainstNullOrEmptyString(configuration.GetConnectionString("azure"));
                         });
                     });
             })
@@ -259,7 +258,7 @@ docker run --network <network> --restart always -e "ACCEPT_EULA=Y" -e "MSSQL_SA_
 
 The implementation will create any required database structures on startup.  If you need to execute the creation scripts manually, please reference the [source code](https://github.com/Shuttle/Shuttle.Hopper.SqlServer.Subscription).
 
-Whenever the `PublishAsync` method is invoked on the `IServiceBus` instance the registered `ISubscriptionService` instance is asked for the subscribers to the published message type.  These are retrieved from the Sql Server database for the implementation we are using.
+Whenever the `PublishAsync` method is invoked on the `IBus` instance the registered `ISubscriptionService` instance is asked for the subscribers to the published message type.  These are retrieved from the Sql Server database for the implementation we are using.
 
 ### Server configuration file
 
@@ -296,9 +295,9 @@ using Shuttle.PublishSubscribe.Messages;
 
 namespace Shuttle.PublishSubscribe.Server;
 
-public class RegisterMemberHandler : IMessageHandler<RegisterMember>
+public class RegisterMemberHandler : IContextMessageHandler<RegisterMember>
 {
-    public async Task ProcessMessageAsync(IHandlerContext<RegisterMember> context)
+    public async Task HandleAsync(IHandlerContext<RegisterMember> context, CancellationToken cancellationToken = default)
     {
         Console.WriteLine();
         Console.WriteLine($"[MEMBER REGISTERED] : user name = '{context.Message.UserName}'");
@@ -320,7 +319,7 @@ This will write out some information to the console window and publish the `Memb
 
 > Install the `Shuttle.Hopper.AzureStorageQueues` nuget package.
 
-This will provide access to the Azure Storage Queues `IQueue` implementation and also include the required dependencies.
+This will provide access to the Azure Storage Queues `ITransport` implementation and also include the required dependencies.
 
 > Install the `Microsoft.Extensions.Hosting` nuget package.
 
@@ -386,11 +385,11 @@ public class Program
                     {
                         options.ConnectionString = configuration.GetConnectionString("Subscription");
                     })
-                    .AddAzureStorageQueues(builder =>
+                    .UseAzureStorageQueues(builder =>
                     {
-                        builder.AddOptions("azure", new()
+                        builder.Configure("azure", options =>
                         {
-                            ConnectionString = Guard.AgainstNullOrEmptyString(configuration.GetConnectionString("azure"))
+                            options.ConnectionString = Guard.AgainstNullOrEmptyString(configuration.GetConnectionString("azure"));
                         });
                     });
             })
@@ -437,9 +436,9 @@ using Shuttle.PublishSubscribe.Messages;
 
 namespace Shuttle.PublishSubscribe.Subscriber;
 
-public class MemberRegisteredHandler : IMessageHandler<MemberRegistered>
+public class MemberRegisteredHandler : IContextMessageHandler<MemberRegistered>
 {
-    public async Task ProcessMessageAsync(IHandlerContext<MemberRegistered> context)
+    public async Task HandleAsync(IHandlerContext<MemberRegistered> context, CancellationToken cancellationToken = default)
     {
         Console.WriteLine();
         Console.WriteLine($"[EVENT RECEIVED] : user name = '{context.Message.UserName}'");

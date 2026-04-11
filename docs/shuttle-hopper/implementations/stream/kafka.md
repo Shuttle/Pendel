@@ -24,25 +24,23 @@ The URI structure is `kafka://configuration-name/topic-name`.
 services.AddHopper()
     .UseKafka(builder =>
     {
-        var kafkaOptions = new KafkaOptions
+        builder.Configure("local", options =>
         {
-            BootstrapServers = "localhost:9092",
-            ReplicationFactor = 1,
-            NumPartitions = 1,
-            MessageSendMaxRetries = 3,
-            RetryBackoff = TimeSpan.FromSeconds(1),
-            EnableAutoCommit = false,
-            EnableAutoOffsetStore = false,
-            FlushEnqueue = false,
-            UseCancellationToken = true,
-            ConsumeTimeout = TimeSpan.FromSeconds(30),
-            OperationTimeout = TimeSpan.FromSeconds(30),
-            ConnectionsMaxIdle = TimeSpan.Zero,
-            Acks = Acks.All,
-            EnableIdempotence = true
-        };
-
-        builder.AddOptions("local", kafkaOptions);
+            options.BootstrapServers = "localhost:9092";
+            options.ReplicationFactor = 1;
+            options.NumPartitions = 1;
+            options.MessageSendMaxRetries = 3;
+            options.RetryBackoff = TimeSpan.FromSeconds(1);
+            options.EnableAutoCommit = false;
+            options.EnableAutoOffsetStore = false;
+            options.FlushEnqueue = false;
+            options.UseCancellationToken = true;
+            options.ConsumeTimeout = TimeSpan.FromSeconds(30);
+            options.OperationTimeout = TimeSpan.FromSeconds(30);
+            options.ConnectionsMaxIdle = TimeSpan.Zero;
+            options.Acks = Acks.All;
+            options.EnableIdempotence = true;
+        });
     });
 ```
 
@@ -52,21 +50,19 @@ The documentation for the `Confluent.Kafka` `ConsumerConfig` and `ProducerConfig
 services.AddHopper()
     .UseKafka(builder =>
     {
-        var kafkaOptions = new KafkaOptions
+        builder.Configure("local", options =>
         {
-            BootstrapServers = "localhost:9092",
+            options.BootstrapServers = "localhost:9092";
             // ... other properties
-            ConsumerConfig = new ConsumerConfig
+            options.ConsumerConfig = new ConsumerConfig
             {
                 // ... Confluent.Kafka specific options
-            },
-            ProducerConfig = new ProducerConfig
+            };
+            options.ProducerConfig = new ProducerConfig
             {
                 // ... Confluent.Kafka specific options
-            }
-        };
-
-        builder.AddOptions("local", kafkaOptions);
+            };
+        });
     });
 ```
 

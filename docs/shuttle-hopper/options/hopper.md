@@ -100,7 +100,7 @@ await Host.CreateDefaultBuilder()
             {
                 configuration.GetSection(HopperOptions.SectionName).Bind(options);
             })
-            .AddMessageHandler(async (IHandlerContext<RegisterMember> context) =>
+            .AddMessageHandler(async (IHandlerContext<RegisterMember> context, CancellationToken cancellationToken = default) =>
             {
                 Console.WriteLine();
                 Console.WriteLine("[MEMBER REGISTERED] : user name = '{0}'", context.Message.UserName);
@@ -113,9 +113,9 @@ await Host.CreateDefaultBuilder()
             })
             .UseAzureStorageQueues(builder =>
             {
-                builder.AddOptions("azure", new()
+                builder.Configure("azure", options =>
                 {
-                    ConnectionString = Guard.AgainstNullOrEmptyString(configuration.GetConnectionString("azure"))
+                    options.ConnectionString = Guard.AgainstNullOrEmptyString(configuration.GetConnectionString("azure"));
                 });
             });
     })
@@ -138,7 +138,7 @@ var services = new ServiceCollection()
     });
 
 services.AddHopper()
-    .AddMessageHandler(async (IHandlerContext<MemberRegistered> context) =>
+    .AddMessageHandler(async (IHandlerContext<MemberRegistered> context, CancellationToken cancellationToken = default) =>
     {
         Console.WriteLine();
         Console.WriteLine("[RESPONSE RECEIVED] : user name = '{0}'", context.Message.UserName);
@@ -148,9 +148,9 @@ services.AddHopper()
     })
     .UseAzureStorageQueues(builder =>
     {
-        builder.AddOptions("azure", new()
+        builder.Configure("azure", options =>
         {
-            ConnectionString = "UseDevelopmentStorage=true;"
+            options.ConnectionString = "UseDevelopmentStorage=true;";
         });
     });
 

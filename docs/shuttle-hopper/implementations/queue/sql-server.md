@@ -23,10 +23,10 @@ The URI structure is `sqlserver://configuration-name/queue-name`.
 services.AddHopper()
     .UseSqlServerQueue(builder =>
     {
-        builder.AddOptions("shuttle", new SqlServerQueueOptions
+        builder.Configure("shuttle", options =>
         {
-            ConnectionString = "server=.;database=shuttle;user id=sa;password=Pass!000;TrustServerCertificate=true",
-            Schema = "dbo"
+            options.ConnectionString = "server=.;database=shuttle;user id=sa;password=Pass!000;TrustServerCertificate=true";
+            options.Schema = "dbo";
         });
     });
 ```

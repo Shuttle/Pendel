@@ -11,7 +11,7 @@ Task<TransportMessage> SendAsync(object message, Action<TransportMessageBuilder>
 Only messages that have no `RecipientInboxWorkTransportUri` set will be routed by the service bus; else the message will be sent to the `RecipientInboxWorkTransportUri`, e.g.:
 
 ```c#
-await serviceBus.SendAsync(new RegisterMember
+await bus.SendAsync(new RegisterMember
 {
     UserName = userName
 }, 

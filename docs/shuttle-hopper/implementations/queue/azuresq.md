@@ -20,15 +20,13 @@ If `ConnectionString` is specified the `StorageAccount` setting will be ignored.
 services.AddHopper()
     .UseAzureStorageQueues(builder =>
     {
-        var azureStorageQueueOptions = new AzureStorageQueueOptions
+        builder.Configure("azure", options =>
         {
-            StorageAccount = "devstoreaccount1",
-            ConnectionString = "UseDevelopmentStorage=true",
-            MaxMessages = 20,
-            VisibilityTimeout = null
-        };
-
-        builder.AddOptions("azure", azureStorageQueueOptions);
+            options.StorageAccount = "devstoreaccount1";
+            options.ConnectionString = "UseDevelopmentStorage=true";
+            options.MaxMessages = 20;
+            options.VisibilityTimeout = null;
+        });
     });
 ```
 
