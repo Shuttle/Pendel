@@ -32,6 +32,54 @@ Please note that there are quite a few breaking changes.
 
 > **Note**: `Shuttle.Esb` has been deprecated and `Shuttle.Hopper` now contains service bus functionality.
 
+### Packages
+
+The following packages have been renamed to align with `Shuttle.Hopper` and using `SqlServer` instead of `Sql`:
+
+- `Shuttle.Esb` -> `Shuttle.Hopper`
+- `Shuttle.Esb.AmazonSqs` -> `Shuttle.Hopper.AmazonSqs`
+- `Shuttle.Esb.AzureEventHubs` -> `Shuttle.Hopper.AzureEventHubs`
+- `Shuttle.Esb.AzureStorageQueues` -> `Shuttle.Hopper.AzureStorageQueues`
+- `Shuttle.Esb.Kafka` -> `Shuttle.Hopper.Kafka`
+- `Shuttle.Esb.RabbitMQ` -> `Shuttle.Hopper.RabbitMQ`
+- `Shuttle.Esb.Sql.Queue` -> `Shuttle.Hopper.SqlServer.Queue`
+- `Shuttle.Esb.Sql.Subscription` -> `Shuttle.Hopper.SqlServer.Subscription`
+
+Any other `Shuttle.Esb.*` packages present in v20 are not currently available in this release.
+
+### Package Registration Convention
+
+Previously, service bus functionality and transports were configured directly on the `IServiceCollection` instance:
+
+```c#
+services.AddServiceBus(builder => { /* ... */ });
+services.AddAmazonSqs(builder => { /* ... */ });
+services.AddRabbitMQ(builder => { /* ... */ });
+```
+
+In `Shuttle.Hopper`, configuration has been consolidated into a fluent builder API. You first call `AddHopper` on the `IServiceCollection`, and then chain transport and feature configurations using the `.Use[Component]()` pattern:
+
+```c#
+services.AddHopper(options => 
+    {
+        // Configure HopperOptions here
+    })
+    .UseAmazonSqs(builder => { /* ... */ })
+    .UseRabbitMQ(builder => { /* ... */ });
+```
+
+### Transport Configuration Options
+
+Across all transports, the approach to customizing the underlying provider has changed. Previously, many options classes exposed `event EventHandler` properties (e.g., `Configure`, `ConfigureConsumer`, `ConfigureBlobStorage`) to hook into or override provider-specific settings.
+
+These events have been removed and replaced with direct properties on the respective options classes to supply the configuration or builders natively.
+
+- **AmazonSqs**: Removed the `Configure` event and the `ServiceUrl` property. Added `AWSCredentials AwsCredentials` and `AmazonSQSConfig AmazonSqsConfig` properties.
+- **AzureStorageQueues**: Removed the `Configure` event. Added a `QueueClientOptions QueueClient` property.
+- **AzureEventHubs**: Removed `ConfigureBlobStorage`, `ConfigureProcessor`, and `ConfigureProducer` events. Replaced by `BlobClientOptions BlobClient`, `EventProcessorClientOptions ProcessorClient`, and `EventHubProducerClientOptions ProducerClient` properties. The `ProcessError` event is now an `AsyncEvent<EventHubProcessErrorEventArgs>` property.
+- **Kafka**: Removed `BuildConsumer`, `BuildProducer`, `ConfigureConsumer`, and `ConfigureProducer` events. Replaced by direct `ConsumerBuilder`, `ProducerBuilder`, `ConsumerConfig`, and `ProducerConfig` properties.
+- **RabbitMQ**: Removed the `Configure` event. Added a `ConnectionFactory ConnectionFactory` property.
+
 ### Inbox options
 
 - `WorkQueueUri` renamed to `WorkTransportUri`.
@@ -51,9 +99,9 @@ Please note that there are quite a few breaking changes.
 - `Defer()` renamed to `DeferUntil(DateTimeOffset)` and `DeferFor(TimeSpan)`.
 - `WillExpire()` renamed to `ExpiresAt(DateTimeOffset)` and `ExpiresIn(TimeSpan)`.
 
-### Shuttle.Esb.Sql.Subscription
+### Shuttle.Esb.Sql.Subscription (now Shuttle.Hopper.SqlServer.Subscription)
 
-Previuosly the SQL subscription service was registered like this:
+Previously the SQL subscription service was registered like this:
 
 ```c#
 services
@@ -64,20 +112,31 @@ services
     });
 ```
 
-It now needs to be registered like this:
+It now needs to be registered via the `AddHopper` builder like this:
 
 ```c#
 services
-    .AddSqlSubscription(builder =>
+    .AddHopper(options => 
     {
-        builder.Options.ConnectionStringName = "Subscription";
-        builder.Options.Schema = "dbo"; // Optional.  Defaults to `dbo`
-
-        builder.UseSqlServer();
+        // configure hopper options
     })
+    .UseSqlServerSubscription(options =>
+    {
+        options.ConnectionString = "Data Source=...";
+        options.Schema = "dbo"; // Optional.  Defaults to `dbo`
+    });
 ```
 
 ## Shuttle.Recall
+
+### Packages
+
+The following packages have been renamed to use `SqlServer` instead of `Sql`:
+
+- `Shuttle.Recall.Sql.EventProcessing` -> `Shuttle.Recall.SqlServer.EventProcessing`
+- `Shuttle.Recall.Sql.Storage` -> `Shuttle.Recall.SqlServer.Storage`
+
+### Changes
 
 - Renamed `IAsyncEventHandler` to `IEventHandler`.
 - Removed `EventStore.CreateEventStream`.  Using `EventStore.GetAsync` will return an empty event stream if none exists.
