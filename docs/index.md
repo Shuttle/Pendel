@@ -4,7 +4,7 @@ layout: home
 hero:
   name: Shuttle
   text: Enterprise-grade free open-source software.
-  tagline: In addition to the specialized pattern implementions such as a service bus and event sourcing, various common pattern implementations are also available.
+  tagline: Alongside specialized implementations such as the Hopper service bus, Recall event sourcing, Mediator, and Pipelines, a range of common patterns is also available.
 
 features:
   - title: Framework Support
