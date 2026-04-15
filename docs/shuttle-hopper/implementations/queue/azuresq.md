@@ -14,7 +14,7 @@ You may want to take a look at how to [get started with Azure Queue storage usin
 
 The URI structure is `azuresq://configuration-name/queue-name`.
 
-If `ConnectionString` is specified the `StorageAccount` setting will be ignored.  When `StorageAccount` is specified the `DefaultAzureCredential` will be used to authenticate.
+If the `StorageAccount` is not specified then the `ConnectionString` will be used. At least one of the two is required.  When `StorageAccount` is specified the `DefaultAzureCredential` will be used to authenticate.
 
 ```c#
 services.AddHopper()
@@ -29,7 +29,6 @@ services.AddHopper()
         });
     });
 ```
-
 
 The default JSON settings structure is as follows:
 
@@ -48,7 +47,7 @@ The default JSON settings structure is as follows:
 }
 ```
 
-## Options
+## `AzureStorageQueueOptions`
 
 | Segment / Argument | Default | Description |
 | --- | --- | --- | 

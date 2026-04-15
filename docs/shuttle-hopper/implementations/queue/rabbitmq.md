@@ -22,7 +22,6 @@ services.AddHopper()
     {
         builder.Configure("local", options =>
         {
-            options.ConnectionFactory = new RabbitMQ.Client.ConnectionFactory();
             options.Host = "127.0.0.1";
             options.VirtualHost = "/";
             options.Port = -1;
@@ -40,6 +39,31 @@ services.AddHopper()
     });
 ```
 
+You can also provide a pre-configured `ConnectionFactory` instance:
+
+```c#
+services.AddHopper()
+    .UseRabbitMQ(builder =>
+    {
+        builder.Configure("local", options =>
+        {
+            options.ConnectionFactory = new RabbitMQ.Client.ConnectionFactory
+            {
+                HostName = "127.0.0.1",
+                VirtualHost = "/",
+                UserName = "shuttle",
+                Password = "shuttle!"
+            };
+            options.PrefetchCount = 25;
+            options.QueueTimeout = TimeSpan.FromSeconds(1);
+            options.ConnectionCloseTimeout = TimeSpan.FromSeconds(1);
+            options.OperationRetryCount = 3;
+            options.Priority = 0;
+            options.Persistent = true;
+            options.Durable = true;
+        });
+    });
+```
 
 The default JSON settings structure is as follows:
 
@@ -71,16 +95,16 @@ The default JSON settings structure is as follows:
 
 | Option | Default    | Description | 
 | --- | --- | --- |
-| `ConnectionFactory` | `null` | The `RabbitMQ.Client.ConnectionFactory` instance.  If `null` and instance will be created and populated using the relevant values in the options; else it should be pre-configured fully. |
+| `ConnectionFactory` | `null` | The `RabbitMQ.Client.ConnectionFactory` instance.  If `null` an instance will be created and populated using the relevant values in the options; else it should be pre-configured fully. |
 | `Host` | | The RabbitMQ host to connect to. |
 | `VirtualHost` | `"/"` | The virtual host to connect to. |
 | `Port` | -1 | Specifies the port to connect to.  A value of `-1` represents `AmqpTcpEndpoint.UseDefaultPort`. |
 | `Username` | | The username to send as a credential. |
 | `Password` | | The password to send as a credential. |
 | `PrefetchCount` | 25 | Specifies the number of messages to prefetch from the queue. |
-| `QueueTimeout` | `00:00:01` | How long to wait when retrieving a message from the queue before timing out and returing `null`. |
+| `QueueTimeout` | `00:00:01` | How long to wait when retrieving a message from the queue before timing out and returning `null`. |
 | `RequestedHeartbeat` | `00:00:30` | Heartbeat timeout to use when negotiating with the server. |
-| `ConnectionCloseTimeout` | `00:00:01` | The duration to wait wait for connections to be closed. |
+| `ConnectionCloseTimeout` | `00:00:01` | The duration to wait for connections to be closed. |
 | `OperationRetryCount` | 3 | How many times to retry relevant queue operations in the event that they fail.  Once the retries have run out the original exception is thrown. |
 | `Priority` | 0 | Determines the number of priorities (`x-max-priority`) supported by the queue. |
 | `Persistent` | true | Determines whether messages will be persisted.  Please be sure of the possible consequences before setting to 'false'. |

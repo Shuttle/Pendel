@@ -14,23 +14,29 @@ The URI structure is `azureeh://configuration-name/hub-name`.
 
 ```c#
 services.AddHopper()
-    .UseAzureEventHubs(eventHubBuilder =>
+    .UseAzureEventHubs(builder =>
     {
-        eventHubBuilder.Configure("azure", options =>
+        builder.Configure("azure", options => 
         {
             options.ConnectionString = "Endpoint=sb://{hub-namespace}.servicebus.windows.net/;SharedAccessKeyName={key-name};SharedAccessKey={key};EntityPath={hub-name}";
+            options.BlobStorageConnectionString = "{BlobStorageConnectionString}";
+            options.ProcessorClient = new() { PrefetchCount = 100 };
             options.ProcessEvents = true;
             options.ConsumerGroup = "$Default";
-            options.BlobStorageConnectionString = "{BlobStorageConnectionString}";
             options.BlobContainerName = "{BlobContainerName}";
             options.OperationTimeout = TimeSpan.FromSeconds(30);
             options.ConsumeTimeout = TimeSpan.FromSeconds(30);
             options.DefaultStartingPosition = EventPosition.Latest;
             options.CheckpointInterval = 1;
+
+            options.ProcessError.Register(async args =>
+            {
+                Console.WriteLine($"[error] : {args.Exception.Message}");
+                await Task.CompletedTask;
+            });
         });
     });
 ```
-
 
 The default JSON settings structure is as follows:
 
@@ -54,7 +60,7 @@ The default JSON settings structure is as follows:
 }
 ```
 
-## Options
+## `EventHubOptions`
 
 | Segment / Argument | Default | Description |
 | --- | --- | --- | 
@@ -68,3 +74,7 @@ The default JSON settings structure is as follows:
 | `DefaultStartingPosition` | `Latest` | The default starting position to use when no checkpoint exists. |
 | `CheckpointInterval` | `1` | The number of events to process before performing a checkpoint. |
 | `ClientIdentifier` | | A unique identifier for the client. |
+| `BlobClient` | | The `BlobClientOptions` used to configure the underlying `BlobContainerClient`. |
+| `ProcessorClient` | | The `EventProcessorClientOptions` used to configure the underlying `EventProcessorClient`. |
+| `ProducerClient` | | The `EventHubProducerClientOptions` used to configure the underlying `EventHubProducerClient`. |
+| `ProcessError` | | The `AsyncEvent<EventHubProcessErrorEventArgs>` triggered when an error occurs during event processing. |

@@ -6,7 +6,7 @@ import { default as pigeon } from "../shuttle-pigeon/sidebar";
 import { default as recall } from "../shuttle-recall/sidebar";
 import { defineConfig } from "vitepress";
 import tailwindcss from "@tailwindcss/vite";
-import { fileURLToPath, URL } from 'node:url'
+import { fileURLToPath, URL } from "node:url";
 
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
@@ -20,6 +20,9 @@ export default defineConfig({
     siteTitle: "Shuttle Documentation",
     search: {
       provider: "local",
+    },
+    editLink: {
+      pattern: "https://github.com/Shuttle/Pendel/edit/master/docs/:path",
     },
     socialLinks: [
       { icon: "github", link: "https://github.com/Shuttle/Pendel" },
@@ -124,10 +127,10 @@ export default defineConfig({
         ],
       },
       {
-        text: "21.0.1-rc3",
+        text: "2026.1",
         items: [
           {
-            text: "pre-v21",
+            text: "v-previous",
             link: "https://shuttle.github.io/pendel-pre-v21/",
           },
           {
@@ -151,10 +154,10 @@ export default defineConfig({
     resolve: {
       alias: [
         {
-          find: '@',
-          replacement: fileURLToPath(new URL('../', import.meta.url))
-        }
-      ]
+          find: "@",
+          replacement: fileURLToPath(new URL("../", import.meta.url)),
+        },
+      ],
     },
     plugins: [tailwindcss()],
   },

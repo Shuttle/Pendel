@@ -31,6 +31,18 @@ services.AddHopper()
     });
 ```
 
+### Outbox Support
+
+To enable outbox support for transactional message processing, use the `UseOutboxDbContext<TDbContext>()` method:
+
+```c#
+services.AddHopper()
+    .UseSqlServerQueue(builder =>
+    {
+        builder.Configure("shuttle", options => { /* ... */ })
+            .UseOutboxDbContext<YourDbContext>();
+    });
+```
 
 The default JSON settings structure is as follows:
 
@@ -51,3 +63,4 @@ The default JSON settings structure is as follows:
 | --- | --- | --- | 
 | `ConnectionString` | | The server connection string. |
 | `Schema` | `dbo` | The database schema to use. |
+| `GetOutboxTransactionAsync` | `null` | Optional delegate to obtain an outbox transaction for transactional message processing. |

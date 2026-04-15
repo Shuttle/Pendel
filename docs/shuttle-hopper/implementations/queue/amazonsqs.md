@@ -25,7 +25,7 @@ services.AddHopper()
         builder.Configure("local", options =>
         {
             options.AwsCredentials = new BasicAWSCredentials("accessKey", "secretKey");
-            options.AmazonSqsConfig = new AmazonSQSConfig
+            options.AmazonSqsConfig = new()
             {
                 ServiceURL = "http://localhost:9324",
                 AuthenticationRegion = "us-east-1"
@@ -35,7 +35,6 @@ services.AddHopper()
         });
     });
 ```
-
 
 ### JSON Configuration
 
@@ -74,9 +73,9 @@ amazonsqs://local/my-queue
 amazonsqs://production/order-processing-queue
 ```
 
-The configuration name (e.g., `local`, `production`) must match a configuration defined via `builder.Configure()`.
+The configuration name (e.g., `local`, `production`) must match a configuration defined via `builder.Configure("name", ...)`.
 
-## Options
+## `AmazonSqsOptions`
 
 | Option | Default | Description |
 | --- | --- | --- |
@@ -92,34 +91,22 @@ The configuration name (e.g., `local`, `production`) must match a configuration 
 
 AWS credentials can be configured in several ways:
 
-### 1. Programmatic Credentials
+### Programmatic Credentials
 
 ```c#
-amazonSqsOptions.AwsCredentials = new BasicAWSCredentials("accessKey", "secretKey");
+options.AwsCredentials = new BasicAWSCredentials("accessKey", "secretKey");
 ```
 
-### 2. Environment Variables
+### Environment Variables
 
 If `AwsCredentials` is not set, the AWS SDK will automatically use credentials from:
 - `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` environment variables
 - AWS credentials file (`~/.aws/credentials`)
 - IAM role (when running on EC2 or ECS)
 
-### 3. IAM Roles (Recommended for Production)
+### IAM Roles (Recommended for Production)
 
 When running on AWS infrastructure, use IAM roles instead of hardcoded credentials.
-
-## Queue Operations
-
-The `AmazonSqsQueue` implementation supports the following operations:
-
-- **Create**: Creates a new SQS queue
-- **Delete**: Deletes an existing SQS queue
-- **Purge**: Removes all messages from a queue
-- **Send**: Sends a message to the queue
-- **Receive**: Receives messages from the queue (with long-polling support)
-- **Acknowledge**: Deletes a message from the queue after successful processing
-- **Release**: Returns a message to the queue for reprocessing
 
 ## Troubleshooting
 
