@@ -32,6 +32,8 @@ Please note that there are quite a few breaking changes.
 
 > **Note**: `Shuttle.Esb` has been deprecated and `Shuttle.Hopper` now contains service bus functionality.
 
+**BREAKING**: The `TransportMessage` has breaking changes but any messages sent from `Shuttle.Esb` may still be processed by a `Shuttle.Hopper` endpoint.  However, messages sent from a `Shuttle.Hopper` endpoint will fail if processed by a `Shuttle.Esb` endpoint.  Please upgrade all related endpoints together.
+
 ### Packages
 
 The following packages have been renamed to align with `Shuttle.Hopper` and using `SqlServer` instead of `Sql`:
