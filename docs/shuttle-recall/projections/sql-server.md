@@ -11,13 +11,12 @@ dotnet add package Shuttle.Recall.SqlServer.EventProcessing
 ## Configuration
 
 ```c#
-services.AddRecall(builder => 
-{
-    builder.UseSqlServerEventProcessing(options => 
+services
+    .AddRecall()
+    .UseSqlServerEventProcessing(options =>
     {
         options.ConnectionString = "connection-string";
     });
-});
 ```
 
 The default JSON settings structure is as follows:

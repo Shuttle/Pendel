@@ -13,13 +13,12 @@ dotnet add package Shuttle.Recall.SqlServer.Storage
 In order to use Sql Server for event storage you should use the `UseSqlServerEventStorage` extension:
 
 ```c#
-services.AddRecall(builder =>
-{
-    builder.UseSqlServerEventStorage(options =>
+services
+    .AddRecall()
+    .UseSqlServerEventStorage(options =>
     {
         options.ConnectionString = "connection-string";
     });
-});
 ```
 
 The options can also be configured via `appsettings.json`:

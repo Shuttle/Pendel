@@ -124,7 +124,7 @@ Returns the events represented by the given `EventRegistrationType`.
 public void Apply(object instance);
 ```
 
-Applies all the events in the stream against the given object by calling the `IEventMethodInvoker` provided to the event strean constructor. 
+Applies all the events in the stream against the given object by calling the `IEventMethodInvoker` provided to the event stream constructor. 
 
 The following is an example of an event method:
 
@@ -168,7 +168,7 @@ All events that belong to the given `id` are removed.
 ### Save
 
 ``` c#
-ValueTask<long> SaveAsync(EventStream eventStream, Action<EventStreamBuilder>? builder = null);
+Task<IEnumerable<EventEnvelope>> SaveAsync(EventStream eventStream, Action<EventStreamBuilder>? builder = null);
 ```
 
-Persists the given `EventStream`.
+ Persists the given `EventStream`.

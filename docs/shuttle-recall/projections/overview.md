@@ -18,31 +18,30 @@ When you need to rebuild your read model for whatever reason you can delete the 
 
 ### AddEventHandler
 
-In order to be able to handle any events in your projection you will need to add event handlers using the `AddEventHandler` method using the `EventStoreBuilder`:
+In order to be able to handle any events in your projection you will need to add event handlers using the `AddEventHandler` method using the `RecallBuilder`:
 
 ```c#
-services.AddEventStore(builder =>
-{
-    builder.AddProjection("projection-name")
-        // event handler type, with optional service lifetime
-        .AddEventHandler(Type, Func<Type, ServiceLifetime>? = null) 
-        // event handler instance (singleton)
-        .AddEventHandler(object)
-        // event handler delegate
-        .AddEventHandler(Delegate)
-        // event handler generic type, with optional service lifetime
-        .AddEventHandler<T>(Func<Type, ServiceLifetime>? = null);
-});
+services
+    .AddRecall()
+    .AddProjection("projection-name")
+    // event handler type, with optional service lifetime
+    .AddEventHandler(Type, Func<Type, ServiceLifetime>? = null)
+    // event handler instance (singleton)
+    .AddEventHandler(object)
+    // event handler delegate
+    .AddEventHandler(Delegate)
+    // event handler generic type, with optional service lifetime
+    .AddEventHandler<T>(Func<Type, ServiceLifetime>? = null);
 ```
 
 ## IEventHandler
 
-Depending on the value of the `EventStoreOptions.Asynchronous` options, an event handler must implement either the `IAsyncEventHandler` interface for asynchronous support, or `IEventHandler` for synchronous event handling:
+An event handler must implement the `IEventHandler<in T>` interface:
 
 ```c#
 public interface IEventHandler<in T> where T : class
 {
-    Task ProcessEventAsync(IEventHandlerContext<T> context);
+    Task HandleAsync(IEventHandlerContext<T> context, CancellationToken cancellationToken = default);
 }
 ```
 
@@ -54,7 +53,7 @@ It also contains the `Projection`.
 
 ## IProjectionService
 
-The `IProjectionService` interface is implemented by a technology-specific package.  The `Shuttle.Recall.Sql.EventProcessing` package provides a Sql Server based implementation of the `IProjectionService`.
+The `IProjectionService` interface is implemented by a technology-specific package.  The `Shuttle.Recall.SqlServer.EventProcessing` package provides a Sql Server based implementation of the `IProjectionService`.
 
 ### GetEventAsync
 

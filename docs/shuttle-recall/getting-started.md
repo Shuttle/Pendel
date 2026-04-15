@@ -8,7 +8,7 @@ This guide demonstrates using Shuttle.Recall with a Sql Server implementation.
 
 Start a new **Console Application** project called `RecallQuickstart` and select a Shuttle.Recall implementation:
 
-> Install the `Shuttle.Recall.Sql.Storage` nuget package.
+> Install the `Shuttle.Recall.SqlServer.Storage` nuget package.
 
 This provides a SQL-based store for doamin events.
 
@@ -28,13 +28,11 @@ public class Renamed
 Next we'll create our `Aggregate Root`.  In a real-world scenario the aggregate in our domain would be something like `Customer`, `Member`, `Invoice`, and so forth.  The aggregate will make use of an `EventStream` to save the changes in the state:
 
 ```c#
-using System.Data.Common;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Shuttle.Data;
 using Shuttle.Recall;
-using Shuttle.Recall.Sql.Storage;
+using Shuttle.Recall.SqlServer.Storage;
 
 namespace RecallQuickstart;
 
@@ -42,21 +40,14 @@ internal class Program
 {
     private static async Task Main(string[] args)
     {
-        DbProviderFactories.RegisterFactory("Microsoft.Data.SqlClient", SqlClientFactory.Instance);
-
         var services = new ServiceCollection();
 
         services
-            .AddDataAccess(builder =>
+            .AddRecall()
+            .UseSqlServerEventStorage(options =>
             {
-                builder.AddConnectionString("EventStore", "Microsoft.Data.SqlClient",
-                    "Server=.;Database=RecallQuickstart;User id=sa;Password=Pass!000;TrustServerCertificate=true;");
-            })
-            .AddSqlEventStorage(builder =>
-            {
-                builder.Options.ConnectionStringName = "EventStore";
-            })
-            .AddEventStore();
+                options.ConnectionString = "Server=.;Database=RecallQuickstart;User id=sa;Password=Pass!000;TrustServerCertificate=true;";
+            });
 
         var serviceProvider = services.BuildServiceProvider();
 

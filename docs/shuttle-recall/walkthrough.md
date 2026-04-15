@@ -135,7 +135,7 @@ Shuttle.Recall.SqlServer.EventProcessing
 
 Also add a reference to the `Recall.Walkthrough` domain project.
 
-The `Shuttle.Recall.Sql.EventProcessing` package will include all the required transitive packages.
+The `Shuttle.Recall.SqlServer.EventProcessing` package will include all the required transitive packages.
 
 Once events are stored as `PrimitiveEvent` records, the event processor will find any events that have not yet been applied to a projection and invoke either an `IEventHandler` implementation, or a matching delegate.
 
@@ -156,7 +156,7 @@ public class CustomerEventHandler : IEventHandler<Customer.Moved>
         _dbContext = dbContext;
     }
 
-    public async Task ProcessEventAsync(IEventHandlerContext<Customer.Moved> context)
+    public async Task HandleAsync(IEventHandlerContext<Customer.Moved> context, CancellationToken cancellationToken = default)
     {
         var customer = await _dbContext.Customers.FindAsync(context.PrimitiveEvent.Id);
 
@@ -201,7 +201,7 @@ public class ServerHostedService : IHostedService
 }
 ```
 
-We are now ready to configure the services, along with the `SqlClientFactory` provider factory which is used internally by the `Shuttle.Data.Core` package:
+We are now ready to configure the services:
 
 ```c#
 using Microsoft.EntityFrameworkCore;
@@ -228,43 +228,40 @@ internal class Program
                     {
                         builder.UseSqlServer(connectionString);
                     })
-                    .AddRecall(recallBuilder =>
+                    .AddRecall()
+                    .UseSqlServerEventStorage(options =>
                     {
-                        recallBuilder
-                            .UseSqlServerEventStorage(builder =>
-                            {
-                                builder.Options.ConnectionString = connectionString;
-                                builder.Options.Schema = "recall";
-                            })
-                            .UseSqlServerEventProcessing(builder =>
-                            {
-                                builder.Options.ConnectionString = connectionString;
-                                builder.Options.Schema = "recall";
-                            })
-                            .AddProjection("Customer")
-                            .AddEventHandler(async (IEventHandlerContext<Customer.Registered> context, CustomerDbContext dbContext) =>
-                            {
-                                await dbContext.Customers.AddAsync(new CustomerEntity
-                                {
-                                    Id = context.PrimitiveEvent.Id,
-                                    Name = context.Event.Name
-                                });
+                        options.ConnectionString = connectionString;
+                        options.Schema = "recall";
+                    })
+                    .UseSqlServerEventProcessing(options =>
+                    {
+                        options.ConnectionString = connectionString;
+                        options.Schema = "recall";
+                    })
+                    .AddProjection("Customer")
+                    .AddEventHandler(async (IEventHandlerContext<Customer.Registered> context, CustomerDbContext dbContext) =>
+                    {
+                        await dbContext.Customers.AddAsync(new CustomerEntity
+                        {
+                            Id = context.PrimitiveEvent.Id,
+                            Name = context.Event.Name
+                        });
 
-                                await dbContext.SaveChangesAsync();
-                            })
-                            .AddEventHandler(async (IEventHandlerContext<Customer.Renamed> context, CustomerDbContext dbContext) =>
-                            {
-                                var customer = await dbContext.Customers.FindAsync(context.PrimitiveEvent.Id);
+                        await dbContext.SaveChangesAsync();
+                    })
+                    .AddEventHandler(async (IEventHandlerContext<Customer.Renamed> context, CustomerDbContext dbContext) =>
+                    {
+                        var customer = await dbContext.Customers.FindAsync(context.PrimitiveEvent.Id);
 
-                                if (customer != null)
-                                {
-                                    customer.Name = context.Event.Name;
-                                    await dbContext.SaveChangesAsync();
-                                }
-                            });
-
-                        recallBuilder.AddProjection("Address").AddEventHandler<CustomerEventHandler>();
-                    });
+                        if (customer != null)
+                        {
+                            customer.Name = context.Event.Name;
+                            await dbContext.SaveChangesAsync();
+                        }
+                    })
+                    .AddProjection("Address")
+                    .AddEventHandler<CustomerEventHandler>();
             })
             .Build()
             .RunAsync();
@@ -296,14 +293,13 @@ internal class Program
         var connectionString = "Server=.;Database=RecallWalkthrough;User ID=sa;Password=Pass!000;Trust Server Certificate=true";
 
         var serviceProvider = new ServiceCollection()
-            .AddRecall(recallBuilder =>
+            .AddRecall()
+            .UseSqlServerEventStorage(options =>
             {
-                recallBuilder.UseSqlServerEventStorage(builder =>
-                {
-                    builder.Options.ConnectionString = connectionString;
-                    builder.Options.Schema = "recall";
-                });
+                options.ConnectionString = connectionString;
+                options.Schema = "recall";
             })
+            .Services
             .BuildServiceProvider();
 
         var eventStore = serviceProvider.GetRequiredService<IEventStore>();
