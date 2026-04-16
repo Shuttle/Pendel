@@ -51,6 +51,8 @@ The event handler context provides the full `EventEnvelope` and `PrimitiveEvent`
 
 It also contains the `Projection`.
 
+You can also call `Defer(TimeSpan? until)` to have the projection wait for other projections to handle related data.  A default deferred duration may be set using the `RecallOptions.EventProcessing.DefaultDeferredDuration`.  Keep in mind that if the deferred duration is less, and in some cases equal to, a `RecallOptions.EventProcessing.ProjectionProcessorIdleDurations` entry you may end up with a poisoned head event where the same event keeps being picked up for processing.
+
 ## IProjectionService
 
 The `IProjectionService` interface is implemented by a technology-specific package.  The `Shuttle.Recall.SqlServer.EventProcessing` package provides a Sql Server based implementation of the `IProjectionService`.
