@@ -57,10 +57,6 @@ const sidebar = {
           text: "Threading",
           link: "/shuttle/shuttle-threading",
         },
-        {
-          text: "TransactionScope",
-          link: "/shuttle/shuttle-transactionscope",
-        },
       ],
     },
   ],
