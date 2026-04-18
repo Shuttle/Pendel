@@ -34,8 +34,7 @@ builder.Services.AddAccessClient(options =>
 })
 .UsePasswordAuthenticationProvider(providerBuilder =>
 {
-    providerBuilder.Options.IdentityName = "identity-name";
-    providerBuilder.Options.Password = "password";
+    builder.Configuration.GetSection(PasswordAuthenticationInterceptorOptions.SectionName).Bind(providerBuilder.Options);
 });
 ```
 

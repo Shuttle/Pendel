@@ -80,8 +80,7 @@ services
     })
     .UsePasswordAuthenticationProvider(providerBuilder =>
     {
-       providerBuilder.Options.IdentityName = "{web-api identity name}";
-       providerBuilder.Options.Password = "{web-api identity password}";
+       builder.Configuration.GetSection(PasswordAuthenticationInterceptorOptions.SectionName).Bind(providerBuilder.Options);
     });
 ```
 
