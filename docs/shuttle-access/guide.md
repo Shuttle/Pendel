@@ -25,7 +25,7 @@ Create the following entities:-
 
 ## Minimal API
 
-Create a new .NET 8.0 `ASP.NET Core Web API` project called `AccessGuide.WebApi` and remember to un-check the `Use controllers` option and to check the `Enable OpenAPI support:
+Create a new .Net 10 `ASP.NET Core Web API` project called `AccessGuide.WebApi` and remember to un-check the `Use controllers` option and to check the `Enable OpenAPI support:
 
 If you run the application you should be able to invoke the `GET http://localhost:{port}/weatherforecast` endpoint to return a list of temperatur readings.
 
@@ -43,35 +43,29 @@ builder.Services.AddAccessAuthorization();
 
 // The client application needs to be able to retrieve session data from the Shuttle.Access.WebApi.
 // This means that it too needs to be authenticated.
-builder.Services.AddAccessClient(clientBuilder =>
+builder.Services.AddAccessClient(options =>
     {
-        // webApplicationBuilder.Configuration.GetSection(AccessClientOptions.SectionName).Bind(clientBuilder.Options);
+        // builder.Configuration.GetSection(AccessClientOptions.SectionName).Bind(options);
         // ...with `appsettings.json` containing the following:
         //    {
         //      "Shuttle": {
         //        "Access": {
         //          "Client": {
-        //            "BaseAddress": "http://localhost:5599",
-        //              "PasswordAuthenticationProvider": 
-        //              {
-        //                "IdentityName": "identity0-name",
-        //                "Password": "password"
-        //              }
+        //            "BaseAddress": "http://localhost:5599"
         //          }
         //        }
         //      }
         //    }   
 
-        clientBuilder.Options.BaseAddress = "http://localhost:5599";
-
-        clientBuilder.AddPasswordAuthenticationProvider(providerBuilder =>
-        {
-            // This will obtain a session for the Web API as the `AccessGuide.WebApi` identity.
-            // Since `AccessGuide.WebApi` is in the `Trusted Identity` role,
-            // the Web API is able to view and register sessions.
-            providerBuilder.Options.IdentityName = "AccessGuide.WebApi";
-            providerBuilder.Options.Password = "AccessGuide.WebApi:Password";
-        });
+        options.BaseAddress = "http://localhost:5599";
+    })
+    .UsePasswordAuthenticationProvider(providerBuilder =>
+    {
+        // This will obtain a session for the Web API as the `AccessGuide.WebApi` identity.
+        // Since `AccessGuide.WebApi` is in the `Trusted Identity` role,
+        // the Web API is able to view and register sessions.
+        providerBuilder.Options.IdentityName = "AccessGuide.WebApi";
+        providerBuilder.Options.Password = "AccessGuide.WebApi:Password";
     });
 ```
 
@@ -130,7 +124,7 @@ builder.Services.AddSwaggerGen(options =>
 });
 ```
 
-Use the `Shuttle.Access` [Web API](http://localhost:5599/swagger/index.html) to register a session by invoking the `POST /v1/sessions` endpoint with the following body:
+Use the `Shuttle.Access` [Web API](http://localhost:5599/scalar/v1) to register a session by invoking the `POST /v1/sessions` endpoint with the following body:
 
 ```json
 {

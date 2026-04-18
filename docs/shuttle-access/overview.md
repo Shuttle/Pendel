@@ -31,9 +31,7 @@ The C# [Shuttle.Access.RestClient](https://www.nuget.org/packages/Shuttle.Access
   "Shuttle": {
     "Access": {
       "Client": {
-        "BaseAddress": "http://localhost:5599",
-        "IdentityName": "identity0-name",
-        "Password": "password"
+        "BaseAddress": "http://localhost:5599"
       }
     }
   }

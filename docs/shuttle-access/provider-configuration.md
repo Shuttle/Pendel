@@ -19,12 +19,12 @@ Once registered you can create a secret and then add the app to the `appsettings
                     },
                     "Authorize": {
                         "Url": "https://github.com/login/oauth/authorize",
-                        "clientId": "<the-oauth-app-client-id>"
+                        "ClientId": "<the-oauth-app-client-id>"
                     },
                     "Token": {
                         "Url": "https://github.com/login/oauth/access_token",
-                        "clientId": "<the-oauth-app-client-id>",
-                        "clientSecret": "<the-oauth-app-client-secret>"
+                        "ClientId": "<the-oauth-app-client-id>",
+                        "ClientSecret": "<the-oauth-app-client-secret>"
                     },
                     "Data": {
                         "Url": "https://api.github.com/user",
