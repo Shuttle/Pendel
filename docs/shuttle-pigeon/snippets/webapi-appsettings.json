@@ -25,7 +25,7 @@
   },
   "ConnectionStrings": {
     "azure": "UseDevelopmentStorage=true;DevelopmentStorageProxyUri=http://azurite",
-    "Access": "Data Source=database;Initial Catalog=Pigeon;user id=sa;password=Pass!000;TrustServerCertificate=true"
+    "Pigeon": "Data Source=database;Initial Catalog=Pigeon;user id=sa;password=Pass!000;TrustServerCertificate=true"
   },
   "Shuttle": {
     "Access": {
@@ -33,7 +33,7 @@
         "BaseAddress": "http://localhost:5599"
       }
     },
-    "ServiceBus": {
+    "Hopper": {
       "MessageRoutes": [
         {
           "Uri": "azuresq://azure/pigeon-server-inbox-work",

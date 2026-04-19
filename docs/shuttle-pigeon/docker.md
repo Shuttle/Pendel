@@ -187,8 +187,8 @@ docker run \
 
 ## Done
 
-To view the web-api endpoints you can browse to the [swagger page](http://localhost:5268/swagger/index.html):
+To view the web-api endpoints you can browse to the [scalar page](http://localhost:5268/scalar/v1):
 
 ```
-http://localhost:5268/swagger/index.html
+http://localhost:5268/scalar/v1
 ```

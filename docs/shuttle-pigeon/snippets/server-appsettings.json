@@ -45,6 +45,14 @@
         "SenderAddress": "noreply@ebenroux.co.za",
         "SenderDisplayName": "(no-reply)"
       },
+      "Smtp": {
+        "Host": "smtp.example.com",
+        "Port": 587,
+        "Username": "noreply@example.com",
+        "Password": "",
+        "SenderAddress": "noreply@example.com",
+        "SenderDisplayName": "(no-reply)"
+      },
       "ChannelDefaultMessageSenders": [
         {
           "Channel": "email",
@@ -52,14 +60,14 @@
         }
       ]
     },
-    "ServiceBus": {
+    "Hopper": {
       "Inbox": {
-        "WorkQueueUri": "azuresq://azure/pigeon-server-inbox-work",
-        "DeferredQueueUri": "azuresq://azure/pigeon-server-inbox-deferred",
-        "ErrorQueueUri": "azuresq://azure/pigeon-error",
+        "WorkTransportUri": "azuresq://azure/pigeon-server-inbox-work",
+        "DeferredTransportUri": "azuresq://azure/pigeon-server-inbox-deferred",
+        "ErrorTransportUri": "azuresq://azure/pigeon-error",
         "MaximumFailureCount": 8,
         "ThreadCount": 1,
-        "DurationToIgnoreOnFailure": [
+        "IgnoreOnFailureDurations": [
           "00:00:01",
           "00:00:01",
           "00:00:01",

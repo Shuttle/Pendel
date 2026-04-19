@@ -5,3 +5,4 @@ A notification message solution that is able to send e-mails using the following
 - MailKit
 - Postmark
 - SendGrid
+- Smtp

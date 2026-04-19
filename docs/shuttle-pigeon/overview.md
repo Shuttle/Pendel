@@ -20,7 +20,7 @@ All projections are also handled by the application.
 
 ## Web API
 
-The web API is hosted by the `Shuttle.Pigeon.WebApi` minimal API application.
+The web API is hosted by the `Shuttle.Pigeon.WebApi` minimal API application. The API documentation is provided by Scalar and is available at the `/scalar/v1` endpoint.
 
 ## Rest Client
 
