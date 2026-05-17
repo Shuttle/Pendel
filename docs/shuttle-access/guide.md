@@ -9,7 +9,7 @@ Navigate to the [front-end](http://localhost:3000) and log in using an identity 
 - Create these identities:
   - `guide-user` with a password of `guide-password`
   - `AccessGuide.WebApi` with a password of `AccessGuide.WebApi:Password`
-- If there is only 1 tenant available the identities will be assigned to that tenants; else, assign the identities to the relevant tenant.
+- If there is only 1 tenant available the identities will be assigned to that tenant; else, assign the identities to the relevant tenant.
 - Create a permission called `weather://forecast/view`.
 - Create a role called `Trusted Identity` and assign the following permissions:
   - `access://sessions/view`
@@ -135,28 +135,23 @@ You should receive a response with the following structure:
 ```json
 {
   "session": {
-    "dateRegistered": "2026-04-18T18:44:05.3055185+00:00",
-    "expiryDate": "2026-04-19T02:44:05.3055422+00:00",
+    "dateRegistered": "2026-05-17T08:36:41.0149896+00:00",
+    "expiryDate": "2026-05-17T16:36:41.0186341+00:00",
     "identityDescription": "",
     "identityId": "49a37e3d-b44e-456b-9a22-8b01a2ca78b2",
     "identityName": "guide-user",
     "permissions": [
       {
-        "description": "",
         "id": "88de8145-5de9-4a68-9172-dafdda0aa32e",
         "name": "weather://forecast/view",
-        "status": 1,
-        "statusName": "Active"
+        "tenantId": "c3ee3908-716b-48df-abda-33b49e09be97"
       }
     ],
-    "tenantId": "c3ee3908-716b-48df-abda-33b49e09be97",
-    "tenantName": "System",
-    "id": "017635dc-bc59-49cf-bcc5-b5af76387869",
-    "tokenHash": "APInB/Lwl2OC9I5NGmh7EJi81QzpRA0ni5DsQDeR+Zk="
+    "id": "42ee25a1-24bd-49dc-949b-dd16fa0aee54"
   },
   "registrationRequested": false,
   "result": "Registered",
-  "token": "78340363-1773-4fe6-a07d-061eb710ab44",
+  "token": "1125eee9-fe47-4193-a7e9-8b3a18c05abb",
   "tenants": [
     {
       "id": "c3ee3908-716b-48df-abda-33b49e09be97",
@@ -170,6 +165,6 @@ You should receive a response with the following structure:
 }
 ```
 
-Copy the `token` and then add an `Authorize` header to the `AccessGuide.WebApi` Scalar `/weatherforecast` request with a value of `Shuttle.Access token=<the-token-value>` (without the `<>`).
+Copy the `token` and then add an `Authorization` header to the `AccessGuide.WebApi` Scalar `/weatherforecast` request with a value of `Shuttle.Access token=<the-token-value>` (without the `<>`).
 
 When you invoke the `GET http://localhost:{port}/weatherforecast` endpoint now you should have access.
