@@ -48,7 +48,7 @@ import{_ as i,o as a,c as n,ag as t}from"./chunks/framework.BuUvxvtQ.js";const r
 <span class="line"><span style="--shiki-light:#6A737D;--shiki-dark:#6A737D;">//    {</span></span>
 <span class="line"><span style="--shiki-light:#6A737D;--shiki-dark:#6A737D;">//        var credential = new Azure.Identity.DefaultAzureCredential();</span></span>
 <span class="line"><span style="--shiki-light:#6A737D;--shiki-dark:#6A737D;">//        var scopes = new[] { &quot;https://management.azure.com/.default&quot; };</span></span>
-<span class="line"><span style="--shiki-light:#6A737D;--shiki-dark:#6A737D;">//        return (await credential.GetTokenAsync(new(scopes), CancellationToken.None)).Token;</span></span>
+<span class="line"><span style="--shiki-light:#6A737D;--shiki-dark:#6A737D;">//        return new BearerAuthenticationContext((await credential.GetTokenAsync(new(scopes), CancellationToken.None)).Token);</span></span>
 <span class="line"><span style="--shiki-light:#6A737D;--shiki-dark:#6A737D;">//    };</span></span>
 <span class="line"><span style="--shiki-light:#6A737D;--shiki-dark:#6A737D;">//})</span></span>
 <span class="line"></span>
