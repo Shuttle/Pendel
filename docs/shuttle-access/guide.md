@@ -94,7 +94,7 @@ builder.Services.AddAccessClient(options =>
 //    {
 //        var credential = new Azure.Identity.DefaultAzureCredential();
 //        var scopes = new[] { "https://management.azure.com/.default" };
-//        return (await credential.GetTokenAsync(new(scopes), CancellationToken.None)).Token;
+//        return new BearerAuthenticationContext((await credential.GetTokenAsync(new(scopes), CancellationToken.None)).Token);
 //    };
 //})
 
