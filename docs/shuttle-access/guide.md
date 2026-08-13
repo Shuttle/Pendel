@@ -71,13 +71,17 @@ To enable the `Shuttle.Access` authorization we need to add the following:
 ```c#
 // var builder = WebApplication.CreateBuilder(args); <-- at some point after
 
-builder.Services.AddAccessAuthorization();
+// Secures this application's endpoints.  The caller's `Authorization` header is forwarded to the
+// Shuttle.Access.WebApi, which validates it and returns the caller's session.
+builder.Services.AddAccessAuthorization(options =>
+{
+    options.BaseAddress = "http://localhost:5599";
+});
 
-// The client application (the Web API in this case) needs to be able to retrieve session 
-// data from the Shuttle.Access.WebApi. This means that the client application needs 
-// to be authenticated and register a session, which will have the permissions associated 
-// with the relevant identity.  We'll use the 'AccessGuide.WebApi' credentials
-// that we registered above.
+// This is all that is needed to secure the endpoints.  The registration below is only required if 
+// the application also needs to call the Shuttle.Access.WebApi as an identity of its own; it is 
+// separate from, and does not affect, resolving the caller's session above.  We'll use the 
+// 'AccessGuide.WebApi' credentials that we registered above.
 builder.Services.AddAccessClient(options =>
 {
     options.BaseAddress = "http://localhost:5599";
@@ -97,7 +101,9 @@ builder.Services.AddAccessClient(options =>
 //        return new BearerAuthenticationContext((await credential.GetTokenAsync(new(scopes), CancellationToken.None)).Token);
 //    };
 //})
+```
 
+Then, once the application has been built:
 
 ```c#
 // var app = builder.Build(); <-- at some point after

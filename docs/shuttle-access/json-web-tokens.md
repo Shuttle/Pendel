@@ -2,25 +2,19 @@
 
 Although Shuttle.Access supports identity name and password authentication, the preferred mechanism is to use JSON Web Tokens.
 
-In order to support JWTs the relevant Web APIs would need to be configured to validate a provided token.  
+In order to support JWTs the `Shuttle.Access.WebApi` deployment has to be configured to validate a provided token.
 
 The `Shuttle.Access.WebApi` may also be configured to expose `OAuth` providers to the front-end that a user may select to authenticate themselves.
 
-## Web API configuration
+## Issuer configuration
 
-Web APIs would need to reference package `Shuttle.Access.RestClient` which provides a client that can access a `Shuttle.Access.WebApi` deployment.  The `Shuttle.Access.AspNetCore` package will be added as a transient reference.
+::: warning
+Issuers are configured **only** on the `Shuttle.Access.WebApi` deployment.  It is the sole validator of issuers and tokens; applications that use Shuttle.Access forward the caller's `Authorization` header and let it do the work.  See [Sessions](/shuttle-access/sessions).
 
-The following will add `Authorization` header authentication handlers for the `Shuttle.Access` and `Bearer` schemes:
+Keeping this in one place means signing keys, audiences, and clock skew are changed in a single deployment instead of being duplicated across every application that trusts it.
+:::
 
-```c#
-services            
-    .AddAccessAuthorization(options =>
-    {
-        builder.Configuration.GetSection(AccessAuthorizationOptions.SectionName).Bind(options);
-    });
-```
-
-This will bind the following to the options:
+The following is bound from the `appsettings.json` of the `Shuttle.Access.WebApi` deployment:
 
 ```json
 {
@@ -43,21 +37,25 @@ This will bind the following to the options:
 }
 ```
 
-There are two ways that the client endpoint can interact with the Shuttle.Access Web API via the REST client, depending on the `PassThrough` option value:
+The incoming token has to contain an identifier of sorts that will be used for the `Identity Name`.  The token will be inspected and the first of the `IdentityNameClaimTypes` that is located will be used as the identity name.  If a validated identity has no active session, one is registered on its behalf.
+
+## Application configuration
+
+Applications reference `Shuttle.Access.AspNetCore` to secure their own endpoints, and `Shuttle.Access.RestClient` to call a `Shuttle.Access.WebApi` deployment as themselves.  The two are independent and neither references the other, so take only what you need.
+
+Securing endpoints needs no JWT configuration at all, and needs only the `Shuttle.Access.AspNetCore` package — the caller's `Bearer` token is forwarded to the Shuttle.Access web API, which validates it:
 
 ```c#
-services
+services            
     .AddAccessAuthorization(options =>
     {
-        options.PassThrough = <true|false>;
+        builder.Configuration.GetSection(AccessAuthorizationOptions.SectionName).Bind(options);
+
+        options.BaseAddress = "http://localhost:5599";
     });
 ```
 
-If it is `true` then the JWT that is received will be passed through to the Shuttle.Access Web API as the `Bearer` token by calling the `GET /v1/session/self` endpont; else the client endpoint should send its own JWT `Bearer` token which is retried by calling the `POST /v1/sessions/search` endpoint to find an active session.  If it cannot find a session, then one is created by the Shuttle.Access Web API.  To retrieve a session the identity requires the `access://sessions/view` permissions, and in order to register a new session it requires the `access://sessions/register` permission.
-
-The incoming token has to contain an identifier of sorts that will be used for the `Identity Name`.  The token will be inspected and the first of the `IdentityNameClaimTypes` that is located will be used as the identity name.
-
-In order for the Web API to interact with the `Shuttle.Access.WebApi` the caller also has to be authenticated.  This is where the following configuration comes in:
+A JWT is only configured on the application side when the application needs to call the Shuttle.Access web API *as itself* — to register identities, read roles, or determine its own permissions.  That is what the `Shuttle.Access.RestClient` authentication providers below supply, and it is unrelated to the credential the caller presents:
 
 ```c#
 services

@@ -4,62 +4,85 @@ An identity and access management system that provides fine-grained permissions 
 
 There is a web-based management front-end, written using Vue, as well as a restful web-api.  A rest client library is also available to facilitate calls to the web-api.
 
-Once an identity obtains a session token it is passed in the `Authorization` header using the `Shuttle.Access` scheme:
+Once an identity obtains a session token it is passed in the `Authorization` header using the `Shuttle.Access` scheme, or a JSON Web Token is passed using the `Bearer` scheme:
 
 ``` http
 Authorization: Shuttle.Access token={GUID}
+Authorization: Bearer {jwt}
 ```
 
-Minimal API endpoints may be secured using either `RequiresPermission` or `RequiresSession`:
+## Securing an endpoint
+
+Add the [Shuttle.Access.AspNetCore](https://www.nuget.org/packages/Shuttle.Access.AspNetCore) package and register the authorization:
 
 ```c#
-app.MapGet("/v1/customers/", async () =>
+builder.Services
+    .AddAccessAuthorization(options =>
     {
-        // For a specific permission use `RequiresPermission`.
-    })
-    .RequiresPermission("crm://customers/view");
+        builder.Configuration.GetSection(AccessAuthorizationOptions.SectionName).Bind(options);
 
-app.MapGet("/v1/customers/", async () =>
+        options.BaseAddress = "http://localhost:5599";   // the Shuttle.Access web API
+    });
+
+// ...
+
+app.UseAccessAuthorization();
+```
+
+There is nothing further to configure.  Your application does not inspect the credential it receives — it forwards the caller's `Authorization` header to the Shuttle.Access web API, which is the only place issuers and tokens are validated.  To also call the web API *as your own application*, add [Shuttle.Access.RestClient](https://www.nuget.org/packages/Shuttle.Access.RestClient) — see [Sessions](/shuttle-access/sessions).
+
+## Applying requirements
+
+Minimal API endpoints may be secured using either `RequirePermission` or `RequireSession`:
+
+```c#
+app.MapGet("/v1/customers", () =>
+    {
+        // For a specific permission use `RequirePermission`.
+    })
+    .RequirePermission("crm://customers/view");
+
+app.MapGet("/v1/customers/{id:guid}", (Guid id) =>
     {
         // If you don't require a specific permission,
-        // but a session has to exist, use `RequiresSession`.
+        // but a session has to exist, use `RequireSession`.
     })
-    .RequiresSession();
+    .RequireSession();
 ```
 
 If you are using controllers, then apply the relevant attribute:
 
 ```c#
 [HttpGet]
-[RequiresPermission("weather://forecast/get")]
+[RequirePermission("weather://forecast/get")]
 public IEnumerable<WeatherForecast> Get()
 {
-    // For a specific permission use `RequiresPermission`.
+    // For a specific permission use `RequirePermission`.
 }
 
-[HttpGet]
-[RequiresSession()]
-public IEnumerable<WeatherForecast> Get()
+[HttpGet("{id:guid}")]
+[RequireSession]
+public WeatherForecast Get(Guid id)
 {
     // If you don't require a specific permission,
-    // but a session has to exist, use `RequiresSession`.
+    // but a session has to exist, use `RequireSession`.
 }
 ```
 
-However, if you need to check whether a particular session has a permission in code, you can use the relevant `IAccessService` implementation:
+A request with no session yields a `401 Unauthorized` response, while a session that lacks the required permission yields a `403 Forbidden` response.
+
+However, if you need to check a permission in code, inject the `ISessionContext`.  It is populated during authentication and carries the resolved session, tenant, and permissions:
 
 ```c#
-app.MapGet("/v1/customers/", async (HttpContext httpContext, IAccessService accessService) =>
+app.MapGet("/v1/categories", (ISessionContext sessionContext) =>
+{
+    if (!sessionContext.HasPermission("pim://categories/review"))
     {
-        // First get the session token.
-        var sessionTokenResult = httpContext.GetAccessSessionToken();
+        return Results.Forbid();
+    }
 
-        // If a session token could be located, check the permission
-        if (!sessionTokenResult.Ok || !await accessService.HasPermissionAsync(sessionTokenResult.SessionToken, "pim://category/review"))
-        {
-            return Results.Unauthorized();
-        }        
-    })
+    return Results.Ok();
+});
 ```
 
 ## Structure
