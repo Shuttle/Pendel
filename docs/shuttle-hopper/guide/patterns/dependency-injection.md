@@ -245,7 +245,7 @@ public class Program
                     {
                         builder.Configure("azure", options =>
                         {
-                            options.ConnectionString = Guard.AgainstNullOrEmptyString(configuration.GetConnectionString("azure"));
+                            options.ConnectionString = Guard.AgainstEmpty(configuration.GetConnectionString("azure"));
                         });
                     });
             })
@@ -277,7 +277,7 @@ public class Program
 
 ### RegisterMemberHandler
 
-> Add a new class called `RegisterMemberHandler` that implements the `IMessageHandler<RegisterMember>` interface as follows:
+> Add a new class called `RegisterMemberHandler` that implements the `IContextMessageHandler<RegisterMember>` interface as follows:
 
 ``` c#
 using System;

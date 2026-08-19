@@ -16,7 +16,7 @@ Invoke the message handler using the data contained in the given `pipelineContex
 
 # MessageHandlerInvoker
 
-Type `MessageHandlerInvoker` implements the `IMessageHandlerInvoker` interface and will attempt to find a matching delegate or implementation of the required `IMessageHandler<>` interface.
+Type `MessageHandlerInvoker` implements the `IMessageHandlerInvoker` interface and will attempt to find a matching delegate or implementation of the required `IContextMessageHandler<>` or `IMessageHandler<>` interface.
 
 If no delegate or handler can be found `false` is returned.
 

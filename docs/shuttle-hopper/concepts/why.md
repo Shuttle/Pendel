@@ -66,9 +66,9 @@ public class Program
             {
                 services.AddSingleton<IDependency, Implementation>();
 
-                services.AddHopper(builder =>
+                services.AddHopper(options =>
                 {
-                    builder.Options.Inbox.WorkTransportUri = 
+                    options.Inbox.WorkTransportUri = 
                         new Uri("queue://configuration/queue-name");
                 });
 

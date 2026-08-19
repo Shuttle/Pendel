@@ -59,7 +59,7 @@ public bool Removed { get; private set; }
 ### Remove
 
 ``` c#
-public void Remove()
+public EventStream Remove()
 ```
 
 This will set the `Removed` property to `true`.  When the `EventStream` is saved using an `IEventStore` implementation it is the responsibility of the event store to remove all the events associated with the `Id`.
@@ -67,7 +67,7 @@ This will set the `Removed` property to `true`.  When the `EventStream` is saved
 ### Commit
 
 ``` c#
-public void Commit()
+public EventStream Commit()
 ```
 
 Adds any appended events to the events and makes the initial version of the stream the current version which is the version number of the last event appended.
@@ -75,7 +75,7 @@ Adds any appended events to the events and makes the initial version of the stre
 ### Add
 
 ``` c#
-public void Add(object data)
+public EventStream Add(object @event)
 ```
 
 Adds a new event to the stream with the next version number applied.  This is an instance of any class.  Events will be defined by your domain:
@@ -121,10 +121,10 @@ Returns the events represented by the given `EventRegistrationType`.
 ### Apply
 
 ``` c#
-public void Apply(object instance);
+public EventStream Apply(object instance);
 ```
 
-Applies all the events in the stream against the given object by calling the `IEventMethodInvoker` provided to the event stream constructor. 
+Applies all the *committed* events in the stream (see [`GetEvents`](#getevents) above) against the given object by calling the `IEventMethodInvoker` provided to the event stream constructor. If the target object has no matching event-handling method for one of the events, an `UnhandledEventException` is thrown.
 
 The following is an example of an event method:
 
@@ -138,10 +138,61 @@ private void On(Sample.Events.v1.SomeEvent someEvent)
 ### ConcurrencyInvariant
 
 ``` c#
-public void ConcurrencyInvariant(int expectedVersion)
+public EventStream ConcurrencyInvariant(int expectedVersion)
 ```
 
 If the event stream's version is not at the `expectedVersion` an `EventStreamConcurrencyException` is thrown.
+
+### WithCorrelationId
+
+``` c#
+public EventStream WithCorrelationId(Guid correlationId)
+```
+
+Sets the `CorrelationId` used to determine projection sequencing (see [above](#eventstream)). Throws `InvalidOperationException` if a `CorrelationId` has already been set on the stream.
+
+`Add`, `Apply`, `Commit`, `ConcurrencyInvariant`, `Remove`, and `WithCorrelationId` all return the `EventStream` itself, so calls can be chained, e.g. `stream.WithCorrelationId(id).Add(eventA).Add(eventB)`.
+
+## EventStreamBuilder
+
+Both `IEventStore.GetAsync` and `IEventStore.SaveAsync` accept an optional `Action<EventStreamBuilder>` used to customize a single call.  A new `EventStreamBuilder` instance is created for each call, so any options set on it only apply to that call.
+
+### Properties
+
+``` c#
+public List<EnvelopeHeader> Headers { get; set; }
+public bool ImmediateConsistency { get; }
+```
+
+### AddHeader
+
+``` c#
+public EventStreamBuilder AddHeader(string key, string value)
+```
+
+Adds a header that is stored alongside every event appended in this call, on both `GetAsync` and `SaveAsync`:
+
+``` c#
+var stream = await store.GetAsync(id, builder =>
+{
+    builder.AddHeader("key", "value");
+});
+```
+
+### WithImmediateConsistency
+
+``` c#
+public EventStreamBuilder WithImmediateConsistency()
+```
+
+Only relevant on `SaveAsync`.  Requests [immediate consistency](/shuttle-recall/projections/overview#immediate-consistency) processing for this save, regardless of whether `RecallOptions.EventProcessing.ImmediateConsistency.Enabled` is set:
+
+``` c#
+await store.SaveAsync(eventStream, builder =>
+{
+    builder.WithImmediateConsistency();
+});
+```
 
 # IEventStore
 
@@ -150,7 +201,7 @@ An `IEventStore` implementation should be able to persist and retrieve an `Event
 ### Get
 
 ``` c#
-Task<EventStream> GetAsync(Guid id, Action<EventStreamBuilder>? builder = null);
+Task<EventStream> GetAsync(Guid id, Action<EventStreamBuilder>? builder = null, CancellationToken cancellationToken = default);
 ```
 
 Returns an `EventStream` containing all events available for the `id`; if it is a new stream where there are no event available, an empty stream is returned.
@@ -160,7 +211,7 @@ Passing an empty `Guid` (`00000000-0000-0000-0000-000000000000`) will immediatel
 ### Remove
 
 ``` c#
-Task RemoveAsync(Guid id);
+Task RemoveAsync(Guid id, CancellationToken cancellationToken = default);
 ```
 
 All events that belong to the given `id` are removed.
@@ -168,7 +219,7 @@ All events that belong to the given `id` are removed.
 ### Save
 
 ``` c#
-Task<IEnumerable<EventEnvelope>> SaveAsync(EventStream eventStream, Action<EventStreamBuilder>? builder = null);
+Task<IEnumerable<EventEnvelope>> SaveAsync(EventStream eventStream, Action<EventStreamBuilder>? builder = null, CancellationToken cancellationToken = default);
 ```
 
- Persists the given `EventStream`.
+ Persists the given `EventStream`.  See [EventStreamBuilder](#eventstreambuilder) above for the options available via `builder`.

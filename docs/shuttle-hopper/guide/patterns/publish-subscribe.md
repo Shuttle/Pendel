@@ -236,7 +236,7 @@ public class Program
                     {
                         builder.Configure("azure", options =>
                         {
-                            options.ConnectionString = Guard.AgainstNullOrEmptyString(configuration.GetConnectionString("azure"));
+                            options.ConnectionString = Guard.AgainstEmpty(configuration.GetConnectionString("azure"));
                         });
                     });
             })
@@ -285,7 +285,7 @@ The Sql Server implementation of the `ISubscriptionService` that we are using by
 
 ### RegisterMemberHandler
 
-> Add a new class called `RegisterMemberHandler` that implements the `IMessageHandler<RegisterMember>` interface as follows:
+> Add a new class called `RegisterMemberHandler` that implements the `IContextMessageHandler<RegisterMember>` interface as follows:
 
 ``` c#
 using System;
@@ -389,7 +389,7 @@ public class Program
                     {
                         builder.Configure("azure", options =>
                         {
-                            options.ConnectionString = Guard.AgainstNullOrEmptyString(configuration.GetConnectionString("azure"));
+                            options.ConnectionString = Guard.AgainstEmpty(configuration.GetConnectionString("azure"));
                         });
                     });
             })
@@ -426,7 +426,7 @@ It is important to note that in a production environment one would not typically
 
 ### MemberRegisteredHandler
 
-> Add a new class called `MemberRegisteredHandler` that implements the `IMessageHandler<MemberRegistered>` interface as follows:
+> Add a new class called `MemberRegisteredHandler` that implements the `IContextMessageHandler<MemberRegistered>` interface as follows:
 
 ``` c#
 using System;

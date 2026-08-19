@@ -7,20 +7,18 @@ When you `Send` a *command* Shuttle needs to be able to determine the relevant t
 In order to register an endpoint as a subscriber you can either manually configure the subscription store, as recommended for production, or register the subscription using the `ISubscriptionService` implementation:
 
 ``` c#
-services.AddHopper(builder =>
-{
+services.AddHopper()
     // using type
-    builder.AddSubscription(typeof(Event1));
-    builder.AddSubscription(typeof(Event2));
+    .AddSubscription(typeof(Event1))
+    .AddSubscription(typeof(Event2))
 
     // using a full type name
-    builder.AddSubscription(typeof(Event1).FullName);
-    builder.AddSubscription(typeof(Event2).FullName);
+    .AddSubscription(typeof(Event1).FullName)
+    .AddSubscription(typeof(Event2).FullName)
 
     // using a generic
-    builder.AddSubscription<Event1>();
-    builder.AddSubscription<Event2>();
-});
+    .AddSubscription<Event1>()
+    .AddSubscription<Event2>();
 ```
 
 In a production environment it is recommended that the subscription store be maintained manually using an elevated identity.  Even though the above configures the required subscriptions it is up to the registered `ISubscriptionService` implementation to perform the required processing and checks.

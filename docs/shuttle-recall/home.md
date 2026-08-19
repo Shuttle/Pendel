@@ -25,3 +25,11 @@ For some background you could  have a look at the following:
 - [Event Sourcing FAQs](https://cqrs.nu/faq/Event%20Sourcing)
 - [Event Sourcing (Martin Fowler)](http://martinfowler.com/eaaDev/EventSourcing.html)
 - [Event Sourcing Pattern (Microsoft)](https://learn.microsoft.com/en-us/azure/architecture/patterns/event-sourcing)
+
+## Related Packages
+
+- **`Shuttle.Recall.SqlServer.Storage`** / **`Shuttle.Recall.SqlServer.EventProcessing`** — SQL Server implementations of event storage and projection processing; see [Events: SQL Server](/shuttle-recall/events/sql-server) and [Projections: SQL Server](/shuttle-recall/projections/sql-server).
+- **`Shuttle.Recall.Testing`** — base `RecallFixture` scenarios for verifying a custom storage/event-processing implementation.
+- **`Shuttle.Recall.OpenTelemetry`** — OpenTelemetry metrics and tracing for Recall-domain events.
+- **`Shuttle.Recall.Samples`** — sample applications demonstrating event sourcing and projections end-to-end.
+- **`Shuttle.Recall.WebApi`** / **`Shuttle.Recall.Vue`** — a reference REST API and Vue admin UI for searching and pruning a SQL Server-backed event store.

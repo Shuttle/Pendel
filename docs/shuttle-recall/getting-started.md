@@ -110,4 +110,4 @@ internal class Program
 }
 ```
 
-Once you have executed the program you'll find the 5 relevant entries in the `EventStore` table in the database.
+Once you have executed the program you'll find the 5 relevant entries in the `dbo.PrimitiveEvent` table in the database (along with a corresponding row in `dbo.EventType`).

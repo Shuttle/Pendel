@@ -83,6 +83,7 @@ The configuration name (e.g., `local`, `production`) must match a configuration 
 | `AmazonSqsConfig` | `null` | AWS SQS configuration object. If `null`, a default configuration will be created. Use this to set `ServiceURL`, `AuthenticationRegion`, and other AWS-specific settings. |
 | `MaxMessages` | `10` | Specifies the number of messages to fetch from the queue in a single request. Valid range: 1-10 (values outside this range will be automatically clamped). |
 | `WaitTime` | `00:00:20` | Specifies the `TimeSpan` duration to perform long-polling. Valid range: 00:00:00 to 00:00:20 (values outside this range will be automatically clamped). |
+| `VisibilityTimeout` | `00:00:30` | Specifies the `TimeSpan` visibility timeout applied to received messages; the timeout is periodically renewed while the message is being processed. |
 
 > [!NOTE]
 > The `MaxMessages` value is automatically clamped between 1 and 10, as per AWS SQS API limits. The `WaitTime` is clamped between 0 and 20 seconds.

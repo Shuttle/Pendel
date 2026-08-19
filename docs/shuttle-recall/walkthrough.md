@@ -1,4 +1,4 @@
-# Walthrough
+# Walkthrough
 
 ## Database
 
@@ -135,7 +135,7 @@ Shuttle.Recall.SqlServer.EventProcessing
 
 Also add a reference to the `Recall.Walkthrough` domain project.
 
-The `Shuttle.Recall.SqlServer.EventProcessing` package will include all the required transitive packages.
+The `Shuttle.Recall.SqlServer.EventProcessing` package will include all the required transitive packages. It reuses the connection/schema configured via `UseSqlServerEventStorage` below — `UseSqlServerEventProcessing` itself only has options such as `ProjectionPrefetchCount`, `MaximumCacheSize`, `CacheDuration`, and `ProjectionLockTimeout` (see [Projections: SQL Server](/shuttle-recall/projections/sql-server)).
 
 Once events are stored as `PrimitiveEvent` records, the event processor will find any events that have not yet been applied to a projection and invoke either an `IEventHandler` implementation, or a matching delegate.
 
@@ -234,34 +234,35 @@ internal class Program
                         options.ConnectionString = connectionString;
                         options.Schema = "recall";
                     })
-                    .UseSqlServerEventProcessing(options =>
+                    .UseSqlServerEventProcessing()
+                    .AddProjection("Customer", projection =>
                     {
-                        options.ConnectionString = connectionString;
-                        options.Schema = "recall";
-                    })
-                    .AddProjection("Customer")
-                    .AddEventHandler(async (IEventHandlerContext<Customer.Registered> context, CustomerDbContext dbContext) =>
-                    {
-                        await dbContext.Customers.AddAsync(new CustomerEntity
+                        projection.AddEventHandler(async (IEventHandlerContext<Customer.Registered> context, CustomerDbContext dbContext) =>
                         {
-                            Id = context.PrimitiveEvent.Id,
-                            Name = context.Event.Name
+                            await dbContext.Customers.AddAsync(new CustomerEntity
+                            {
+                                Id = context.PrimitiveEvent.Id,
+                                Name = context.Event.Name
+                            });
+
+                            await dbContext.SaveChangesAsync();
                         });
 
-                        await dbContext.SaveChangesAsync();
-                    })
-                    .AddEventHandler(async (IEventHandlerContext<Customer.Renamed> context, CustomerDbContext dbContext) =>
-                    {
-                        var customer = await dbContext.Customers.FindAsync(context.PrimitiveEvent.Id);
-
-                        if (customer != null)
+                        projection.AddEventHandler(async (IEventHandlerContext<Customer.Renamed> context, CustomerDbContext dbContext) =>
                         {
-                            customer.Name = context.Event.Name;
-                            await dbContext.SaveChangesAsync();
-                        }
+                            var customer = await dbContext.Customers.FindAsync(context.PrimitiveEvent.Id);
+
+                            if (customer != null)
+                            {
+                                customer.Name = context.Event.Name;
+                                await dbContext.SaveChangesAsync();
+                            }
+                        });
                     })
-                    .AddProjection("Address")
-                    .AddEventHandler<CustomerEventHandler>();
+                    .AddProjection("Address", projection =>
+                    {
+                        projection.AddEventHandler<CustomerEventHandler>();
+                    });
             })
             .Build()
             .RunAsync();

@@ -164,7 +164,7 @@ This tells the endpoint that all messages sent having a type name starting with 
 
 ### MemberRegisteredHandler
 
-> Create a new class called `MemberRegisteredHandler` that implements the `IMessageHandler<MemberRegistered>` interface as follows:
+> Create a new class called `MemberRegisteredHandler` that implements the `IContextMessageHandler<MemberRegistered>` interface as follows:
 
 ``` c#
 using System;
@@ -239,7 +239,7 @@ internal class Program
                     {
                         builder.Configure("azure", options =>
                         {
-                            options.ConnectionString = Guard.AgainstNullOrEmptyString(configuration.GetConnectionString("azure"));
+                            options.ConnectionString = Guard.AgainstEmpty(configuration.GetConnectionString("azure"));
                         });
                     });
             })
@@ -271,7 +271,7 @@ internal class Program
 
 ### RegisterMemberHandler
 
-> Add a new class called `RegisterMemberHandler` that implements the `IMessageHandler<RegisterMember>` interface as follows:
+> Add a new class called `RegisterMemberHandler` that implements the `IContextMessageHandler<RegisterMember>` interface as follows:
 
 ``` c#
 using System;

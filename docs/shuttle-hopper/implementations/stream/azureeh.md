@@ -29,11 +29,11 @@ services.AddHopper()
             options.DefaultStartingPosition = EventPosition.Latest;
             options.CheckpointInterval = 1;
 
-            options.ProcessError.Register(async args =>
+            options.ProcessError += async (args, cancellationToken) =>
             {
-                Console.WriteLine($"[error] : {args.Exception.Message}");
+                Console.WriteLine($"[error] : {args.ProcessErrorEventArgs.Exception.Message}");
                 await Task.CompletedTask;
-            });
+            };
         });
     });
 ```

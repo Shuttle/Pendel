@@ -1,6 +1,6 @@
 # Implementations
 
-These packages are those implementing the queue interfaces `IQueue` and `IQueueFactory`, subscription service implementations of `ISubscriptionService`, and then the `IIdempotenceService` implementations.
+These packages are those implementing the queue interfaces `IQueue` and `IQueueFactory`, and subscription service implementations of `ISubscriptionService`.
 
 ## Queues
 

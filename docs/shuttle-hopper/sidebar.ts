@@ -100,10 +100,6 @@ const guide = [
                 text: 'Dependency Injection',
                 link: '/shuttle-hopper/guide/patterns/dependency-injection'
             },
-            {
-                text: 'Message Idempotence',
-                link: '/shuttle-hopper/guide/patterns/message-idempotence'
-            },
         ]
     },
     {

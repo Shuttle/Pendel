@@ -74,7 +74,7 @@ The `HopperOptions` provides several `AsyncEvent` properties that allow you to h
 | `MessageNotHandled` | Occurs when no message handler could be found for a received message. |
 | `MessageReceived` | Occurs when a message has been received from the transport. |
 | `MessageReleased` | Occurs when a message is released back to the transport. |
-| `MessageReturned` | Occurs when a message is returned to the transport (e.g., after a failure if no error transport is configured). |
+| `DeferredMessageReturned` | Occurs when a deferred message has been returned to the inbox work queue. |
 | `MessageSent` | Occurs when a message has been successfully sent. |
 | `TransportCreated` | Occurs when a new transport instance is created. |
 | `TransportDisposed` | Occurs after a transport instance has been disposed. |
@@ -115,7 +115,7 @@ await Host.CreateDefaultBuilder()
             {
                 builder.Configure("azure", options =>
                 {
-                    options.ConnectionString = Guard.AgainstNullOrEmptyString(configuration.GetConnectionString("azure"));
+                    options.ConnectionString = Guard.AgainstEmpty(configuration.GetConnectionString("azure"));
                 });
             });
     })
@@ -123,7 +123,7 @@ await Host.CreateDefaultBuilder()
     .RunAsync(); // The `BusHostedService` will be invoked which starts the `IBus`.
 ```
 
-To suppress the registration of the `BusHostedService` use the `SuppressBusHostedService()` method on the `HopperBuilder`.
+The `BusHostedService` is always registered, but it starts and stops the `IBus` only when the `AutoStart` option on `HopperOptions` is `true` (the default).  Set `AutoStart` to `false` if you want to start the bus manually instead.
 
 ### Manual start
 

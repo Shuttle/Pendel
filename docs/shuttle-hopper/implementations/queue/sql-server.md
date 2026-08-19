@@ -50,8 +50,10 @@ The default JSON settings structure is as follows:
 {
   "Shuttle": {
     "SqlServerQueue": {
-      "ConnectionString": "connection-string",
-      "Schema": "dbo"
+      "shuttle": {
+        "ConnectionString": "connection-string",
+        "Schema": "dbo"
+      }
     }
   }
 }

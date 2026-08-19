@@ -1,11 +1,11 @@
 # Exception Handling
 
-When an exception occurs within a pipeline an `OnPipelineException` event is raised on the pipeline and any observers that have hooked onto the event will be called:
+When an exception occurs within a pipeline a `PipelineFailed` event is raised on the pipeline and any observers that have hooked onto the event will be called:
 
 ``` c#
-public class ReceiveExceptionObserver : IPipelineObserver<OnPipelineException>
+public class ReceiveExceptionObserver : IPipelineObserver<PipelineFailed>
 {
-    public async Task ExecuteAsync(IPipelineContext<OnPipelineException> pipelineContext)
+    public async Task ExecuteAsync(IPipelineContext<PipelineFailed> pipelineContext, CancellationToken cancellationToken = default)
     {
         // set by calling MarkExceptionHandled
         if (pipelineContext.Pipeline.ExceptionHandled) 
@@ -22,7 +22,7 @@ public class ReceiveExceptionObserver : IPipelineObserver<OnPipelineException>
 }
 ```
 
-Typically you would not respond to the `OnPipelineException` event but you need to be cognizant of how it affects the message processing.
+Typically you would not respond to the `PipelineFailed` event but you need to be cognizant of how it affects the message processing.
 
 Exception handling differs between queues and streams.
 

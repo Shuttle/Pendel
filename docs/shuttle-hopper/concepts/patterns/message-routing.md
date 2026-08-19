@@ -5,7 +5,7 @@ Once you have instantiated a message you need to get it to a specific endpoint. 
 Message routing occurs only when sending a message.  In most cases a message would be a "command", but any message can be sent.  Messages are sent by calling the `SendAsync` method on the service bus instance:
 
 ```c#
-Task<TransportMessage> SendAsync(object message, Action<TransportMessageBuilder>? builder = null);
+Task<TransportMessage> SendAsync(object message, Action<TransportMessageBuilder>? builder = null, CancellationToken cancellationToken = default);
 ```
 
 Only messages that have no `RecipientInboxWorkTransportUri` set will be routed by the service bus; else the message will be sent to the `RecipientInboxWorkTransportUri`, e.g.:
@@ -29,8 +29,8 @@ Shuttle.Hopper uses an implementation of an `IMessageRouteProvider` to determine
 public interface IMessageRouteProvider
 {
     IEnumerable<IMessageRoute> MessageRoutes { get; }
-    Task AddAsync(IMessageRoute messageRoute);
-    Task<IEnumerable<string>> GetRouteUrisAsync(string messageType);
+    Task AddAsync(IMessageRoute messageRoute, CancellationToken cancellationToken = default);
+    Task<IEnumerable<string>> GetRouteUrisAsync(string messageType, CancellationToken cancellationToken = default);
 }
 ```
 

@@ -307,7 +307,7 @@ internal class Program
 
 ### TemperatureReadHandler
 
-> Add a new class called `TemperatureReadHandler` that implements the `IMessageHandler<TemperatureRead>` interface as follows:
+> Add a new class called `TemperatureReadHandler` that implements the `IContextMessageHandler<TemperatureRead>` interface as follows:
 
 ``` c#
 using Shuttle.Hopper;

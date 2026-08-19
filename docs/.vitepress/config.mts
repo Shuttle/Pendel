@@ -123,8 +123,12 @@ export default defineConfig({
         ],
       },
       {
-        text: "2026.1",
+        text: "2026.2",
         items: [
+          {
+            text: "2026.1",
+            link: "https://shuttle.github.io/pendel-2026.1/",
+          },
           {
             text: "v-previous",
             link: "https://shuttle.github.io/pendel-pre-v21/",
