@@ -86,37 +86,39 @@ services
 
 The `OAuth` providers are configured in the `appsettings.json` of the `Shuttle.Access.WebApi` deployment:
 
+`Providers` is keyed by provider name, and `ClientId`/`ClientSecret`/`RedirectUri`/`Scope` sit directly on the
+provider — not nested under `Authorize`/`Token`:
+
 ```json
 {
   "Shuttle": {
     "OAuth": {
-      "DefaultRedirectUri": "http://localhost:3000/oauth",
-      "Providers": [
-        {
-          "Name": "GitHub",
+      "Providers": {
+        "GitHub": {
+          "RedirectUri": "http://localhost:3000/oauth",
+          "ClientId": "{client-id}",
+          "ClientSecret": "{client-secret}",
           "Authorize": {
-            "ClientId": "{client-id}",
             "Url": "https://github.com/login/oauth/authorize"
           },
           "Token": {
-            "ClientId": "{client-id}",
-            "ClientSecret": "{client-secret}",
             "Url": "https://github.com/login/oauth/access_token"
           },
           "Data": {
-            "Url": "https://api.github.com/user"
+            "Url": "https://api.github.com/user",
+            "EmailPropertyName": "email",
+            "IdentityPropertyName": "email"
           },
-          "scope": "user:email"
+          "Scope": "user:email"
         },
-        {
-          "Name": "Microsoft",
+        "Microsoft": {
+          "RedirectUri": "http://localhost:3000/oauth",
+          "ClientId": "{client-id}",
           "Authorize": {
-            "ClientId": "{client-id}",
             "Url": "https://login.microsoftonline.com/{tenant-id}/oauth2/v2.0/authorize",
             "CodeChallengeMethod": "S256"
           },
           "Token": {
-            "ClientId": "{client-id}",
             "Url": "https://login.microsoftonline.com/{tenant-id}/oauth2/v2.0/token",
             "ContentTypeHeader": "application/x-www-form-urlencoded",
             "OriginHeader": "http://localhost:3000"
@@ -124,11 +126,12 @@ The `OAuth` providers are configured in the `appsettings.json` of the `Shuttle.A
           "Data": {
             "Url": "https://graph.microsoft.com/v1.0/me",
             "AuthorizationHeaderScheme": "Bearer",
-            "EMailPropertyName": "mail"
+            "EmailPropertyName": "mail",
+            "IdentityPropertyName": "mail"
           },
           "Scope": "User.Read"
         }
-      ]
+      }
     }
   }
 }

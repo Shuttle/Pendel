@@ -20,7 +20,10 @@ All projections are also handled by the application.
 
 ## Web API
 
-The web API is hosted by the `Shuttle.Access.WebApi` minimal API application.
+The web API is hosted by the `Shuttle.Access.WebApi` minimal API application. Unlike the server, it can also process
+mutations itself, entirely in-process — see [Consistency](/shuttle-access/consistency) for when each process is
+responsible for updating the projections, and [Configuration](/shuttle-access/configuration) for the full set of
+`appsettings.json` options for both applications.
 
 ## Rest Client
 

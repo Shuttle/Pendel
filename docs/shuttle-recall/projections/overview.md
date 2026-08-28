@@ -6,6 +6,42 @@ Since the event sourcing side of things produces a series of events that are chr
 
 Each one of these processing streams is called a **projection**.  All events for a given `CorrelationId`, or `Id` if `CorrelationId` is `null`, are processed in order using the `SequenceNumber`.
 
+## Configuration
+
+`RecallOptions.EventProcessing` (`EventProcessingOptions`) controls the [`EventProcessor`](#eventprocessor) and its [projections](#projection). It is part of `RecallOptions`, bound from the `"Shuttle:Recall"` section — see [Events: Configuration](/shuttle-recall/events/overview#configuration) for how to bind it.
+
+| Property | Default | Description |
+|----------|---------|-------------|
+| `IncludedProjections` | `[]` | Names of the projections the `EventProcessor` should run. If empty, every registered projection is eligible (subject to `ExcludedProjections`). May not be specified together with `ExcludedProjections` |
+| `ExcludedProjections` | `[]` | Names of the projections to exclude from processing when `IncludedProjections` is empty. May not be specified together with `IncludedProjections` |
+| `ProjectionThreadCount` | `5` | Number of threads used to process projections concurrently |
+| `ProjectionProcessorIdleDurations` | *(see below)* | Successive idle-wait durations used between projection-processing passes when nothing was available; the last entry repeats once exhausted. Defaults to `EventProcessingOptions.DefaultProjectionProcessorIdleDurations` when left empty |
+| `DefaultDeferredDuration` | `00:00:05` | Default delay used by [`Defer`](#ieventhandlercontext) when no explicit delay is passed |
+| `ImmediateConsistency` | *(see below)* | Options controlling [immediate consistency](#immediate-consistency) processing |
+
+```json
+{
+  "Shuttle": {
+    "Recall": {
+      "EventProcessing": {
+        "IncludedProjections": [],
+        "ExcludedProjections": [],
+        "ProjectionThreadCount": 5,
+        "ProjectionProcessorIdleDurations": [ "00:00:00.250", "00:00:00.250", "00:00:00.250", "00:00:00.250", "00:00:00.500", "00:00:00.500", "00:00:01" ],
+        "DefaultDeferredDuration": "00:00:05",
+        "ImmediateConsistency": {
+          "Enabled": false,
+          "IncludedProjections": [],
+          "ExcludedProjections": []
+        }
+      }
+    }
+  }
+}
+```
+
+`EventProcessingOptions.EventHandled` and `EventProcessingOptions.ImmediateConsistencyFailed` are code-only `AsyncEvent` hooks (not bindable from JSON) — see [Immediate Consistency](#immediate-consistency) below for the latter.
+
 ## EventProcessor
 
 An `EventProcessor` instance is used to manage all the projections.  `Projection` instances may be added to the `EventProcessor` and each runs on its own thread.  In contrast to normal message processing there is no **poison** queue and no retries.  If processing fails for any reason the process should be terminated.
@@ -78,6 +114,23 @@ services.AddRecall(options =>
     options.EventProcessing.ImmediateConsistency.Enabled = true;
     options.EventProcessing.ImmediateConsistency.IncludedProjections.Add("ProjectionName");
 });
+```
+
+  or the equivalent `appsettings.json` (see [Configuration](#configuration) above):
+
+```json
+{
+  "Shuttle": {
+    "Recall": {
+      "EventProcessing": {
+        "ImmediateConsistency": {
+          "Enabled": true,
+          "IncludedProjections": [ "ProjectionName" ]
+        }
+      }
+    }
+  }
+}
 ```
 
 - Per save, via `EventStreamBuilder.WithImmediateConsistency()` (see [EventStreamBuilder](/shuttle-recall/events/overview#eventstreambuilder)), regardless of whether `Enabled` is set:

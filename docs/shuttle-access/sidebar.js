@@ -17,6 +17,14 @@ const access = [
                 link: '/shuttle-access/overview'
             },
             {
+                text: 'Consistency',
+                link: '/shuttle-access/consistency'
+            },
+            {
+                text: 'Configuration',
+                link: '/shuttle-access/configuration'
+            },
+            {
                 text: 'Docker',
                 link: '/shuttle-access/docker'
             },

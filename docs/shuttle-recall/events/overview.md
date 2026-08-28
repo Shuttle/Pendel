@@ -1,5 +1,40 @@
 # Events
 
+## Configuration
+
+`Shuttle.Recall`'s core options are bound from a `RecallOptions` instance passed to `AddRecall`. `RecallOptions.SectionName` is `"Shuttle:Recall"`; this package does not bind the section automatically, so you would do so yourself:
+
+```c#
+services.AddRecall(options =>
+{
+    configuration.GetSection(RecallOptions.SectionName).Bind(options);
+});
+```
+
+The `EventStore` property (`EventStoreOptions`) governs how domain events are applied to an object via [`Apply`](#apply):
+
+| Property | Default | Description |
+|----------|---------|-------------|
+| `EventHandlingMethodName` | `"On"` | Name of the convention-based method invoked for each event, e.g. `private void On(SomeEvent someEvent)` (see [`Apply`](#apply) below) |
+| `BindingFlags` | `Instance, NonPublic` | Reflection binding flags used to locate that method on the target object |
+| `PrimitiveEventSequencerIdleDurations` | *(see below)* | Successive idle-wait durations used between primitive-event-sequencing passes when nothing was sequenced; the last entry repeats once exhausted. Defaults to `EventStoreOptions.DefaultPrimitiveEventSequencerIdleDurations` when left empty. Only relevant once sequencing has been enabled via `RecallBuilder.RegisterPrimitiveEventSequencing()` |
+
+```json
+{
+  "Shuttle": {
+    "Recall": {
+      "EventStore": {
+        "EventHandlingMethodName": "On",
+        "BindingFlags": "Instance, NonPublic",
+        "PrimitiveEventSequencerIdleDurations": [ "00:00:00.250", "00:00:00.250", "00:00:00.250", "00:00:00.250", "00:00:00.500", "00:00:00.500", "00:00:01" ]
+      }
+    }
+  }
+}
+```
+
+`RecallOptions.EventProcessing` (`EventProcessingOptions`) is documented in [Projections: Configuration](/shuttle-recall/projections/overview#configuration). `RecallOptions.Operation` is a code-only `AsyncEvent<OperationEventArgs>` hook (not bindable from JSON) raised around internal operations such as event-stream persistence and primitive-event sequencing — useful for logging/tracing.
+
 ## EventStore
 
 An `EventStream` contains events for a given `Guid` identifier and is kept outside of your object at all times.
