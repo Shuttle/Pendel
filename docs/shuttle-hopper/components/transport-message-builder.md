@@ -30,6 +30,14 @@ public bool ShouldReply { get; }
 public bool ShouldSendToSelf { get; }
 ```
 
+### InboxName
+
+``` c#
+public string? InboxName { get; }
+```
+
+The name of the [additional inbox](../options/additional-inboxes.md) of this endpoint that the message should be sent to, if any.
+
 ## Methods
 
 ### ToSelf
@@ -38,7 +46,17 @@ public bool ShouldSendToSelf { get; }
 public TransportMessageBuilder ToSelf();
 ```
 
-This sets the `ShouldSendToSelf` flag.  During dispatch the `RecipientInboxWorkTransportUri` will be set to the local inbox work transport uri.
+This sets the `ShouldSendToSelf` flag.  During dispatch the `RecipientInboxWorkTransportUri` will be set to the primary inbox work transport uri.
+
+### ToInbox
+
+``` c#
+public TransportMessageBuilder ToInbox(string name);
+```
+
+This sets the `InboxName`.  During dispatch the `RecipientInboxWorkTransportUri` will be set to the work transport uri of the [additional inbox](../options/additional-inboxes.md) with the given name.  An `InvalidOperationException` is thrown if no additional inbox with that name has been configured.
+
+`ToSelf`, `ToInbox`, `AsReply` and `WithRecipient` are mutually exclusive.
 
 ### AsReply
 

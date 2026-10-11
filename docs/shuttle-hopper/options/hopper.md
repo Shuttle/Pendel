@@ -57,6 +57,9 @@ The default JSON settings structure is as follows:
 | `RemoveCorruptMessages` | `false` | A message is corrupt when the `TransportMessage` retrieved from the transport cannot be deserialized.  If `false` (default) the process will be killed.  If `true` the message will be acknowledged with no processing. |
 | `AutoStart` | `true` | Determines whether the `IBus` will be started automatically when the hosted service starts. |
 | `UriMappings` | | A list of `UriMappingOptions` instances that allow mapping a source URI (as used in code) to a target URI (the actual physical transport). |
+| `Inbox` | | The primary [inbox options](./inbox.md). |
+| `AdditionalInboxes` | | A case-insensitive dictionary of named [additional inbox options](./additional-inboxes.md); each entry must be registered using `AddInbox`. |
+| `Outbox` | | The [outbox options](./outbox.md). |
 
 The `IIdentityProvider` implementation is responsible for honouring the `CacheIdentity` attribute.
 
@@ -74,7 +77,7 @@ The `HopperOptions` provides several `AsyncEvent` properties that allow you to h
 | `MessageNotHandled` | Occurs when no message handler could be found for a received message. |
 | `MessageReceived` | Occurs when a message has been received from the transport. |
 | `MessageReleased` | Occurs when a message is released back to the transport. |
-| `DeferredMessageReturned` | Occurs when a deferred message has been returned to the inbox work queue. |
+| `DeferredMessageReturned` | Occurs when a deferred message has been returned to the work queue of the primary inbox or of an additional inbox. |
 | `MessageSent` | Occurs when a message has been successfully sent. |
 | `TransportCreated` | Occurs when a new transport instance is created. |
 | `TransportDisposed` | Occurs after a transport instance has been disposed. |

@@ -79,3 +79,5 @@ The default JSON settings structure is as follows:
 | `DeferredMessageProcessorResetInterval` | `00:01:00` | The duration to wait before restarting the `DeferredMessageProcessor` once it has halted. |
 | `DeferredMessageProcessorIdleDuration` | `00:00:01` | The duration to wait when the `DeferredMessageProcessor` is idle. |
 
+An endpoint may also process [additional inboxes](./additional-inboxes.md) next to this primary inbox.
+

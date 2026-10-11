@@ -239,6 +239,10 @@ const options = [
                 link: '/shuttle-hopper/options/inbox'
             },
             {
+                text: 'Additional Inboxes',
+                link: '/shuttle-hopper/options/additional-inboxes'
+            },
+            {
                 text: 'Message Routes',
                 link: '/shuttle-hopper/options/message-routes'
             },
