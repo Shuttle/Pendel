@@ -7,7 +7,49 @@ detail. This page covers everything else.
 
 Connection strings (`ConnectionStrings:Access`, `ConnectionStrings:azure`) and `Shuttle:Hopper` (queue transports and
 message routes — see the [Docker](/shuttle-access/docker) and [Docker Compose](/shuttle-access/docker-compose) guides
-for example values) follow standard `Shuttle.Hopper` configuration.
+for example values) follow standard `Shuttle.Hopper` configuration — see [Transports](#transports) below for how the
+queue transport itself is selected.
+
+## Transports
+
+`Shuttle.Access.Server` and `Shuttle.Access.WebApi` register a Hopper transport for each transport configuration
+section that is present (via `Shuttle.Access.Hosting`'s `UseConfiguredTransports`). The transport used for a queue is
+selected by the scheme of its URI, and the URI host selects the named transport (the child key of the section):
+
+| Transport | Section | URI |
+| --- | --- | --- |
+| Azure Storage Queues | `Shuttle:Hopper:AzureStorageQueues:{name}` | `azuresq://{name}/{queue}` |
+| RabbitMQ | `Shuttle:Hopper:RabbitMQ:{name}` | `rabbitmq://{name}/{queue}` |
+
+At least one transport section is required. For Azure Storage Queues, when neither `StorageAccount` nor
+`ConnectionString` is set, the connection string named `{name}` is used — this is how the
+[Docker](/shuttle-access/docker) and [Docker Compose](/shuttle-access/docker-compose) examples configure Azurite via
+`ConnectionStrings:azure`.
+
+Example using RabbitMQ instead of the default Azure Storage Queues:
+
+```json
+{
+  "Shuttle": {
+    "Hopper": {
+      "RabbitMQ": {
+        "local": {
+          "Host": "localhost",
+          "Username": "shuttle",
+          "Password": "shuttle!"
+        }
+      },
+      "Inbox": {
+        "WorkTransportUri": "rabbitmq://local/access-server-inbox-work",
+        "DeferredTransportUri": "rabbitmq://local/access-server-inbox-deferred",
+        "ErrorTransportUri": "rabbitmq://local/access-error"
+      }
+    }
+  }
+}
+```
+
+The web API's `MessageRoutes` URI must point at the same transport as the server's work queue.
 
 ## `Shuttle:Access` — shared
 

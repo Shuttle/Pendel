@@ -61,7 +61,9 @@ shuttle-access-efbundle-win-x64.exe --connection "Server=.;Database=Access;User 
 
 ## Azurite
 
-The server makes use of Azure Storage Queues for messaging.  You can use the following to create a local [Azurite](https://learn.microsoft.com/en-us/azure/storage/common/storage-use-azurite):
+The server makes use of Azure Storage Queues for messaging by default — see
+[Configuration > Transports](/shuttle-access/configuration#transports) if you'd like to use RabbitMQ instead. You can
+use the following to create a local [Azurite](https://learn.microsoft.com/en-us/azure/storage/common/storage-use-azurite):
 
 (replace `<local-azurite-folder` with a local folder where you'd like your azurite data stored; else you could remove the volume mapping)
 

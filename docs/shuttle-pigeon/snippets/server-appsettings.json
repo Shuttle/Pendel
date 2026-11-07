@@ -61,6 +61,12 @@
       ]
     },
     "Hopper": {
+      "AzureStorageQueues": {
+        "azure": {}
+      },
+      "RabbitMQ": {
+        ".": {}
+      },
       "Inbox": {
         "WorkTransportUri": "azuresq://azure/pigeon-server-inbox-work",
         "DeferredTransportUri": "azuresq://azure/pigeon-server-inbox-deferred",

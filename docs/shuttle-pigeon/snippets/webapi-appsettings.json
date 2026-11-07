@@ -34,6 +34,12 @@
       }
     },
     "Hopper": {
+      "AzureStorageQueues": {
+        "azure": {}
+      },
+      "RabbitMQ": {
+        ".": {}
+      },
       "MessageRoutes": [
         {
           "Uri": "azuresq://azure/pigeon-server-inbox-work",

@@ -17,6 +17,10 @@ const access = [
                 link: '/shuttle-pigeon/overview'
             },
             {
+                text: 'Configuration',
+                link: '/shuttle-pigeon/configuration'
+            },
+            {
                 text: 'Docker',
                 link: '/shuttle-pigeon/docker'
             },
