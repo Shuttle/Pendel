@@ -17,6 +17,10 @@ const access = [
                 link: '/shuttle-access/overview'
             },
             {
+                text: 'Identities',
+                link: '/shuttle-access/identities'
+            },
+            {
                 text: 'Consistency',
                 link: '/shuttle-access/consistency'
             },

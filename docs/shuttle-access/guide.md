@@ -146,6 +146,7 @@ You should receive a response with the following structure:
     "identityDescription": "",
     "identityId": "49a37e3d-b44e-456b-9a22-8b01a2ca78b2",
     "identityName": "guide-user",
+    "signInName": "guide-user",
     "permissions": [
       {
         "id": "88de8145-5de9-4a68-9172-dafdda0aa32e",

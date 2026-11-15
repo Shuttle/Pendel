@@ -95,6 +95,20 @@ Every `IAccessClient` endpoint is available, each authorized against the permiss
 identity.  Omitting the authentication provider fails the host at startup rather than on the first outbound call.  See
 the [Rest Client](/shuttle-access/rest-client) page for the available providers.
 
+## `IdentityName` vs. `SignInName`
+
+A session carries both `IdentityName` and `SignInName`, and they are not always the same value:
+
+| Property | Always holds |
+| --- | --- |
+| `IdentityName` | The identity's *current* primary name |
+| `SignInName` | Whatever name was actually presented when the session was registered |
+
+An identity may have [alternate names](/shuttle-access/identities) in addition to its primary name, and signing in
+with any of them succeeds. `SignInName` remembers which one was used; `IdentityName` always reflects the primary name
+as it stands now, so the two diverge once the identity is renamed, or an alternate name is promoted, after the
+session was registered.
+
 ## Console applications
 
 `Shuttle.Access.RestClient` depends on nothing but the web API contracts and needs no incoming request, so a console
