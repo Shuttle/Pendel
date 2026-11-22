@@ -70,21 +70,23 @@ The default JSON settings structure is as follows:
 ```json
 {
   "Shuttle": {
-    "RabbitMQ": {
-      "local": {
-        "Host": "127.0.0.1",
-        "VirtualHost": "/",
-        "Port": -1,
-        "Username": "shuttle",
-        "Password": "shuttle!",
-        "PrefetchCount": 25,
-        "QueueTimeout": "00:00:01",
-        "RequestedHeartbeat": "00:00:30",
-        "ConnectionCloseTimeout": "00:00:01",
-        "OperationRetryCount": 3,
-        "Priority": 0,
-        "Persistent": true,
-        "Durable": true
+    "Hopper": {
+      "RabbitMQ": {
+        "local": {
+          "Host": "127.0.0.1",
+          "VirtualHost": "/",
+          "Port": -1,
+          "Username": "shuttle",
+          "Password": "shuttle!",
+          "PrefetchCount": 25,
+          "QueueTimeout": "00:00:01",
+          "RequestedHeartbeat": "00:00:30",
+          "ConnectionCloseTimeout": "00:00:01",
+          "OperationRetryCount": 3,
+          "Priority": 0,
+          "Persistent": true,
+          "Durable": true
+        }
       }
     }
   }

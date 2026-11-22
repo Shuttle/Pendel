@@ -43,17 +43,19 @@ The default JSON settings structure is as follows:
 ```json
 {
   "Shuttle": {
-    "AzureEventHubs": {
-      "azure": {
-        "ConnectionString": "Endpoint=sb://{hub-namespace}.servicebus.windows.net/;SharedAccessKeyName={key-name};SharedAccessKey={key};EntityPath={hub-name}",
-        "ProcessEvents": false,
-        "ConsumerGroup": "$Default",
-        "BlobStorageConnectionString": "{BlobStorageConnectionString}",
-        "BlobContainerName": "{BlobContainerName}",
-        "OperationTimeout": "00:00:30",
-        "ConsumeTimeout": "00:00:30",
-        "DefaultStartingPosition": "Latest",
-        "CheckpointInterval": 1
+    "Hopper": {
+      "AzureEventHubs": {
+        "azure": {
+          "ConnectionString": "Endpoint=sb://{hub-namespace}.servicebus.windows.net/;SharedAccessKeyName={key-name};SharedAccessKey={key};EntityPath={hub-name}",
+          "ProcessEvents": false,
+          "ConsumerGroup": "$Default",
+          "BlobStorageConnectionString": "{BlobStorageConnectionString}",
+          "BlobContainerName": "{BlobContainerName}",
+          "OperationTimeout": "00:00:30",
+          "ConsumeTimeout": "00:00:30",
+          "DefaultStartingPosition": "Latest",
+          "CheckpointInterval": 1
+        }
       }
     }
   }

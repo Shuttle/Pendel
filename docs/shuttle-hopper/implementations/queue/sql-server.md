@@ -49,10 +49,12 @@ The default JSON settings structure is as follows:
 ```json
 {
   "Shuttle": {
-    "SqlServerQueue": {
-      "shuttle": {
-        "ConnectionString": "connection-string",
-        "Schema": "dbo"
+    "Hopper": {
+      "SqlServerQueue": {
+        "shuttle": {
+          "ConnectionString": "connection-string",
+          "Schema": "dbo"
+        }
       }
     }
   }

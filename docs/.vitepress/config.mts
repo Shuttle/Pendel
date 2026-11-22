@@ -138,6 +138,11 @@ export default defineConfig({
             activeMatch: `^/upgrade-v21`,
             link: "/upgrade-v21",
           },
+          {
+            text: "Change log",
+            activeMatch: `^/changelog`,
+            link: "/changelog",
+          },
         ],
       },
     ],

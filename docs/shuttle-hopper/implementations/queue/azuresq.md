@@ -35,12 +35,14 @@ The default JSON settings structure is as follows:
 ```json
 {
   "Shuttle": {
-    "AzureStorageQueues": {
-      "azure": {
-        "StorageAccount": "devstoreaccount1",
-        "ConnectionString": "UseDevelopmentStorage=true",
-        "MaxMessages": 32,
-        "VisibilityTimeout": "00:00:30"
+    "Hopper": {
+      "AzureStorageQueues": {
+        "azure": {
+          "StorageAccount": "devstoreaccount1",
+          "ConnectionString": "UseDevelopmentStorage=true",
+          "MaxMessages": 32,
+          "VisibilityTimeout": "00:00:30"
+        }
       }
     }
   }
